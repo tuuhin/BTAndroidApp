@@ -24,8 +24,7 @@ android {
 		release {
 			isMinifyEnabled = false
 			proguardFiles(
-				getDefaultProguardFile("proguard-android-optimize.txt"),
-				"proguard-rules.pro"
+				getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
 			)
 		}
 	}
@@ -50,20 +49,28 @@ android {
 }
 
 dependencies {
-
+	//core
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)
 	implementation(libs.androidx.activity.compose)
+	//	compose
 	implementation(platform(libs.androidx.compose.bom))
 	implementation(libs.androidx.ui)
 	implementation(libs.androidx.ui.graphics)
 	implementation(libs.androidx.ui.tooling.preview)
 	implementation(libs.androidx.material3)
+	// koin
+	implementation(platform(libs.koin.bom))
+	implementation(libs.koin.core)
+	implementation(libs.koin.android)
+	implementation(libs.koin.compose)
+	//tests
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
 	androidTestImplementation(platform(libs.androidx.compose.bom))
 	androidTestImplementation(libs.androidx.ui.test.junit4)
+	//debug
 	debugImplementation(libs.androidx.ui.tooling)
 	debugImplementation(libs.androidx.ui.test.manifest)
 }
