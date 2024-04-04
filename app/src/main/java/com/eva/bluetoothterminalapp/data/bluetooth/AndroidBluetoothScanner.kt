@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothScanner
+import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -42,8 +43,7 @@ class AndroidBluetoothScanner(
 	private val _hasConnectPermission: Boolean
 		get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 			ContextCompat.checkSelfPermission(
-				context,
-				Manifest.permission.BLUETOOTH_CONNECT
+				context, Manifest.permission.BLUETOOTH_CONNECT
 			) == PackageManager.PERMISSION_GRANTED
 		else true
 
@@ -64,6 +64,35 @@ class AndroidBluetoothScanner(
 			else devices + device
 		}
 	}
+
+	override val isScanRunning: Flow<Boolean>
+		get() = callbackFlow {
+			trySend(false)
+			val intentFilter = IntentFilter().apply {
+				addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+				addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+			}
+
+			val scanDiscoveryReceiver = ScanDiscoveryReceiver(
+				onchange = { result ->
+					when (result) {
+						ScanDiscoveryReceiver.BtScanDiscoveryMode.SCAN_STATED -> trySend(true)
+						ScanDiscoveryReceiver.BtScanDiscoveryMode.SCAN_ENDED -> trySend(false)
+					}
+				}
+			)
+
+			ContextCompat.registerReceiver(
+				context,
+				scanDiscoveryReceiver,
+				intentFilter,
+				ContextCompat.RECEIVER_EXPORTED
+			)
+
+			awaitClose {
+				context.unregisterReceiver(scanDiscoveryReceiver)
+			}
+		}
 
 	override val isBluetoothActive: Flow<Boolean>
 		get() = callbackFlow {
@@ -86,40 +115,44 @@ class AndroidBluetoothScanner(
 
 
 	@SuppressLint("MissingPermission")
-	override fun findPairedDevices() {
-		if (!_hasConnectPermission) return
+	override fun findPairedDevices(): Result<Unit> {
+		if (!_hasConnectPermission)
+			return Result.failure(BluetoothPermissionNotProvided())
 
-		val pairedDevices = _bluetoothAdapter?.bondedDevices
-			?.map(BluetoothDevice::toDomainModel) ?: emptyList()
+		val pairedDevices =
+			_bluetoothAdapter?.bondedDevices?.map(BluetoothDevice::toDomainModel) ?: emptyList()
 
 		_bondedDevices.update { pairedDevices }
+		return Result.success(Unit)
 	}
 
 	@SuppressLint("MissingPermission")
-	override fun startScan() {
-		if (!_hasConnectPermission ) return
-
-		// start discovery for bluetooth devices
-		// it will listen for 12 seconds
-		_bluetoothAdapter?.startDiscovery()
-		Log.d(BLUETOOTH_SCANNER, "STARTED")
+	override fun startScan(): Result<Boolean> {
+		if (!_hasConnectPermission)
+			return Result.failure(BluetoothPermissionNotProvided())
 		// register BroadCastReceiver to receive bluetooth devices
 		ContextCompat.registerReceiver(
 			context,
 			receiver,
 			IntentFilter(BluetoothDevice.ACTION_FOUND),
-			ContextCompat.RECEIVER_NOT_EXPORTED
+			ContextCompat.RECEIVER_EXPORTED
 		)
+		// start discovery for bluetooth devices
+		// it will listen for 12 seconds
+		val status = _bluetoothAdapter?.startDiscovery() ?: false
+		return Result.success(status)
 	}
 
 	@SuppressLint("MissingPermission")
-	override fun stopScan() {
-		if (!_hasConnectPermission) return
+	override fun stopScan(): Result<Boolean> {
+		if (!_hasConnectPermission)
+			return Result.failure(BluetoothPermissionNotProvided())
+		// stop discovery
+		val status = _bluetoothAdapter?.cancelDiscovery() ?: false
 		// unregister the receiver
 		Log.d(BLUETOOTH_SCANNER, "STOPPED")
 		context.unregisterReceiver(receiver)
-		// stop discovery
-		_bluetoothAdapter?.cancelDiscovery()
+		return Result.success(status)
 	}
 
 }
