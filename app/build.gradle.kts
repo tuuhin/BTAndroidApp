@@ -59,11 +59,21 @@ dependencies {
 	implementation(libs.androidx.ui.graphics)
 	implementation(libs.androidx.ui.tooling.preview)
 	implementation(libs.androidx.material3)
+	//lifecycle compose runtime
+	implementation(libs.androidx.lifecycle.runtime.compose)
+	//navigation
+	implementation(libs.androidx.navigation.compose)
+	//kotlin immutable
+	implementation(libs.kotlinx.collections.immutable)
+	//splash api
+	implementation(libs.androidx.core.splashscreen)
 	// koin
 	implementation(platform(libs.koin.bom))
 	implementation(libs.koin.core)
 	implementation(libs.koin.android)
 	implementation(libs.koin.compose)
+	//icons
+	implementation(libs.androidx.material.icons.extended)
 	//tests
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)

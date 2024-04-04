@@ -11,12 +11,19 @@
 
   <uses-permission
     android:name="android.permission.BLUETOOTH_SCAN"
-    android:usesPermissionFlags="neverForLocation" />
+    android:usesPermissionFlags="neverForLocation"
+    tools:targetApi="s" />
   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
   <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
 
-  <uses-feature android:name="android.hardware.bluetooth" />
+  <uses-permission
+    android:name="android.permission.ACCESS_COARSE_LOCATION"
+    android:maxSdkVersion="30" />
+  <uses-permission
+    android:name="android.permission.ACCESS_FINE_LOCATION"
+    android:maxSdkVersion="30" />
 
+  <uses-feature android:name="android.hardware.bluetooth" />
   <uses-feature
     android:name="android.hardware.bluetooth_le"
     android:required="false" />
@@ -30,12 +37,12 @@
     android:label="@string/app_name"
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
-    android:theme="@style/Theme.BlueToothTerminalApp"
+    android:theme="@style/Theme.App.Starting"
     tools:targetApi="31">
     <activity
       android:name=".MainActivity"
       android:exported="true"
-      android:theme="@style/Theme.BlueToothTerminalApp">
+      android:theme="@style/Theme.App.Starting">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
 
