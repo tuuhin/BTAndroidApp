@@ -1,14 +1,22 @@
 [versions]
 agp = "8.3.1"
+compose_destination_animation_version = "1.9.50"
+compose_destination_core_version = "1.9.63"
+coreSplashscreen = "1.0.1"
 kotlin = "1.9.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
+kotlinxCollectionsImmutable = "0.3.7"
+kotlinxDatetime = "0.6.0-RC.2"
+ksp = "1.9.63"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.8.2"
 composeBom = "2024.03.00"
 koinBom = "3.5.3"
+materialIconsExtended = "1.6.4"
+ksp_version = "1.9.0-1.0.13"
 
 [libraries]
 #core
@@ -24,6 +32,18 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+#splash
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+#lifecyle compose runtime
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
+#icons
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+#kotlinx immutable
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
+#navigation
+compose_destination_animation = { module = "io.github.raamcosta.compose-destinations:animations-core", version.ref = "compose_destination_animation_version" }
+compose_destination_core = { module = "io.github.raamcosta.compose-destinations:core", version.ref = "compose_destination_core_version" }
+compose_destination_ksp = { module = "io.github.raamcosta.compose-destinations:ksp", version.ref = "ksp" }
 #koin
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koinBom" }
 koin-core = { module = "io.insert-koin:koin-core" }
@@ -33,9 +53,11 @@ koin-compose = { module = "io.insert-koin:koin-androidx-compose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+#datetime
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
+google_devtools_ksp = { id = "com.google.devtools.ksp", version.ref = "ksp_version" }

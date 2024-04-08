@@ -1,6 +1,8 @@
 plugins {
 	alias(libs.plugins.androidApplication)
 	alias(libs.plugins.jetbrainsKotlinAndroid)
+	alias(libs.plugins.google.devtools.ksp)
+	id("kotlin-parcelize")
 }
 
 android {
@@ -62,9 +64,13 @@ dependencies {
 	//lifecycle compose runtime
 	implementation(libs.androidx.lifecycle.runtime.compose)
 	//navigation
-	implementation(libs.androidx.navigation.compose)
+	implementation(libs.compose.destination.animation)
+	implementation(libs.compose.destination.core)
+	ksp(libs.compose.destination.ksp)
 	//kotlin immutable
 	implementation(libs.kotlinx.collections.immutable)
+	//kotlinx datetime
+	implementation(libs.kotlinx.datetime)
 	//splash api
 	implementation(libs.androidx.core.splashscreen)
 	// koin
