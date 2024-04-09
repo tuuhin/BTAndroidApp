@@ -1,6 +1,10 @@
 package com.eva.bluetoothterminalapp.presentation.navigation.screens
 
 import android.widget.Toast
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -9,38 +13,36 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.eva.bluetoothterminalapp.presentation.feature_devices.BTDeviceViewmodel
-import com.eva.bluetoothterminalapp.presentation.feature_devices.BTDevicesRoute
-import com.eva.bluetoothterminalapp.presentation.navigation.args.toArgs
+import com.eva.bluetoothterminalapp.presentation.feature_client.BTClientRoute
+import com.eva.bluetoothterminalapp.presentation.feature_client.BTClientViewModel
+import com.eva.bluetoothterminalapp.presentation.navigation.args.ConnectionRouteArgs
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.destinations.BTClientScreenDestination
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
-@RootNavGraph(start = true)
 @Destination(
-	route = Routes.DEVICES_ROUTE,
-	style = RouteAnimation::class
+	route = Routes.CLIENT_CONNECTION_ROUTE,
+	style = RouteAnimation::class,
+	navArgsDelegate = ConnectionRouteArgs::class
 )
 @Composable
-fun BTDevicesScreen(
-	navController: DestinationsNavigator
+fun BTClientScreen(
+	navigator: DestinationsNavigator,
 ) {
 
+	val context = LocalContext.current
 	val lifecyleOwner = LocalLifecycleOwner.current
 	val snackBarHostState = LocalSnackBarProvider.current
-	val context = LocalContext.current
 
-	val viewModel = koinViewModel<BTDeviceViewmodel>()
+	val viewModel = koinViewModel<BTClientViewModel>()
 
-	val state by viewModel.screenState.collectAsStateWithLifecycle()
+	val isConnected by viewModel.clientState.collectAsStateWithLifecycle()
 
-	LaunchedEffect(lifecyleOwner) {
+	LaunchedEffect(lifecyleOwner, viewModel) {
 		lifecyleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 			viewModel.uiEvents.collect { event ->
 				when (event) {
@@ -55,15 +57,16 @@ fun BTDevicesScreen(
 		}
 	}
 
-	BTDevicesRoute(
-		state = state,
-		onEvent = viewModel::onEvents,
-		onSelectDevice = { device ->
-			val args = device.toArgs()
-			navController.navigate(BTClientScreenDestination(args), onlyIfResumed = true)
-		},
-		onConnectAsServer = {
-
+	BTClientRoute(
+		state = isConnected,
+		onEvent = viewModel::onEvent,
+		navigation = {
+			IconButton(onClick = navigator::popBackStack) {
+				Icon(
+					imageVector = Icons.AutoMirrored.Default.ArrowBack,
+					contentDescription = "Arrow Back"
+				)
+			}
 		},
 	)
 }
