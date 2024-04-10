@@ -11,10 +11,12 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
 import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothScanner
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
+import com.eva.bluetoothterminalapp.domain.exceptions.LocationPermissionNotProvided
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +30,7 @@ private typealias BluetoothDeviceModels = List<BluetoothDeviceModel>
 
 private const val BLUETOOTH_SCANNER = "ANDROID_BLUETOOTH_SCANNER"
 
+@SuppressLint("MissingPermission")
 class AndroidBluetoothScanner(
 	private val context: Context
 ) : BluetoothScanner {
@@ -40,6 +43,9 @@ class AndroidBluetoothScanner(
 	private val _isBluetoothActive: Boolean
 		get() = _bluetoothAdapter?.isEnabled ?: false
 
+	private val isDiscovering: Boolean
+		get() = _bluetoothAdapter?.isDiscovering ?: false
+
 	private val _hasConnectPermission: Boolean
 		get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 			ContextCompat.checkSelfPermission(
@@ -47,27 +53,36 @@ class AndroidBluetoothScanner(
 			) == PackageManager.PERMISSION_GRANTED
 		else true
 
+	private val _hasLocationPermission: Boolean
+		get() = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+			ContextCompat.checkSelfPermission(
+				context,
+				Manifest.permission.ACCESS_FINE_LOCATION
+			) == PermissionChecker.PERMISSION_GRANTED
+		else true
+
 
 	private val _availableDevices = MutableStateFlow<BluetoothDeviceModels>(emptyList())
-	override val availableDevices: StateFlow<List<BluetoothDeviceModel>>
+	override val availableDevices: StateFlow<BluetoothDeviceModels>
 		get() = _availableDevices.asStateFlow()
 
 
 	private val _bondedDevices = MutableStateFlow<BluetoothDeviceModels>(emptyList())
-	override val pairedDevices: StateFlow<List<BluetoothDeviceModel>>
+	override val pairedDevices: StateFlow<BluetoothDeviceModels>
 		get() = _bondedDevices.asStateFlow()
 
 
 	private val receiver = ScanResultsReceiver { device ->
 		_availableDevices.update { devices ->
-			if (devices.contains(device)) devices
+			// if device in available devices or device in paired devices then don't update
+			if (devices.contains(device) || pairedDevices.value.contains(device)) devices
 			else devices + device
 		}
 	}
 
 	override val isScanRunning: Flow<Boolean>
 		get() = callbackFlow {
-			trySend(false)
+			trySend(isDiscovering)
 			val intentFilter = IntentFilter().apply {
 				addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
 				addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
@@ -76,8 +91,8 @@ class AndroidBluetoothScanner(
 			val scanDiscoveryReceiver = ScanDiscoveryReceiver(
 				onchange = { result ->
 					when (result) {
-						ScanDiscoveryReceiver.BtScanDiscoveryMode.SCAN_STATED -> trySend(true)
-						ScanDiscoveryReceiver.BtScanDiscoveryMode.SCAN_ENDED -> trySend(false)
+						BTScanDiscoveryStatus.SCAN_STATED -> trySend(true)
+						BTScanDiscoveryStatus.SCAN_ENDED -> trySend(false)
 					}
 				}
 			)
@@ -94,6 +109,7 @@ class AndroidBluetoothScanner(
 			}
 		}
 
+
 	override val isBluetoothActive: Flow<Boolean>
 		get() = callbackFlow {
 			trySend(_isBluetoothActive)
@@ -105,7 +121,7 @@ class AndroidBluetoothScanner(
 				context,
 				btModeReceiver,
 				IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED),
-				ContextCompat.RECEIVER_NOT_EXPORTED
+				ContextCompat.RECEIVER_EXPORTED
 			)
 
 			awaitClose {
@@ -126,10 +142,13 @@ class AndroidBluetoothScanner(
 		return Result.success(Unit)
 	}
 
-	@SuppressLint("MissingPermission")
+
 	override fun startScan(): Result<Boolean> {
 		if (!_hasConnectPermission)
 			return Result.failure(BluetoothPermissionNotProvided())
+		// checks only for android 11 and lower otherwise its always false
+		if (!_hasLocationPermission)
+			return Result.failure(LocationPermissionNotProvided())
 		// register BroadCastReceiver to receive bluetooth devices
 		ContextCompat.registerReceiver(
 			context,
@@ -143,7 +162,7 @@ class AndroidBluetoothScanner(
 		return Result.success(status)
 	}
 
-	@SuppressLint("MissingPermission")
+
 	override fun stopScan(): Result<Boolean> {
 		if (!_hasConnectPermission)
 			return Result.failure(BluetoothPermissionNotProvided())
@@ -153,6 +172,16 @@ class AndroidBluetoothScanner(
 		Log.d(BLUETOOTH_SCANNER, "STOPPED")
 		context.unregisterReceiver(receiver)
 		return Result.success(status)
+	}
+
+
+	override fun releaseResources() {
+		try {
+			//remove the broadcast receiver if not removed
+			context.unregisterReceiver(receiver)
+		} catch (e: Exception) {
+			Log.d(BLUETOOTH_SCANNER, "RECEIVER ALREADY REMOVED")
+		}
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.util
+package com.eva.bluetoothterminalapp.presentation.feature_devices.util
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Audiotrack

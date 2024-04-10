@@ -45,4 +45,9 @@ interface BluetoothScanner {
 	 * @return [Result] determining whether if scan is stopped successfully
 	 */
 	fun stopScan(): Result<Boolean>
+
+	/**
+	 * Clears resources when done
+	 */
+	fun releaseResources()
 }

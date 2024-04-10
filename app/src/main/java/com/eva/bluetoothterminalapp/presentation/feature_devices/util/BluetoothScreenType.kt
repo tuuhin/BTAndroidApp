@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_devices.state
+package com.eva.bluetoothterminalapp.presentation.feature_devices.util
 
 import android.os.Build
 

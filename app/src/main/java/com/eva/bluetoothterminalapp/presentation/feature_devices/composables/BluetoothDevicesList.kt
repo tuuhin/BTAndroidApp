@@ -27,7 +27,7 @@ fun BluetoothDevicesList(
 	availableDevices: ImmutableList<BluetoothDeviceModel>,
 	onSelectDevice: (BluetoothDeviceModel) -> Unit,
 	modifier: Modifier = Modifier,
-	locationPlaceholder: @Composable LazyItemScope.() -> Unit = {},
+	locationPlaceholder: (@Composable LazyItemScope.() -> Unit)? = null,
 	contentPaddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
 
@@ -72,7 +72,7 @@ fun BluetoothDevicesList(
 		) { _, device ->
 			BluetoothDeviceCard(
 				device = device,
-				onClick = { onSelectDevice(device) },
+				onConnect = { onSelectDevice(device) },
 				modifier = Modifier
 					.fillMaxWidth()
 					.animateItemPlacement()
@@ -96,8 +96,10 @@ fun BluetoothDevicesList(
 				)
 			}
 		}
-		item {
-			locationPlaceholder(this)
+		locationPlaceholder?.let { content ->
+			item {
+				content(this)
+			}
 		}
 		itemsIndexed(
 			items = availableDevices,
@@ -106,7 +108,7 @@ fun BluetoothDevicesList(
 		) { _, device ->
 			BluetoothDeviceCard(
 				device = device,
-				onClick = { onSelectDevice(device) },
+				onConnect = { onSelectDevice(device) },
 				modifier = Modifier
 					.fillMaxWidth()
 					.animateItemPlacement()

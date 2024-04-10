@@ -13,17 +13,15 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -33,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
@@ -41,27 +38,34 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.presentation.composables.BTNotEnabledBox
 import com.eva.bluetoothterminalapp.presentation.composables.BtPermissionNotProvidedBox
 import com.eva.bluetoothterminalapp.presentation.composables.LocationPermissionCard
+import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTConnectToServerButton
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTDeviceRouteTopBar
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BluetoothDevicesList
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenState
-import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BluetoothScreenType
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.DeviceScreenEvents
+import com.eva.bluetoothterminalapp.presentation.feature_devices.util.BluetoothScreenType
+import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BTDevicesRoute(
 	state: BTDevicesScreenState,
 	onEvent: (DeviceScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
+	onConnectAsServer: () -> Unit = {},
+	onSelectDevice: (BluetoothDeviceModel) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
 ) {
 	val context = LocalContext.current
+	val snackBarHostState = LocalSnackBarProvider.current
 
-	var hasBtPermission by remember {
+	var hasBtPermission by remember(context) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 			mutableStateOf(
 				ContextCompat.checkSelfPermission(
@@ -71,7 +75,7 @@ fun BTDevicesRoute(
 		else mutableStateOf(true)
 	}
 
-	var hasFineLocationPermission by remember {
+	var hasFineLocationPermission by remember(context) {
 		mutableStateOf(
 			ContextCompat.checkSelfPermission(
 				context, Manifest.permission.ACCESS_FINE_LOCATION
@@ -90,42 +94,49 @@ fun BTDevicesRoute(
 	}
 
 
-	val isLocationBlockRequired by remember(hasFineLocationPermission) {
+	val showLocationBlock by remember(hasFineLocationPermission) {
 		derivedStateOf { Build.VERSION.SDK_INT <= Build.VERSION_CODES.R && !hasFineLocationPermission }
 	}
 
 	val showScanButton by remember(hasBtPermission, hasFineLocationPermission, state.isBtActive) {
 		derivedStateOf {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) hasBtPermission && state.isBtActive
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+				hasBtPermission && state.isBtActive
 			else hasFineLocationPermission && state.isBtActive
 		}
 	}
 
+	val showServerButton by remember(hasBtPermission, state.isBtActive) {
+		derivedStateOf {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+				hasBtPermission && state.isBtActive
+			else state.isBtActive
+		}
+	}
+
 	Scaffold(
-		topBar = { BTDeviceRouteTopBar(navigation = navigation) },
+		topBar = {
+			BTDeviceRouteTopBar(
+				isScanning = state.isScanning,
+				canShowScanOption = showScanButton,
+				navigation = navigation,
+				startScan = { onEvent(DeviceScreenEvents.StartScan) },
+				stopScan = { onEvent(DeviceScreenEvents.StopScan) },
+			)
+		},
 		floatingActionButton = {
 			AnimatedVisibility(
-				visible = showScanButton,
-				enter = slideInVertically() + fadeIn(),
-				exit = slideOutVertically() + fadeOut(),
-				label = "Show Scan Button Animation"
+				visible = showServerButton,
+				enter = slideInVertically(),
+				exit = slideOutVertically()
 			) {
-				ExtendedFloatingActionButton(
-					onClick = {
-						if (state.isScanning) onEvent(DeviceScreenEvents.StopScan)
-						else onEvent(DeviceScreenEvents.StartScan)
-					},
-					shape = MaterialTheme.shapes.large,
-				) {
-					if (!state.isScanning) Text(text = stringResource(id = R.string.start_bluetooth_scan))
-					else Text(text = stringResource(id = R.string.stop_bluetooth_scan))
-				}
+				BTConnectToServerButton(onConnectAsServer = onConnectAsServer)
 			}
-
 		},
-		floatingActionButtonPosition = FabPosition.Center,
+		snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
 		modifier = modifier,
 	) { scPadding ->
+
 		Crossfade(
 			targetState = screenType,
 			label = "Is Bluetooth Active",
@@ -153,12 +164,13 @@ fun BTDevicesRoute(
 					BluetoothDevicesList(
 						pairedDevices = state.pairedDevices,
 						availableDevices = state.availableDevices,
-						onSelectDevice = {},
+						onSelectDevice = onSelectDevice,
 						locationPlaceholder = {
 							AnimatedVisibility(
-								visible = isLocationBlockRequired,
+								visible = showLocationBlock,
 								enter = expandVertically() + fadeIn(),
-								exit = shrinkVertically() + fadeOut()
+								exit = shrinkVertically() + fadeOut(),
+								modifier = Modifier.animateItemPlacement()
 							) {
 								LocationPermissionCard(
 									onLocationAccess = { isAllowed ->
@@ -178,7 +190,6 @@ fun BTDevicesRoute(
 						.padding(dimensionResource(R.dimen.sc_padding))
 				)
 			}
-
 		}
 	}
 }
@@ -199,6 +210,7 @@ private fun BTDeviceRoutePreview(
 ) = BlueToothTerminalAppTheme {
 	BTDevicesRoute(
 		state = state,
-		onEvent = {}
+		onEvent = {},
+		onSelectDevice = { }
 	)
 }
