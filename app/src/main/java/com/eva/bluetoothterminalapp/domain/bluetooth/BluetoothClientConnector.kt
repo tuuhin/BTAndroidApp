@@ -3,19 +3,19 @@ package com.eva.bluetoothterminalapp.domain.bluetooth
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.BroadcastReceiver
-import com.eva.bluetoothterminalapp.domain.models.BTClientStatus
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
+import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface BluetoothClientConnector {
 
 	/**
-	 * Provides [BTClientStatus] as a stateflow,the connection mode determine what the connection
+	 * Provides [ClientConnectionState] as a stateflow,the connection mode determine what the connection
 	 * is doing currently
-	 * @see [BTClientStatus]
+	 * @see [ClientConnectionState]
 	 */
-	val isConnected: StateFlow<BTClientStatus>
+	val isConnected: StateFlow<ClientConnectionState>
 
 	/**
 	 * Connect the client either to a device via its UUID or current server via specified uuid
@@ -37,9 +37,9 @@ interface BluetoothClientConnector {
 
 	/**
 	 * Sends the information to the end server from this device
-	 * @param info [ByteArray] of the data to be sent
+	 * @param data [ByteArray] of the data to be sent
 	 */
-	suspend fun sendData(info: ByteArray): Result<Boolean>
+	suspend fun sendData(data: String): Result<Boolean>
 
 	/**
 	 * Closes the [BluetoothSocket] to which the client is connected

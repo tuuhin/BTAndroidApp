@@ -15,8 +15,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
-import com.eva.bluetoothterminalapp.domain.models.BTClientStatus
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
+import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -62,8 +62,8 @@ class AndroidBTClientConnector(
 		else true
 
 
-	private val _connectMode = MutableStateFlow(BTClientStatus.CONNECTION_INITIALIZING)
-	override val isConnected: StateFlow<BTClientStatus>
+	private val _connectMode = MutableStateFlow(ClientConnectionState.CONNECTION_INITIALIZING)
+	override val isConnected: StateFlow<ClientConnectionState>
 		get() = _connectMode.asStateFlow()
 
 
@@ -85,7 +85,7 @@ class AndroidBTClientConnector(
 	 */
 	private val remoteDeviceUUIDReceiver = RemoteDeviceUUIDReceiver { uuids ->
 		// don't update uuid if its null
-		//Log.d(CLIENT_LOGGER,"UUID FOUND : $uuids")
+		Log.d(CLIENT_LOGGER, "FOUNDED ALL UUIDS: $uuids")
 		val receivedUUID = uuids.firstOrNull() ?: return@RemoteDeviceUUIDReceiver
 		scope.launch { _otherDeviceUUID.emit(receivedUUID) }
 		Log.d(CLIENT_LOGGER, "REMOTE DEVICE UUID $receivedUUID")
@@ -123,12 +123,12 @@ class AndroidBTClientConnector(
 					// set socket
 					_transferService = BluetoothTransferService(socket)
 					// set connection mode to accepted
-					_connectMode.update { BTClientStatus.CONNECTION_ACCEPTED }
+					_connectMode.update { ClientConnectionState.CONNECTION_ACCEPTED }
 				}
 			} catch (e: IOException) {
 				e.printStackTrace()
 				// if any exception occurred it's a denied connection
-				_connectMode.update { BTClientStatus.CONNECTION_DENIED }
+				_connectMode.update { ClientConnectionState.CONNECTION_DENIED }
 			}
 		}
 	}
@@ -178,17 +178,15 @@ class AndroidBTClientConnector(
 		get() = _connectMode.flatMapLatest { status ->
 			// start reading from the flow is status is connected otherwise it
 			// will return an empty flow
-			val canRead = status == BTClientStatus.CONNECTION_ACCEPTED
+			val canRead = status == ClientConnectionState.CONNECTION_ACCEPTED
 			_transferService?.readFromStream(canRead = canRead) ?: emptyFlow()
 		}.flowOn(Dispatchers.IO)
 
 
-	override suspend fun sendData(info: ByteArray): Result<Boolean> {
-		// don't allow anything to be sent till connection is in accepted mode
-		if (_connectMode.value == BTClientStatus.CONNECTION_ACCEPTED)
-			return Result.success(false)
-
-		return _transferService?.writeToStream(info) ?: Result.success(false)
+	override suspend fun sendData(data: String): Result<Boolean> {
+		val infoAsByteArray = data.trim().encodeToByteArray()
+		return _transferService?.writeToStream(infoAsByteArray)
+			?: Result.success(false)
 	}
 
 

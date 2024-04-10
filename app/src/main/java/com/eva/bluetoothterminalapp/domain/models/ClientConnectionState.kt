@@ -1,6 +1,6 @@
 package com.eva.bluetoothterminalapp.domain.models
 
-enum class BTClientStatus {
+enum class ClientConnectionState {
 	/**
 	 * Starting the connection with the other device
 	 */
@@ -9,7 +9,7 @@ enum class BTClientStatus {
 	/**
 	 * Remote device is recognized by the device
 	 */
-	CONNECTION_CONNECTED,
+	CONNECTION_DEVICE_FOUND,
 
 	/**
 	 * Remote Device connection is accepted

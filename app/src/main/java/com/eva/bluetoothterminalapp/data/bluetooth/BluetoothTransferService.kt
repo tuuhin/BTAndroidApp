@@ -21,19 +21,22 @@ class BluetoothTransferService(
 	private val _inputStream = socket.inputStream
 	private val _outputStream = socket.outputStream
 
-	private val _buffer = ByteArray(512)
+	private val _buffer = ByteArray(2 * 1_024)
 
 	fun readFromStream(canRead: Boolean) = flow {
 		while (canRead && socket.isConnected && currentCoroutineContext().isActive) {
-			// clear the buffer each time
-			_buffer.fill(element = 0, fromIndex = 0, toIndex = _buffer.size)
 			try {
+				// clear the buffer each time before reading
+				_buffer.fill(0)
+				//buffer cleared
 				val byteCount = _inputStream.read(_buffer)
 				// byte count is lessen than 0 thus stream closed
 				if (byteCount <= 0) continue
-				val message = _buffer.decodeToString(endIndex = byteCount)
-				// skip if a message is empty
-				if (message.isEmpty() || message.isBlank()) continue
+				val message = _buffer.decodeToString(endIndex = byteCount).trim()
+				//skip if message is blank
+				if (message.isBlank()) continue
+
+				Log.d(TRANSFER_LOGGER, "MESSAGE $message")
 
 				val btMessage = BluetoothMessage(
 					message = message,

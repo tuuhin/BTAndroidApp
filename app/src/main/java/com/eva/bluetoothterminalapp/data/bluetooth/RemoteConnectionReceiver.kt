@@ -6,10 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import com.eva.bluetoothterminalapp.domain.models.BTClientStatus
+import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
 
 class RemoteConnectionReceiver(
-	private val onResults: (connected: BTClientStatus, device: BluetoothDevice?) -> Unit
+	private val onResults: (connected: ClientConnectionState, device: BluetoothDevice?) -> Unit
 ) : BroadcastReceiver() {
 
 	override fun onReceive(context: Context?, intent: Intent?) {
@@ -24,8 +24,8 @@ class RemoteConnectionReceiver(
 
 		val action = when (intent.action) {
 			BluetoothDevice.ACTION_BOND_STATE_CHANGED -> bondStateToConnectionMode(bondState)
-			BluetoothDevice.ACTION_ACL_CONNECTED -> BTClientStatus.CONNECTION_CONNECTED
-			BluetoothDevice.ACTION_ACL_DISCONNECTED -> BTClientStatus.CONNECTION_DISCONNECTED
+			BluetoothDevice.ACTION_ACL_CONNECTED -> ClientConnectionState.CONNECTION_DEVICE_FOUND
+			BluetoothDevice.ACTION_ACL_DISCONNECTED -> ClientConnectionState.CONNECTION_DISCONNECTED
 			else -> null
 		}
 
@@ -34,10 +34,10 @@ class RemoteConnectionReceiver(
 		action?.let { mode -> onResults(mode, device) }
 	}
 
-	private fun bondStateToConnectionMode(bondState: Int): BTClientStatus? {
+	private fun bondStateToConnectionMode(bondState: Int): ClientConnectionState? {
 		return when (bondState) {
-			BluetoothDevice.BOND_BONDED -> BTClientStatus.CONNECTION_BONDED
-			BluetoothDevice.BOND_BONDING -> BTClientStatus.CONNECTION_BONDING
+			BluetoothDevice.BOND_BONDED -> ClientConnectionState.CONNECTION_BONDED
+			BluetoothDevice.BOND_BONDING -> ClientConnectionState.CONNECTION_BONDING
 			else -> null
 		}
 	}

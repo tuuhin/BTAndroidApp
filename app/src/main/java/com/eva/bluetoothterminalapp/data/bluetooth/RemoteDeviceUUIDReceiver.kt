@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.ParcelUuid
-import android.util.Log
 import java.util.UUID
 
 class RemoteDeviceUUIDReceiver(
@@ -24,8 +23,6 @@ class RemoteDeviceUUIDReceiver(
 		val mappedUUID = uuid?.filterIsInstance<ParcelUuid>()
 			?.map(ParcelUuid::getUuid)
 			?: emptyList()
-
-		Log.d("RECEIVED_UUIDS", "$mappedUUID")
 
 		onReceivedUUIDs(mappedUUID)
 	}
