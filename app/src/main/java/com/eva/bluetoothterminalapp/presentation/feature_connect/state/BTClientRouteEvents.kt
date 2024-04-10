@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_client.state
+package com.eva.bluetoothterminalapp.presentation.feature_connect.state
 
 sealed interface BTClientRouteEvents {
 

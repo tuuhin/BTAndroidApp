@@ -32,14 +32,16 @@
   <string name="close_connection_dialog_text">Close the server/client connection between two devices</string>
   <string name="dialog_action_close">Close</string>
   <string name="dialog_action_cancel">Cancel</string>
-  <string name="textfield_placeholder">Enter Text to Send</string>
+  <string name="text_field_placeholder">Enter Text to Send</string>
   <string name="connection_device_found">Device Found</string>
   <string name="connection_denied">Connection Denied</string>
   <string name="connection_disconnected">Device Disconnected</string>
   <string name="connection_device_bonding">Bonding…</string>
   <string name="connection_bonded">Connection Bonded</string>
   <string name="connection_init">Connecting to device…</string>
-  <string name="connection_accpted">Device Connected</string>
+  <string name="connection_init_server">Starting Server…</string>
+  <string name="connection_accepted">Device Connected</string>
   <string name="clear_terminal_tooltip_text">Clear Terminal</string>
   <string name="devices_image_type">Device Image type %s</string>
+  <string name="connection_server_listening">Listening for connection…</string>
 </resources>

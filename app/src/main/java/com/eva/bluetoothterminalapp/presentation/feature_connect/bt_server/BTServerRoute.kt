@@ -1,18 +1,27 @@
-package com.eva.bluetoothterminalapp.presentation.feature_client
+package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imeNestedScroll
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -22,49 +31,62 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.models.BTClientStatus
-import com.eva.bluetoothterminalapp.presentation.feature_client.composables.BTClientTopBar
-import com.eva.bluetoothterminalapp.presentation.feature_client.composables.ConnectionStatusCard
+import com.eva.bluetoothterminalapp.domain.models.ServerConnectionState
+import com.eva.bluetoothterminalapp.presentation.feature_client.composables.BTMessageText
 import com.eva.bluetoothterminalapp.presentation.feature_client.composables.EndConnectionDialog
-import com.eva.bluetoothterminalapp.presentation.feature_client.composables.ReceivedMessageText
 import com.eva.bluetoothterminalapp.presentation.feature_client.composables.SendCommandTextField
-import com.eva.bluetoothterminalapp.presentation.feature_client.state.BTClientRouteEvents
-import com.eva.bluetoothterminalapp.presentation.feature_client.state.BTClientRouteState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.ServerConnectionStateCard
+import com.eva.bluetoothterminalapp.presentation.feature_connect.state.BTServerRouteEvents
+import com.eva.bluetoothterminalapp.presentation.feature_connect.state.BTServerRouteState
+import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun BTClientRoute(
-	state: BTClientRouteState,
-	onEvent: (BTClientRouteEvents) -> Unit,
+fun BTServerRoute(
+	state: BTServerRouteState,
+	onEvent: (BTServerRouteEvents) -> Unit,
 	modifier: Modifier = Modifier,
 	navigation: @Composable () -> Unit = {},
 ) {
 
-	val isStatusAccepted by remember(state.connectionMode) {
-		derivedStateOf { state.connectionMode == BTClientStatus.CONNECTION_ACCEPTED }
+	val snackBarHostState = LocalSnackBarProvider.current
+
+	val isConnectionAccepted by remember(state.connectionMode) {
+		derivedStateOf {
+			state.connectionMode == ServerConnectionState.CONNECTION_ACCEPTED
+		}
 	}
 
 	EndConnectionDialog(
 		showDialog = state.showDisconnectDialog,
-		onConfirm = { onEvent(BTClientRouteEvents.DisConnectClient) },
-		onDismiss = { onEvent(BTClientRouteEvents.CloseDisconnectDialog) },
+		onConfirm = { },
+		onDismiss = { },
 	)
 
 	BackHandler(
-		enabled = isStatusAccepted,
-		onBack = { onEvent(BTClientRouteEvents.OpenDisconnectDialog) },
+		enabled = isConnectionAccepted,
+		onBack = { },
 	)
 
 	Scaffold(
 		topBar = {
-			BTClientTopBar(
-				connectionState = state.connectionMode,
-				navigation = navigation,
-				onConnect = { onEvent(BTClientRouteEvents.ConnectClient) },
-				onDisconnect = { onEvent(BTClientRouteEvents.DisConnectClient) },
-				onClear = { onEvent(BTClientRouteEvents.ClearTerminal) },
+			TopAppBar(
+				title = { Text(text = "Server") },
+				navigationIcon = navigation,
+				actions = {
+					AnimatedVisibility(
+						visible = isConnectionAccepted,
+						enter = slideInVertically(),
+						exit = slideOutVertically()
+					) {
+						TextButton(onClick = {}) {
+							Text(text = "Stop Server")
+						}
+					}
+				},
 			)
 		},
+		snackbarHost = { SnackbarHost(snackBarHostState) },
 		modifier = modifier
 	) { scPadding ->
 		Column(
@@ -74,8 +96,8 @@ fun BTClientRoute(
 				.fillMaxSize(),
 			verticalArrangement = Arrangement.spacedBy(4.dp)
 		) {
-			ConnectionStatusCard(
-				btClientStatus = state.connectionMode,
+			ServerConnectionStateCard(
+				connectionState = state.connectionMode,
 				modifier = Modifier
 					.align(Alignment.CenterHorizontally)
 					.fillMaxWidth(.75f)
@@ -91,24 +113,24 @@ fun BTClientRoute(
 					items = state.messages,
 					key = { _, message -> message.logTime.toEpochMilliseconds() }
 				) { _, message ->
-					ReceivedMessageText(
+					BTMessageText(
 						message = message,
 						modifier = Modifier.padding(vertical = 2.dp)
 					)
 				}
 			}
 			HorizontalDivider(
-				thickness = 1.dp,
+				color = MaterialTheme.colorScheme.outlineVariant,
 				modifier = Modifier.fillMaxWidth()
 			)
 			SendCommandTextField(
 				value = state.textFieldValue,
-				isEnable = isStatusAccepted,
-				onChange = { onEvent(BTClientRouteEvents.OnTextFieldValue(it)) },
-				onImeAction = { onEvent(BTClientRouteEvents.OnSendEvents) },
+				isEnable = isConnectionAccepted,
+				onChange = { value -> onEvent(BTServerRouteEvents.OnTextFieldValue(value)) },
+				onImeAction = { onEvent(BTServerRouteEvents.OnSendEvents) },
 				modifier = modifier
 					.fillMaxWidth()
-					.imePadding()
+					.navigationBarsPadding()
 			)
 		}
 	}

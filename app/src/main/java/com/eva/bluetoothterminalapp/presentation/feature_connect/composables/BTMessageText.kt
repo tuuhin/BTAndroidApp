@@ -14,11 +14,11 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessageType
-import com.eva.bluetoothterminalapp.presentation.feature_client.util.toReadableTimeText
+import com.eva.bluetoothterminalapp.presentation.feature_connect.util.toReadableTimeText
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
-fun ReceivedMessageText(
+fun BTMessageText(
 	message: BluetoothMessage,
 	modifier: Modifier = Modifier
 ) {
@@ -49,9 +49,9 @@ fun ReceivedMessageText(
 
 @PreviewLightDark
 @Composable
-private fun ReceivedMessageTextPreview() = BlueToothTerminalAppTheme {
+private fun BTMessageTextPreview() = BlueToothTerminalAppTheme {
 	Surface {
-		ReceivedMessageText(
+		BTMessageText(
 			message = BluetoothMessage(
 				message = "HELLO",
 				type = BluetoothMessageType.MESSAGE_BY_DEVICE,

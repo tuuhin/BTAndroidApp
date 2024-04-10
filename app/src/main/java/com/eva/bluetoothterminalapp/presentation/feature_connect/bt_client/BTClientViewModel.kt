@@ -1,16 +1,18 @@
-package com.eva.bluetoothterminalapp.presentation.feature_client
+package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
-import com.eva.bluetoothterminalapp.presentation.feature_client.state.BTClientRouteEvents
-import com.eva.bluetoothterminalapp.presentation.feature_client.state.BTClientRouteState
+import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
+import com.eva.bluetoothterminalapp.domain.models.BluetoothMessageType
+import com.eva.bluetoothterminalapp.presentation.feature_connect.state.BTClientRouteEvents
+import com.eva.bluetoothterminalapp.presentation.feature_connect.state.BTClientRouteState
 import com.eva.bluetoothterminalapp.presentation.navigation.args.ConnectionRouteArgs
 import com.eva.bluetoothterminalapp.presentation.navigation.screens.navArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,20 +77,38 @@ class BTClientViewModel(
 
 	private fun startClientJob() {
 		_connectAsClientJob = viewModelScope.launch {
-			connector.connectClient(address = connectionDevice.address, secure = true)
+			connector.connectClient(
+				address = connectionDevice.address,
+				secure = true,
+				connectAsClient = true
+			)
 		}
 	}
 
-	private fun updateConnectionMode() = connector.isConnected.onEach { status ->
-		_clientState.update { state -> state.copy(connectionMode = status) }
-	}.launchIn(viewModelScope)
+	private fun updateConnectionMode() = connector.isConnected
+		.onEach { status ->
+			_clientState.update { state -> state.copy(connectionMode = status) }
+		}.launchIn(viewModelScope)
 
 	private fun sendText(message: String) = viewModelScope.launch {
-		val messageAsByteArray = message.trim().encodeToByteArray()
+
+		val messageAsByteArray = message.trim()
 		val result = connector.sendData(messageAsByteArray)
-		result.onFailure { err ->
-			_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "MESSAGE"))
-		}
+
+		result.fold(
+			onSuccess = {
+				val addedMessage = BluetoothMessage(
+					message = message,
+					type = BluetoothMessageType.MESSAGE_FROM_CLIENT
+				)
+				_clientState.update { state ->
+					state.copy(messages = state.messages.add(addedMessage))
+				}
+			},
+			onFailure = { err ->
+				_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "MESSAGE"))
+			},
+		)
 	}
 
 
@@ -99,7 +119,8 @@ class BTClientViewModel(
 		}
 		.onEach { message ->
 			_clientState.update { state ->
-				state.copy(messages = (state.messages + message).toPersistentList())
+				val updatedMessages = state.messages.add(message)
+				state.copy(messages = updatedMessages)
 			}
 		}.launchIn(viewModelScope)
 
@@ -111,6 +132,7 @@ class BTClientViewModel(
 
 	override fun onCleared() {
 		connector.releaseResources()
+		Log.d("VIEWMODEL", "CLEARED CLIENT")
 		super.onCleared()
 	}
 

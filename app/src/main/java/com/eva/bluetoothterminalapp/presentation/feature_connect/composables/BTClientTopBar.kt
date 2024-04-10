@@ -15,12 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.models.BTClientStatus
+import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BTClientTopBar(
-	connectionState: BTClientStatus,
+	connectionState: ClientConnectionState,
 	navigation: @Composable () -> Unit,
 	onConnect: () -> Unit,
 	onDisconnect: () -> Unit,

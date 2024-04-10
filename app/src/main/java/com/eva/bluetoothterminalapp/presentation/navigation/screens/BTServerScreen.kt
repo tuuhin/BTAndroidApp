@@ -13,9 +13,8 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.BTClientRoute
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.BTClientViewModel
-import com.eva.bluetoothterminalapp.presentation.navigation.args.ConnectionRouteArgs
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.BTServerRoute
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.BTServerViewModel
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
@@ -25,22 +24,20 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
 @Destination(
-	route = Routes.CLIENT_CONNECTION_ROUTE,
-	style = RouteAnimation::class,
-	navArgsDelegate = ConnectionRouteArgs::class
+	route = Routes.SERVER_ROUTE,
+	style = RouteAnimation::class
 )
 @Composable
-fun BTClientScreen(
+fun BTServerScreen(
 	navigator: DestinationsNavigator,
 ) {
+	val viewModel = koinViewModel<BTServerViewModel>()
 
 	val context = LocalContext.current
 	val lifecyleOwner = LocalLifecycleOwner.current
 	val snackBarHostState = LocalSnackBarProvider.current
 
-	val viewModel = koinViewModel<BTClientViewModel>()
-
-	val isConnected by viewModel.clientState.collectAsStateWithLifecycle()
+	val state by viewModel.state.collectAsStateWithLifecycle()
 
 	LaunchedEffect(lifecyleOwner, viewModel) {
 		lifecyleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -57,8 +54,8 @@ fun BTClientScreen(
 		}
 	}
 
-	BTClientRoute(
-		state = isConnected,
+	BTServerRoute(
+		state = state,
 		onEvent = viewModel::onEvent,
 		navigation = {
 			IconButton(onClick = navigator::popBackStack) {

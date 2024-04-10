@@ -16,12 +16,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.models.BTClientStatus
+import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
-fun ConnectionStatusCard(
-	btClientStatus: BTClientStatus,
+fun ClientConnectionStateCard(
+	clientState: ClientConnectionState,
 	modifier: Modifier = Modifier
 ) {
 	Card(
@@ -31,21 +31,21 @@ fun ConnectionStatusCard(
 		modifier = modifier
 	) {
 		Crossfade(
-			targetState = btClientStatus,
-			label = "Current Status",
+			targetState = clientState,
+			label = "Current client state",
 			animationSpec = tween(durationMillis = 300, easing = LinearEasing),
 			modifier = Modifier
 				.padding(12.dp)
 				.align(Alignment.CenterHorizontally)
-		) { status ->
-			when (status) {
-				BTClientStatus.CONNECTION_DEVICE_FOUND -> Text(text = stringResource(id = R.string.connection_device_found))
-				BTClientStatus.CONNECTION_DENIED -> Text(text = stringResource(id = R.string.connection_denied))
-				BTClientStatus.CONNECTION_DISCONNECTED -> Text(text = stringResource(id = R.string.connection_disconnected))
-				BTClientStatus.CONNECTION_BONDING -> Text(text = stringResource(id = R.string.connection_device_bonding))
-				BTClientStatus.CONNECTION_BONDED -> Text(text = stringResource(id = R.string.connection_bonded))
-				BTClientStatus.CONNECTION_INITIALIZING -> Text(text = stringResource(R.string.connection_init))
-				BTClientStatus.CONNECTION_ACCEPTED -> Text(text = stringResource(id = R.string.connection_accpted))
+		) { state ->
+			when (state) {
+				ClientConnectionState.CONNECTION_DEVICE_FOUND -> Text(text = stringResource(id = R.string.connection_device_found))
+				ClientConnectionState.CONNECTION_DENIED -> Text(text = stringResource(id = R.string.connection_denied))
+				ClientConnectionState.CONNECTION_DISCONNECTED -> Text(text = stringResource(id = R.string.connection_disconnected))
+				ClientConnectionState.CONNECTION_BONDING -> Text(text = stringResource(id = R.string.connection_device_bonding))
+				ClientConnectionState.CONNECTION_BONDED -> Text(text = stringResource(id = R.string.connection_bonded))
+				ClientConnectionState.CONNECTION_INITIALIZING -> Text(text = stringResource(R.string.connection_init))
+				ClientConnectionState.CONNECTION_ACCEPTED -> Text(text = stringResource(id = R.string.connection_accepted))
 			}
 		}
 	}
@@ -53,9 +53,9 @@ fun ConnectionStatusCard(
 
 @PreviewLightDark
 @Composable
-private fun ConnectionStatusCardPreview() = BlueToothTerminalAppTheme {
-	ConnectionStatusCard(
-		btClientStatus = BTClientStatus.CONNECTION_DEVICE_FOUND,
+private fun ClientConnectionStatePreview() = BlueToothTerminalAppTheme {
+	ClientConnectionStateCard(
+		clientState = ClientConnectionState.CONNECTION_DEVICE_FOUND,
 		modifier = Modifier.fillMaxWidth()
 	)
 }

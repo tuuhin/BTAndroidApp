@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_client.util
+package com.eva.bluetoothterminalapp.presentation.feature_connect.util
 
 import kotlinx.datetime.Instant
 import kotlinx.datetime.format

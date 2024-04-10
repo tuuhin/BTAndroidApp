@@ -16,11 +16,11 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.eva.bluetoothterminalapp.domain.models.BTClientStatus
+import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
 
 @Composable
 fun AnimatedConnectDisconnectButton(
-	connectionState: BTClientStatus,
+	connectionState: ClientConnectionState,
 	onConnect: () -> Unit,
 	onDisConnect: () -> Unit,
 	modifier: Modifier = Modifier
@@ -28,13 +28,13 @@ fun AnimatedConnectDisconnectButton(
 
 	val showConnectButton by remember(connectionState) {
 		derivedStateOf {
-			connectionState == BTClientStatus.CONNECTION_ACCEPTED ||
-					connectionState == BTClientStatus.CONNECTION_DISCONNECTED
+			connectionState == ClientConnectionState.CONNECTION_ACCEPTED ||
+					connectionState == ClientConnectionState.CONNECTION_DISCONNECTED
 		}
 	}
 
 	val isConnected by remember(connectionState) {
-		derivedStateOf { connectionState == BTClientStatus.CONNECTION_ACCEPTED }
+		derivedStateOf { connectionState == ClientConnectionState.CONNECTION_ACCEPTED }
 	}
 
 	AnimatedVisibility(
