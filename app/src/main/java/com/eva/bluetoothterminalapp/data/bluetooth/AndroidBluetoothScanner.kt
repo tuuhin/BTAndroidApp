@@ -56,8 +56,7 @@ class AndroidBluetoothScanner(
 	private val _hasLocationPermission: Boolean
 		get() = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
 			ContextCompat.checkSelfPermission(
-				context,
-				Manifest.permission.ACCESS_FINE_LOCATION
+				context, Manifest.permission.ACCESS_FINE_LOCATION
 			) == PermissionChecker.PERMISSION_GRANTED
 		else true
 
@@ -72,13 +71,39 @@ class AndroidBluetoothScanner(
 		get() = _bondedDevices.asStateFlow()
 
 
-	private val receiver = ScanResultsReceiver { device ->
+	private val _scanReceiver = ScanResultsReceiver { device ->
 		_availableDevices.update { devices ->
 			// if device in available devices or device in paired devices then don't update
-			if (devices.contains(device) || pairedDevices.value.contains(device)) devices
+			if (devices.contains(device) || _bondedDevices.value.contains(device)) devices
 			else devices + device
 		}
 	}
+
+	private val _bondDeviceUpdatedReceiver = BondStateChangedReceiver(
+		onNewDeviceBonded = { newDevice ->
+			// if no new device so do nothing
+			val deviceModel = newDevice?.toDomainModel() ?: return@BondStateChangedReceiver
+			// if the device already in bonded devices list then also do nothing
+			if (deviceModel in _bondedDevices.value) return@BondStateChangedReceiver
+			// if the device in available device remove it
+			if (deviceModel in _availableDevices.value) {
+				_availableDevices.update { devices ->
+					devices.filter { it.address != deviceModel.address }
+				}
+			}
+			// otherwise add it
+			_bondedDevices.update { devices -> devices + deviceModel }
+		},
+		onOldDeviceUnBonded = { oldDevice ->
+			// if no new device so do nothing
+			val deviceModel = oldDevice?.toDomainModel() ?: return@BondStateChangedReceiver
+			// if the device address matches the old devices address then remove it
+			if (deviceModel !in _bondedDevices.value) return@BondStateChangedReceiver
+			_bondedDevices.update { devices ->
+				devices.filter { it.address != deviceModel.address }
+			}
+		},
+	)
 
 	override val isScanRunning: Flow<Boolean>
 		get() = callbackFlow {
@@ -138,6 +163,17 @@ class AndroidBluetoothScanner(
 		val pairedDevices =
 			_bluetoothAdapter?.bondedDevices?.map(BluetoothDevice::toDomainModel) ?: emptyList()
 
+		val intentFilters = IntentFilter().apply {
+			addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+		}
+
+		ContextCompat.registerReceiver(
+			context,
+			_bondDeviceUpdatedReceiver,
+			intentFilters,
+			ContextCompat.RECEIVER_EXPORTED
+		)
+
 		_bondedDevices.update { pairedDevices }
 		return Result.success(Unit)
 	}
@@ -152,7 +188,7 @@ class AndroidBluetoothScanner(
 		// register BroadCastReceiver to receive bluetooth devices
 		ContextCompat.registerReceiver(
 			context,
-			receiver,
+			_scanReceiver,
 			IntentFilter(BluetoothDevice.ACTION_FOUND),
 			ContextCompat.RECEIVER_EXPORTED
 		)
@@ -170,15 +206,17 @@ class AndroidBluetoothScanner(
 		val status = _bluetoothAdapter?.cancelDiscovery() ?: false
 		// unregister the receiver
 		Log.d(BLUETOOTH_SCANNER, "STOPPED")
-		context.unregisterReceiver(receiver)
+		context.unregisterReceiver(_scanReceiver)
 		return Result.success(status)
 	}
 
 
 	override fun releaseResources() {
 		try {
-			//remove the broadcast receiver if not removed
-			context.unregisterReceiver(receiver)
+			// remove the broadcast receiver for find device
+			context.unregisterReceiver(_scanReceiver)
+			// remove broadcast from newly bounded devices
+			context.unregisterReceiver(_bondDeviceUpdatedReceiver)
 		} catch (e: Exception) {
 			Log.d(BLUETOOTH_SCANNER, "RECEIVER ALREADY REMOVED")
 		}

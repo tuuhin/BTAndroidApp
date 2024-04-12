@@ -6,18 +6,15 @@ import android.content.Context
 import android.content.Intent
 
 class ScanDiscoveryReceiver(
-	private val onchange: (BtScanDiscoveryMode) -> Unit,
+	private val onchange: (BTScanDiscoveryStatus) -> Unit,
 ) : BroadcastReceiver() {
 
 	override fun onReceive(context: Context?, intent: Intent?) {
-		when (intent?.action) {
-			BluetoothAdapter.ACTION_DISCOVERY_STARTED -> onchange(BtScanDiscoveryMode.SCAN_STATED)
-			BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> onchange(BtScanDiscoveryMode.SCAN_ENDED)
+		if (intent?.action == null) return
+		// if any other device is scanning then this Discover will also respond
+		when (intent.action) {
+			BluetoothAdapter.ACTION_DISCOVERY_STARTED -> onchange(BTScanDiscoveryStatus.SCAN_STATED)
+			BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> onchange(BTScanDiscoveryStatus.SCAN_ENDED)
 		}
-	}
-
-	enum class BtScanDiscoveryMode {
-		SCAN_STATED,
-		SCAN_ENDED
 	}
 }
