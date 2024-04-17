@@ -6,13 +6,16 @@ import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessageType
-import com.eva.bluetoothterminalapp.presentation.feature_connect.state.BTClientRouteEvents
-import com.eva.bluetoothterminalapp.presentation.feature_connect.state.BTClientRouteState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteEvents
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.ClientTypeState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.CloseConnectionEvent
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.StartConnectionEvents
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.util.ClientConnectType
 import com.eva.bluetoothterminalapp.presentation.navigation.args.ConnectionRouteArgs
 import com.eva.bluetoothterminalapp.presentation.navigation.screens.navArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +28,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+private const val LOGGER = "BLUETOOTH_CLIENT_VIEW_MODEL"
+
 class BTClientViewModel(
 	private val connector: BluetoothClientConnector,
 	private val savedStateHandle: SavedStateHandle,
@@ -32,6 +37,12 @@ class BTClientViewModel(
 
 	private val _clientState = MutableStateFlow(BTClientRouteState())
 	val clientState = _clientState.asStateFlow()
+
+	private val _showCloseDialog = MutableStateFlow(false)
+	val showCloseDialog = _showCloseDialog.asStateFlow()
+
+	private val _connectionType = MutableStateFlow(ClientTypeState())
+	val connectionType = _connectionType.asStateFlow()
 
 	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	override val uiEvents: SharedFlow<UiEvents>
@@ -42,46 +53,79 @@ class BTClientViewModel(
 
 	private var _connectAsClientJob: Job? = null
 
+	private val _textFieldValue: String
+		get() = _clientState.value.textFieldValue
+
+	private val _isConnectAsClient: Boolean
+		get() = _connectionType.value.connectType == ClientConnectType.CONNECT_TO_SERVER
+
 	init {
-		//start the client
-		startClientJob()
 		// reads for incoming messages
 		readIncomingData()
 		// update connection mode
 		updateConnectionMode()
 	}
 
-	fun onEvent(event: BTClientRouteEvents) {
+	fun onCloseConnectionEvent(event: CloseConnectionEvent) {
 		when (event) {
-			BTClientRouteEvents.ConnectClient -> startClientJob()
-			BTClientRouteEvents.DisConnectClient -> closeConnection()
-			BTClientRouteEvents.ClearTerminal -> clearTerminal()
-			BTClientRouteEvents.OnSendEvents -> sendText(_clientState.value.textFieldValue)
-			is BTClientRouteEvents.OnTextFieldValue -> _clientState.update { state ->
-				state.copy(textFieldValue = event.message)
-			}
-
-			BTClientRouteEvents.CloseDisconnectDialog -> toggleDialog(false)
-			BTClientRouteEvents.OpenDisconnectDialog -> toggleDialog(true)
+			CloseConnectionEvent.OnCancelAndCloseDialog -> toggleDialog(false)
+			CloseConnectionEvent.OnOpenDisconnectDialog -> toggleDialog(true)
+			CloseConnectionEvent.OnDisconnectAndNavigateBack -> onDisconnectAndClose()
 		}
 	}
 
-	private fun clearTerminal() = _clientState.update { state ->
-		state.copy(messages = persistentListOf())
+	fun onStartConnectionEvents(event: StartConnectionEvents) {
+		when (event) {
+			is StartConnectionEvents.OnConnectTypeChanged -> _connectionType.update { state ->
+				state.copy(connectType = event.type)
+			}
+
+			StartConnectionEvents.OnAcceptConnection -> onConnectWithConnectionType()
+			StartConnectionEvents.OnCancelAndNavigateBack -> onDisconnectAndClose()
+		}
 	}
 
-	private fun toggleDialog(isOpen: Boolean) = _clientState.update { state ->
-		state.copy(showDisconnectDialog = isOpen)
+	fun onClientConnectionEvents(event: BTClientRouteEvents) {
+		when (event) {
+			BTClientRouteEvents.OnReconnectClient -> startClientJob()
+			BTClientRouteEvents.OnDisconnectClient -> closeConnection()
+			BTClientRouteEvents.OnSendEvents -> sendText()
+			is BTClientRouteEvents.OnSendFieldTextChanged -> _clientState.update { state ->
+				state.copy(textFieldValue = event.text)
+			}
+		}
 	}
+
+
+	private fun onConnectWithConnectionType() {
+		_connectionType.update { state -> state.copy(showConnectDialog = false) }
+		startClientJob()
+	}
+
+
+	private fun onDisconnectAndClose() = viewModelScope.launch {
+		//close the dialog
+		_showCloseDialog.update { false }
+		// close the connection
+		closeConnection(showToast = true)
+		//navigate back
+		_uiEvents.emit(UiEvents.NavigateBack)
+	}
+
+	private fun toggleDialog(isOpen: Boolean) = _showCloseDialog.update { isOpen }
 
 
 	private fun startClientJob() {
+		if (_connectAsClientJob?.isActive == true) return
+		// create a client job to connect to the client
 		_connectAsClientJob = viewModelScope.launch {
-			connector.connectClient(
+			val connectionResults = connector.connectClient(
 				address = connectionDevice.address,
-				secure = true,
-				connectAsClient = true
+				connectAsClient = _isConnectAsClient
 			)
+			connectionResults.onFailure { err ->
+				_uiEvents.emit(UiEvents.ShowSnackBar(message = err.message ?: ""))
+			}
 		}
 	}
 
@@ -90,10 +134,14 @@ class BTClientViewModel(
 			_clientState.update { state -> state.copy(connectionMode = status) }
 		}.launchIn(viewModelScope)
 
-	private fun sendText(message: String) = viewModelScope.launch {
+	private fun sendText() = viewModelScope.launch {
 
-		val messageAsByteArray = message.trim()
-		val result = connector.sendData(messageAsByteArray)
+		val message = _textFieldValue.trim()
+		if (message.isEmpty()) {
+			_uiEvents.emit(UiEvents.ShowSnackBar("Cannot send empty message"))
+			return@launch
+		}
+		val result = connector.sendData(message)
 
 		result.fold(
 			onSuccess = {
@@ -102,20 +150,29 @@ class BTClientViewModel(
 					type = BluetoothMessageType.MESSAGE_FROM_CLIENT
 				)
 				_clientState.update { state ->
-					state.copy(messages = state.messages.add(addedMessage))
+					val updatedList = state.messages.add(addedMessage)
+					state.copy(messages = updatedList, textFieldValue = "")
 				}
 			},
 			onFailure = { err ->
-				_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "MESSAGE"))
+				_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "Failed to send message"))
 			},
 		)
+
+
 	}
 
 
 	private fun readIncomingData() = connector.readIncomingData
 		.catch { err ->
-			_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: ""))
-			closeConnection()
+			Log.e(LOGGER, "SOME_ERROR_OCCURRED", err)
+			_uiEvents.emit(
+				UiEvents.ShowSnackBarWithActions(
+					message = err.message ?: "",
+					actionText = "Disconnect",
+					action = ::closeConnection
+				)
+			)
 		}
 		.onEach { message ->
 			_clientState.update { state ->
@@ -124,15 +181,26 @@ class BTClientViewModel(
 			}
 		}.launchIn(viewModelScope)
 
-	private fun closeConnection() {
-		connector.closeClient()
+	private fun closeConnection(showToast: Boolean = false) = viewModelScope.launch {
+		// cancels the job and close the connection
+		_clientState.update { state -> state.copy(textFieldValue = "") }
 		_connectAsClientJob?.cancel()
+		val result = connector.closeClient()
+
+		result.onFailure {
+			if (showToast) _uiEvents.emit(UiEvents.ShowToast("Connection Closed"))
+			else _uiEvents.emit(UiEvents.ShowSnackBar("Connection Closed"))
+		}
 	}
 
 
 	override fun onCleared() {
+		// close the connection
+		closeConnection()
+		// unregister the receivers
 		connector.releaseResources()
-		Log.d("VIEWMODEL", "CLEARED CLIENT")
+		// log viewmodel is cleared
+		Log.d(LOGGER, "CLEARED CLIENT")
 		super.onCleared()
 	}
 

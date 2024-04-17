@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_connect.state
+package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state
 
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
@@ -9,5 +9,4 @@ data class BTClientRouteState(
 	val connectionMode: ClientConnectionState = ClientConnectionState.CONNECTION_INITIALIZING,
 	val messages: PersistentList<BluetoothMessage> = persistentListOf(),
 	val textFieldValue: String = "",
-	val showDisconnectDialog: Boolean = false,
 )

@@ -1,14 +1,12 @@
-package com.eva.bluetoothterminalapp.presentation.feature_client.composables
+package com.eva.bluetoothterminalapp.presentation.feature_connect.composables
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,6 +26,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
@@ -43,35 +43,41 @@ fun SendCommandTextField(
 	val interaction = remember { MutableInteractionSource() }
 	val isFocused by interaction.collectIsFocusedAsState()
 
+
+	val surfaceColor by animateColorAsState(
+		targetValue = if (isFocused) MaterialTheme.colorScheme.surfaceContainerHighest
+		else MaterialTheme.colorScheme.surfaceContainerHigh,
+		label = "Container color"
+	)
+
+	val iconButtonColor by animateColorAsState(
+		targetValue = if (isEnable) MaterialTheme.colorScheme.primaryContainer
+		else MaterialTheme.colorScheme.primary.copy(alpha = .4f),
+		label = "Icon button colors"
+	)
+
 	BasicTextField(
 		value = value,
 		onValueChange = onChange,
 		decorationBox = { content ->
-
-			val surfaceColor = if (isFocused) MaterialTheme.colorScheme.surfaceContainerHighest
-			else MaterialTheme.colorScheme.surfaceContainerHigh
-
-			Surface(
-				color = surfaceColor,
-				shape = MaterialTheme.shapes.large,
-				contentColor = MaterialTheme.colorScheme.onSurface
+			Row(
+				verticalAlignment = Alignment.CenterVertically
 			) {
-				Row(
-					modifier = Modifier.padding(6.dp),
-					horizontalArrangement = Arrangement.SpaceBetween,
-					verticalAlignment = Alignment.CenterVertically
+				Surface(
+					color = surfaceColor,
+					shape = MaterialTheme.shapes.extraLarge,
+					contentColor = MaterialTheme.colorScheme.onSurface,
+					modifier = Modifier.weight(1f),
 				) {
 					Box(
 						modifier = Modifier
-							.weight(1f)
-							.padding(8.dp)
-							.horizontalScroll(state = rememberScrollState()),
+							.padding(horizontal = 16.dp, vertical = 12.dp),
 					) {
 						when {
 							value.isBlank() ->
 								Text(
 									text = stringResource(id = R.string.text_field_placeholder),
-									style = MaterialTheme.typography.bodyMedium,
+									style = MaterialTheme.typography.labelLarge,
 									color = MaterialTheme.colorScheme.onSurfaceVariant
 										.copy(alpha = .5f)
 								)
@@ -79,39 +85,50 @@ fun SendCommandTextField(
 							else -> content()
 						}
 					}
-					IconButton(
-						onClick = onImeAction,
-						colors = IconButtonDefaults.filledIconButtonColors(),
-					) {
-						Icon(
-							painter = painterResource(id = R.drawable.ic_send),
-							contentDescription = null,
-						)
-					}
+				}
+				IconButton(
+					onClick = onImeAction,
+					enabled = isEnable,
+					colors = IconButtonDefaults
+						.filledIconButtonColors(containerColor = iconButtonColor)
+				) {
+					Icon(
+						painter = painterResource(id = R.drawable.ic_send),
+						contentDescription = "Send",
+					)
 				}
 			}
 		},
 		enabled = isEnable,
-		textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+		textStyle = MaterialTheme.typography.bodyMedium
+			.copy(color = MaterialTheme.colorScheme.onSurface),
 		cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
 		keyboardActions = KeyboardActions(
 			onSend = { onImeAction() },
 		),
 		keyboardOptions = KeyboardOptions(
-			autoCorrect = false, imeAction = ImeAction.Send
+			autoCorrect = false,
+			imeAction = ImeAction.Send
 		),
 		maxLines = 4,
-		modifier = modifier.focusable(enabled = true, interactionSource = interaction)
+		interactionSource = interaction,
+		modifier = modifier.focusable(enabled = true)
 	)
-
 }
+
+private class TextValuePreviewParams :
+	CollectionPreviewParameterProvider<String>(listOf("", "Some value"))
 
 @PreviewLightDark
 @Composable
-private fun SendCommandTextFieldPreview() = BlueToothTerminalAppTheme {
+private fun SendCommandTextFieldPreview(
+	@PreviewParameter(TextValuePreviewParams::class)
+	value: String
+) = BlueToothTerminalAppTheme {
 	Surface {
 		SendCommandTextField(
-			value = "",
+			value = value,
+			isEnable = false,
 			onChange = {},
 			modifier = Modifier.padding(10.dp)
 		)

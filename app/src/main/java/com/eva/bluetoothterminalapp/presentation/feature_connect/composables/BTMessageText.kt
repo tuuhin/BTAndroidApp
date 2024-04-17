@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_client.composables
+package com.eva.bluetoothterminalapp.presentation.feature_connect.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -11,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessageType
@@ -40,21 +42,27 @@ fun BTMessageText(
 			color = when (message.type) {
 				BluetoothMessageType.MESSAGE_FROM_SERVER -> MaterialTheme.colorScheme.primary
 				BluetoothMessageType.MESSAGE_FROM_CLIENT -> MaterialTheme.colorScheme.secondary
-				BluetoothMessageType.MESSAGE_BY_DEVICE -> MaterialTheme.colorScheme.tertiary
 			},
 			fontWeight = FontWeight.SemiBold
 		)
 	}
 }
 
+private class BTMessageTextPreviewParams :
+	CollectionPreviewParameterProvider<BluetoothMessageType>(BluetoothMessageType.entries)
+
+
 @PreviewLightDark
 @Composable
-private fun BTMessageTextPreview() = BlueToothTerminalAppTheme {
+private fun BTMessageTextPreview(
+	@PreviewParameter(BTMessageTextPreviewParams::class)
+	type: BluetoothMessageType
+) = BlueToothTerminalAppTheme {
 	Surface {
 		BTMessageText(
 			message = BluetoothMessage(
-				message = "HELLO",
-				type = BluetoothMessageType.MESSAGE_BY_DEVICE,
+				message = "Some message",
+				type = type,
 			),
 			modifier = Modifier.padding(12.dp)
 		)

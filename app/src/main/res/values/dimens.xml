@@ -2,4 +2,6 @@
 <resources>
   <dimen name="sc_padding">12dp</dimen>
   <dimen name="min_device_image_size">32dp</dimen>
+  <dimen name="sc_padding_secondary">6dp</dimen>
+  <dimen name="connection_chip_offset">10dp</dimen>
 </resources>
