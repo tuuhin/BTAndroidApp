@@ -3,7 +3,6 @@ package com.eva.bluetoothterminalapp.data.bluetooth_le
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
@@ -18,19 +17,17 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEScanner
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.ScanError
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothLEDeviceNotSupportedException
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothNotEnabled
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
 import com.eva.bluetoothterminalapp.domain.exceptions.LocationPermissionNotProvided
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +41,7 @@ import kotlin.time.Duration
 
 private const val LOGGER_TAG = "BLE_SCANNER_TAG"
 
-private typealias BluetoothDevices = List<BluetoothDeviceModel>
+private typealias BluetoothDevices = List<BluetoothLEDeviceModel>
 
 @SuppressLint("MissingPermission")
 class AndroidBluetoothLEScanner(
@@ -77,10 +74,9 @@ class AndroidBluetoothLEScanner(
 	private val _bleScanner: BluetoothLeScanner?
 		get() = _btAdapter?.bluetoothLeScanner
 
-	private val _scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
 	private val _devices = MutableStateFlow<BluetoothDevices>(emptyList())
-	override val leDevices: StateFlow<List<BluetoothDeviceModel>>
+	override val leDevices: StateFlow<BluetoothDevices>
 		get() = _devices.asStateFlow()
 
 	private val _isScanning = MutableStateFlow(false)
@@ -97,8 +93,7 @@ class AndroidBluetoothLEScanner(
 		override fun onBatchScanResults(results: MutableList<ScanResult>?) {
 			super.onBatchScanResults(results)
 			val newDevices = results?.filter { it.isConnectable }
-				?.map(ScanResult::getDevice)
-				?.map(BluetoothDevice::toDomainModel)
+				?.map(ScanResult::toDomainModel)
 				?.filter { model -> model !in _devices.value } ?: return
 
 			_devices.update { oldDevices -> oldDevices + newDevices }
@@ -108,7 +103,7 @@ class AndroidBluetoothLEScanner(
 			super.onScanResult(callbackType, result)
 			if (result?.isConnectable == false) return
 			// add it to devices
-			val newDevice = result?.device?.toDomainModel() ?: return
+			val newDevice = result?.toDomainModel() ?: return
 			_devices.update { devices ->
 				if (newDevice !in devices) devices + newDevice else devices
 			}
@@ -124,13 +119,18 @@ class AndroidBluetoothLEScanner(
 				SCAN_FAILED_SCANNING_TOO_FREQUENTLY -> ScanError.SCAN_TOO_FREQUENT
 				else -> ScanError.SCAN_ERROR_UNKNOWN
 			}
-			_scope.launch { _scanError.send(error) }
+			val result = _scanError.trySend(error)
+			result.onFailure {
+				Log.d(LOGGER_TAG, "FAILED TO SEND ERROR CODE")
+			}
 		}
 	}
 
+
 	@SuppressLint("MissingPermission")
 	override suspend fun startDiscovery(duration: Duration) {
-		val result = handleProblems()
+		//checking for failures
+		val result = checkIfPermissionAndBTEnabled()
 		result.onFailure { err -> Log.d(LOGGER_TAG, err.message ?: "") }
 		// if scan is running so don't do anything
 		if (_isScanning.value) return
@@ -155,17 +155,16 @@ class AndroidBluetoothLEScanner(
 		}
 	}
 
-	override fun stopDiscovery() {
-		val result = handleProblems()
-		result.onFailure { err -> Log.d(LOGGER_TAG, err.message ?: "") }
 
+	override fun stopDiscovery() {
+		val result = checkIfPermissionAndBTEnabled()
+		result.onFailure { err -> Log.d(LOGGER_TAG, err.message ?: "") }
 		stopScanCallback()
 	}
 
-	override fun clearResources() {
-		// cancels the coroutine scope
-		_scope.cancel()
-	}
+
+	override fun clearResources() = Unit
+
 
 	private fun startScanCallBack() {
 		if (_isScanning.value) return
@@ -196,7 +195,7 @@ class AndroidBluetoothLEScanner(
 		Log.d(LOGGER_TAG, "SCAN STOPPED")
 	}
 
-	private fun handleProblems(): Result<Unit> = when {
+	private fun checkIfPermissionAndBTEnabled(): Result<Unit> = when {
 		!hasBTLEFeature -> Result.failure(BluetoothLEDeviceNotSupportedException())
 		!_isBTEnabled -> Result.failure(BluetoothNotEnabled())
 		!_hasScanPermission -> Result.failure(BluetoothPermissionNotProvided())

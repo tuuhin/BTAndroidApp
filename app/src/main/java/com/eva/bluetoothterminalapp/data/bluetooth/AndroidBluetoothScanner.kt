@@ -43,13 +43,13 @@ class AndroidBluetoothScanner(
 	private val _isBluetoothActive: Boolean
 		get() = _bluetoothAdapter?.isEnabled ?: false
 
-	private val isDiscovering: Boolean
+	override val isBTDiscovering: Boolean
 		get() = _bluetoothAdapter?.isDiscovering ?: false
 
 	private val _hasConnectPermission: Boolean
 		get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 			ContextCompat.checkSelfPermission(
-				context, Manifest.permission.BLUETOOTH_CONNECT
+				context, Manifest.permission.BLUETOOTH_SCAN
 			) == PackageManager.PERMISSION_GRANTED
 		else true
 
@@ -107,7 +107,7 @@ class AndroidBluetoothScanner(
 
 	override val isScanRunning: Flow<Boolean>
 		get() = callbackFlow {
-			trySend(isDiscovering)
+			trySend(isBTDiscovering)
 			val intentFilter = IntentFilter().apply {
 				addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
 				addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
@@ -115,6 +115,7 @@ class AndroidBluetoothScanner(
 
 			val scanDiscoveryReceiver = ScanDiscoveryReceiver(
 				onchange = { result ->
+					Log.d(BLUETOOTH_SCANNER, "SCAN RESULTS $result")
 					when (result) {
 						BTScanDiscoveryStatus.SCAN_STATED -> trySend(true)
 						BTScanDiscoveryStatus.SCAN_ENDED -> trySend(false)
@@ -203,10 +204,8 @@ class AndroidBluetoothScanner(
 		if (!_hasConnectPermission)
 			return Result.failure(BluetoothPermissionNotProvided())
 		// stop discovery
+		Log.d(BLUETOOTH_SCANNER, "SCAN STOPPED")
 		val status = _bluetoothAdapter?.cancelDiscovery() ?: false
-		// unregister the receiver
-		Log.d(BLUETOOTH_SCANNER, "STOPPED")
-		context.unregisterReceiver(_scanReceiver)
 		return Result.success(status)
 	}
 

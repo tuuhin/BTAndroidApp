@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.domain.bluetooth_le
 
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.Duration
@@ -9,7 +8,7 @@ import kotlin.time.Duration.Companion.seconds
 
 interface BluetoothLEScanner {
 
-	val leDevices: StateFlow<List<BluetoothDeviceModel>>
+	val leDevices: StateFlow<List<BluetoothLEDeviceModel>>
 
 	val isScanning: StateFlow<Boolean>
 

@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,6 +15,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import com.eva.bluetoothterminalapp.R
 
 @Composable
@@ -23,6 +25,9 @@ fun AnimatedScanButton(
 	modifier: Modifier = Modifier,
 	startScan: () -> Unit = {},
 	stopScan: () -> Unit = {},
+	style: TextStyle = MaterialTheme.typography.titleMedium,
+	colors: ButtonColors = ButtonDefaults
+		.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
 ) {
 	AnimatedVisibility(
 		visible = canShowScanOption,
@@ -45,24 +50,16 @@ fun AnimatedScanButton(
 			},
 		) { normal ->
 			if (normal)
-				TextButton(
-					onClick = startScan,
-					colors = ButtonDefaults
-						.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
-				) {
+				TextButton(onClick = startScan, colors = colors) {
 					Text(
 						text = stringResource(id = R.string.start_bluetooth_scan),
-						style = MaterialTheme.typography.titleMedium
+						style = style
 					)
 				}
-			else TextButton(
-				onClick = stopScan,
-				colors = ButtonDefaults
-					.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-			) {
+			else TextButton(onClick = stopScan, colors = colors) {
 				Text(
 					text = stringResource(id = R.string.stop_bluetooth_scan),
-					style = MaterialTheme.typography.titleMedium
+					style = style
 				)
 			}
 		}

@@ -24,6 +24,12 @@ interface BluetoothScanner {
 	val isBluetoothActive: Flow<Boolean>
 
 	/**
+	 * A getter version of [isScanRunning]
+	 * @see [isScanRunning]
+	 */
+	val isBTDiscovering: Boolean
+
+	/**
 	 * A flow to determine if scanning is running
 	 */
 	val isScanRunning: Flow<Boolean>
