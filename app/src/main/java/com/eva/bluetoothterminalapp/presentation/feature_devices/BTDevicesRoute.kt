@@ -2,68 +2,84 @@ package com.eva.bluetoothterminalapp.presentation.feature_devices
 
 import android.Manifest
 import android.os.Build
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
-import com.eva.bluetoothterminalapp.presentation.composables.BTNotEnabledBox
-import com.eva.bluetoothterminalapp.presentation.composables.BtPermissionNotProvidedBox
-import com.eva.bluetoothterminalapp.presentation.composables.LocationPermissionCard
-import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTConnectToServerButton
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTDeviceRouteTopBar
+import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTDevicesTabsLayout
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BluetoothDevicesList
+import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BluetoothLeDeviceList
+import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.DevicesScreenModeContainer
+import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenEvents
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenState
-import com.eva.bluetoothterminalapp.presentation.feature_devices.state.DeviceScreenEvents
-import com.eva.bluetoothterminalapp.presentation.feature_devices.util.BluetoothScreenType
+import com.eva.bluetoothterminalapp.presentation.feature_devices.util.BTDeviceTabs
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(
+	ExperimentalFoundationApi::class,
+	ExperimentalMaterial3Api::class
+)
 @Composable
 fun BTDevicesRoute(
+	isBTActive: Boolean,
+	isScanning: Boolean,
 	state: BTDevicesScreenState,
-	onEvent: (DeviceScreenEvents) -> Unit,
+	onEvent: (BTDevicesScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
-	onConnectAsServer: () -> Unit = {},
+	initialTab: BTDeviceTabs = BTDeviceTabs.CLASSIC,
 	onSelectDevice: (BluetoothDeviceModel) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
 ) {
 	val context = LocalContext.current
 	val snackBarHostState = LocalSnackBarProvider.current
+
+	val pagerState = rememberPagerState(
+		initialPage = initialTab.tabIdx,
+		pageCount = { BTDeviceTabs.entries.size }
+	)
+
+	val currentTab by remember(pagerState.currentPage) {
+		derivedStateOf {
+			if (BTDeviceTabs.LOW_ENERGY.tabIdx == pagerState.currentPage)
+				BTDeviceTabs.LOW_ENERGY
+			else BTDeviceTabs.CLASSIC
+		}
+	}
+
+	val scope = rememberCoroutineScope()
+
+	LaunchedEffect(pagerState.currentPage) {
+		// when the current page changes stop any running scan
+		onEvent(BTDevicesScreenEvents.OnStopAnyRunningScan)
+	}
 
 	var hasBtPermission by remember(context) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
@@ -75,7 +91,7 @@ fun BTDevicesRoute(
 		else mutableStateOf(true)
 	}
 
-	var hasFineLocationPermission by remember(context) {
+	var hasLocationPermission by remember(context) {
 		mutableStateOf(
 			ContextCompat.checkSelfPermission(
 				context, Manifest.permission.ACCESS_FINE_LOCATION
@@ -83,134 +99,130 @@ fun BTDevicesRoute(
 		)
 	}
 
-	val screenType by remember(hasBtPermission, state.isBtActive) {
+	val showLocationBlock by remember(hasLocationPermission) {
+		derivedStateOf { Build.VERSION.SDK_INT < Build.VERSION_CODES.S && !hasLocationPermission }
+	}
+
+	val showScanButton by remember(hasBtPermission, hasLocationPermission, isBTActive) {
 		derivedStateOf {
-			when {
-				hasBtPermission && state.isBtActive -> BluetoothScreenType.BLUETOOTH_PERMISSION_GRANTED
-				hasBtPermission && !state.isBtActive -> BluetoothScreenType.BLUETOOTH_NOT_ENABLED
-				else -> BluetoothScreenType.BLUETOOTH_PERMISSION_DENIED
-			}
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) hasBtPermission && isBTActive
+			else hasLocationPermission && isBTActive
 		}
 	}
 
-
-	val showLocationBlock by remember(hasFineLocationPermission) {
-		derivedStateOf { Build.VERSION.SDK_INT <= Build.VERSION_CODES.R && !hasFineLocationPermission }
-	}
-
-	val showScanButton by remember(hasBtPermission, hasFineLocationPermission, state.isBtActive) {
-		derivedStateOf {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-				hasBtPermission && state.isBtActive
-			else hasFineLocationPermission && state.isBtActive
-		}
-	}
-
-	val showServerButton by remember(hasBtPermission, state.isBtActive) {
-		derivedStateOf {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-				hasBtPermission && state.isBtActive
-			else state.isBtActive
-		}
-	}
+	val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior()
 
 	Scaffold(
 		topBar = {
 			BTDeviceRouteTopBar(
-				isScanning = state.isScanning,
+				isScanning = isScanning,
 				canShowScanOption = showScanButton,
 				navigation = navigation,
-				startScan = { onEvent(DeviceScreenEvents.StartScan) },
-				stopScan = { onEvent(DeviceScreenEvents.StopScan) },
+				startScan = {
+					when (currentTab) {
+						BTDeviceTabs.CLASSIC -> onEvent(BTDevicesScreenEvents.StartScan)
+						BTDeviceTabs.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StartLEDeviceScan)
+					}
+				},
+				stopScan = {
+					when (currentTab) {
+						BTDeviceTabs.CLASSIC -> onEvent(BTDevicesScreenEvents.StopScan)
+						BTDeviceTabs.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StopLEDevicesScan)
+					}
+				},
+				scrollBehavior = scrollBehaviour
 			)
 		},
-		floatingActionButton = {
-			AnimatedVisibility(
-				visible = showServerButton,
-				enter = slideInVertically(),
-				exit = slideOutVertically()
-			) {
-				BTConnectToServerButton(onConnectAsServer = onConnectAsServer)
-			}
-		},
 		snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-		modifier = modifier,
+		modifier = modifier.nestedScroll(scrollBehaviour.nestedScrollConnection),
 	) { scPadding ->
-
-		Crossfade(
-			targetState = screenType,
-			label = "Is Bluetooth Active",
-			animationSpec = tween(durationMillis = 400),
-			modifier = Modifier.padding(scPadding)
-		) { mode ->
-			when (mode) {
-				BluetoothScreenType.BLUETOOTH_NOT_ENABLED -> BTNotEnabledBox(
-					modifier = Modifier
-						.fillMaxSize()
-						.padding(dimensionResource(R.dimen.sc_padding))
-				)
-
-				BluetoothScreenType.BLUETOOTH_PERMISSION_GRANTED -> Column(
-					modifier = Modifier.fillMaxSize(),
-					verticalArrangement = Arrangement.spacedBy(4.dp)
-				) {
-					AnimatedVisibility(
-						visible = state.isScanning,
-						enter = slideInHorizontally(),
-						exit = slideOutHorizontally()
-					) {
-						LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+		DevicesScreenModeContainer(
+			isActive = isBTActive,
+			hasPermission = hasBtPermission,
+			onBTPermissionChanged = { hasBtPermission = it },
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(scPadding)
+		) {
+			BTDevicesTabsLayout(
+				pagerState = pagerState,
+				isScanning = isScanning,
+				onTabChange = { tab ->
+					scope.launch {
+						pagerState.animateScrollToPage(tab.tabIdx)
 					}
+				},
+				classicTabContent = {
 					BluetoothDevicesList(
 						pairedDevices = state.pairedDevices,
 						availableDevices = state.availableDevices,
+						showLocationPlaceholder = showLocationBlock,
 						onSelectDevice = onSelectDevice,
-						locationPlaceholder = {
-							AnimatedVisibility(
-								visible = showLocationBlock,
-								enter = expandVertically() + fadeIn(),
-								exit = shrinkVertically() + fadeOut(),
-								modifier = Modifier.animateItemPlacement()
-							) {
-								LocationPermissionCard(
-									onLocationAccess = { isAllowed ->
-										hasFineLocationPermission = isAllowed
-									},
-								)
-							}
+						contentPadding = PaddingValues(dimensionResource(R.dimen.sc_padding)),
+						onLocationPermsAccept = { isAccepted ->
+							hasLocationPermission = isAccepted
 						},
-						modifier = Modifier.padding(dimensionResource(R.dimen.sc_padding))
 					)
-				}
-
-				BluetoothScreenType.BLUETOOTH_PERMISSION_DENIED -> BtPermissionNotProvidedBox(
-					onPermissionChanged = { hasBtPermission = it },
-					modifier = Modifier
-						.fillMaxSize()
-						.padding(dimensionResource(R.dimen.sc_padding))
-				)
-			}
+				},
+				leTabContent = {
+					BluetoothLeDeviceList(
+						hasLocationPermission = hasLocationPermission,
+						leDevices = state.leDevices,
+						contentPadding = PaddingValues(horizontal = dimensionResource(R.dimen.sc_padding)),
+						onLocationPermissionChanged = { isAccepted ->
+							hasLocationPermission = isAccepted
+						},
+					)
+				},
+			)
 		}
 	}
 }
 
-private class BTDeviceRoutePreviewParams : CollectionPreviewParameterProvider<BTDevicesScreenState>(
+private class BTDeviceClassicalScreenStateParams
+	: CollectionPreviewParameterProvider<BTDevicesScreenState>(
 	listOf(
-		PreviewFakes.FAKE_DEVICE_SCREEN_STATE_WITH_SCANNING_AND_CONNECTED_DEVICE,
-		PreviewFakes.FAKE_DEVICE_SCREEN_STATE_WITH_BL_ON_AND_PAIRED_DEVICES,
-		PreviewFakes.FAKE_DEVICE_SCREEN_STATE_WITH_BL_OFF,
+		PreviewFakes.FAKE_DEVICE_STATE_WITH_PAIRED_AND_AVAILABLE_DEVICES,
+		PreviewFakes.FAKE_DEVICE_STATE_WITH_PAIRED_DEVICE,
+		PreviewFakes.FAKE_DEVICE_STATE_WITH_NO_DEVICE,
 	)
 )
 
 @PreviewLightDark
 @Composable
-private fun BTDeviceRoutePreview(
-	@PreviewParameter(BTDeviceRoutePreviewParams::class)
+private fun BTDeviceRouteWithClassicDevicesPreview(
+	@PreviewParameter(BTDeviceClassicalScreenStateParams::class)
 	state: BTDevicesScreenState
 ) = BlueToothTerminalAppTheme {
 	BTDevicesRoute(
+		isBTActive = true,
+		isScanning = false,
 		state = state,
 		onEvent = {},
+		onSelectDevice = { }
+	)
+}
+
+class BTDevicesLEScreenStateParams
+	: CollectionPreviewParameterProvider<BTDevicesScreenState>(
+	listOf(
+		PreviewFakes.FAKE_DEVICE_STATE_WITH_NO_DEVICE,
+		PreviewFakes.FAKE_DEVICE_STATE_WITH_SOME_BLE_DEVICES,
+	)
+)
+
+@PreviewLightDark
+@Composable
+private fun BTDeviceRouteWithLEDevicesPreview(
+	@PreviewParameter(BTDevicesLEScreenStateParams::class)
+	state: BTDevicesScreenState
+) = BlueToothTerminalAppTheme {
+	BTDevicesRoute(
+		isBTActive = true,
+		isScanning = false,
+		state = state,
+		onEvent = {},
+		initialTab = BTDeviceTabs.LOW_ENERGY,
 		onSelectDevice = { }
 	)
 }

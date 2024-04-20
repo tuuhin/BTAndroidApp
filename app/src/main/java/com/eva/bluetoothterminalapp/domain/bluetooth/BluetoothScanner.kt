@@ -4,6 +4,9 @@ import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Bluetooth Classic Scanner
+ */
 interface BluetoothScanner {
 
 	/**

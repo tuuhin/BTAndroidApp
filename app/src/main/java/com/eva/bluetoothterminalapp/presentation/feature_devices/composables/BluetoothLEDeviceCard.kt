@@ -19,10 +19,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEDeviceModel
 import com.eva.bluetoothterminalapp.presentation.feature_devices.util.imageVector
+import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
+import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
 fun BluetoothLEDeviceCard(
@@ -76,4 +79,12 @@ fun BluetoothLEDeviceCard(
 			}
 		}
 	}
+}
+
+@PreviewLightDark
+@Composable
+private fun BluetoothLEDeviceCardPreview() = BlueToothTerminalAppTheme {
+	BluetoothLEDeviceCard(
+		leDeviceModel = PreviewFakes.FAKE_LE_DEVICE_MODEL,
+	)
 }

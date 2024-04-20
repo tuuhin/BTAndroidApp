@@ -2,13 +2,14 @@ package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -36,27 +37,29 @@ fun DevicesScreenModeContainer(
 		}
 	}
 
-	Crossfade(
-		targetState = screenType,
-		label = "Show some type of screen based on screen type",
-		animationSpec = tween(durationMillis = 400),
+	Box(
 		modifier = modifier,
-	) { mode ->
-		when (mode) {
-			BluetoothScreenType.BLUETOOTH_NOT_ENABLED -> BTNotEnabledBox(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(dimensionResource(R.dimen.sc_padding))
-			)
+		contentAlignment = Alignment.Center
+	) {
+		Crossfade(
+			targetState = screenType,
+			label = "Show some type of screen based on screen type",
+			animationSpec = tween(durationMillis = 400),
+		) { mode ->
+			when (mode) {
+				BluetoothScreenType.BLUETOOTH_NOT_ENABLED -> BTNotEnabledBox(
+					modifier = Modifier
+						.padding(dimensionResource(R.dimen.sc_padding))
+				)
 
-			BluetoothScreenType.BLUETOOTH_PERMISSION_DENIED -> BtPermissionNotProvidedBox(
-				onPermissionChanged = onBTPermissionChanged,
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(dimensionResource(R.dimen.sc_padding))
-			)
+				BluetoothScreenType.BLUETOOTH_PERMISSION_DENIED -> BtPermissionNotProvidedBox(
+					onPermissionChanged = onBTPermissionChanged,
+					modifier = Modifier
+						.padding(dimensionResource(R.dimen.sc_padding))
+				)
 
-			BluetoothScreenType.BLUETOOTH_PERMISSION_GRANTED -> content()
+				BluetoothScreenType.BLUETOOTH_PERMISSION_GRANTED -> content()
+			}
 		}
 	}
 }

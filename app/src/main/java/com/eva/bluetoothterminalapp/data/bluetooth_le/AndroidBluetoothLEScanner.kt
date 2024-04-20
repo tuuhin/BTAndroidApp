@@ -135,7 +135,8 @@ class AndroidBluetoothLEScanner(
 		// if scan is running so don't do anything
 		if (_isScanning.value) return
 		// if normal scan is running then stop it
-		_btAdapter?.cancelDiscovery()
+		if (_btAdapter?.isDiscovering == true)
+			_btAdapter?.cancelDiscovery()
 
 		withContext(Dispatchers.Default) {
 			try {

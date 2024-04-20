@@ -1,61 +1,55 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
+import com.eva.bluetoothterminalapp.presentation.composables.LocationPermissionCard
 import kotlinx.collections.immutable.ImmutableList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BluetoothDevicesList(
+	showLocationPlaceholder: Boolean,
 	pairedDevices: ImmutableList<BluetoothDeviceModel>,
 	availableDevices: ImmutableList<BluetoothDeviceModel>,
 	onSelectDevice: (BluetoothDeviceModel) -> Unit,
+	onLocationPermsAccept: (Boolean) -> Unit,
 	modifier: Modifier = Modifier,
-	locationPlaceholder: (@Composable LazyItemScope.() -> Unit)? = null,
-	contentPaddingValues: PaddingValues = PaddingValues(0.dp)
+	contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
 
-	LazyColumn(
-		modifier = modifier,
-		verticalArrangement = Arrangement.spacedBy(8.dp),
-		contentPadding = contentPaddingValues
-	) {
+	val isPairedListEmpty by remember(pairedDevices) {
+		derivedStateOf(pairedDevices::isEmpty)
+	}
 
+	LazyColumn(
+		modifier = modifier.fillMaxSize(),
+		verticalArrangement = Arrangement.spacedBy(8.dp),
+		contentPadding = contentPadding
+	) {
 		stickyHeader {
-			Column(
-				modifier = Modifier
-					.wrapContentHeight()
-					.fillMaxWidth(),
-			) {
-				Text(
-					text = stringResource(id = R.string.paired_device),
-					style = MaterialTheme.typography.titleMedium,
-					color = MaterialTheme.colorScheme.onSurface
-				)
-				Text(
-					text = stringResource(id = R.string.paired_device_desc),
-					style = MaterialTheme.typography.bodySmall,
-					color = MaterialTheme.colorScheme.onSurfaceVariant
-				)
-			}
+			PairedDevicesHeader()
 		}
-		if (pairedDevices.isEmpty()) {
+		if (isPairedListEmpty) {
 			item {
 				Text(
 					text = stringResource(id = R.string.paired_device_not_found),
@@ -68,7 +62,7 @@ fun BluetoothDevicesList(
 		itemsIndexed(
 			items = pairedDevices,
 			key = { _, device -> device.address },
-			contentType = { _, device -> device.type }
+			contentType = { _, device -> device.javaClass.simpleName }
 		) { _, device ->
 			BluetoothDeviceCard(
 				device = device,
@@ -79,32 +73,22 @@ fun BluetoothDevicesList(
 			)
 		}
 		stickyHeader {
-			Column(
-				modifier = Modifier
-					.wrapContentHeight()
-					.fillMaxWidth(),
-			) {
-				Text(
-					text = stringResource(id = R.string.available_scan_devices),
-					style = MaterialTheme.typography.titleMedium,
-					color = MaterialTheme.colorScheme.onSurface
-				)
-				Text(
-					text = stringResource(id = R.string.available_scan_devices_desc),
-					style = MaterialTheme.typography.bodySmall,
-					color = MaterialTheme.colorScheme.onSurfaceVariant
-				)
-			}
+			AvailableDevicesHeader()
 		}
-		locationPlaceholder?.let { content ->
+		if (showLocationPlaceholder) {
 			item {
-				content(this)
+				LocationPermissionCard(
+					onLocationAccess = onLocationPermsAccept,
+					modifier = Modifier
+						.fillMaxWidth()
+						.animateItemPlacement()
+				)
 			}
 		}
 		itemsIndexed(
 			items = availableDevices,
 			key = { _, device -> device.address },
-			contentType = { _, device -> device.type }
+			contentType = { _, device -> device.javaClass.simpleName }
 		) { _, device ->
 			BluetoothDeviceCard(
 				device = device,
@@ -114,5 +98,47 @@ fun BluetoothDevicesList(
 					.animateItemPlacement()
 			)
 		}
+	}
+}
+
+@Composable
+private fun PairedDevicesHeader(modifier: Modifier = Modifier) {
+	Column(
+		modifier = modifier
+			.background(MaterialTheme.colorScheme.surface)
+			.padding(bottom = 8.dp)
+			.fillMaxWidth(),
+	) {
+		Text(
+			text = stringResource(id = R.string.paired_device),
+			style = MaterialTheme.typography.titleMedium,
+			color = MaterialTheme.colorScheme.onSurface
+		)
+		Text(
+			text = stringResource(id = R.string.paired_device_desc),
+			style = MaterialTheme.typography.labelMedium,
+			color = MaterialTheme.colorScheme.onSurfaceVariant
+		)
+	}
+}
+
+@Composable
+fun AvailableDevicesHeader(modifier: Modifier = Modifier) {
+	Column(
+		modifier = modifier
+			.background(MaterialTheme.colorScheme.surface)
+			.padding(bottom = 8.dp)
+			.fillMaxWidth(),
+	) {
+		Text(
+			text = stringResource(id = R.string.available_scan_devices),
+			style = MaterialTheme.typography.titleMedium,
+			color = MaterialTheme.colorScheme.onSurface
+		)
+		Text(
+			text = stringResource(id = R.string.available_scan_devices_desc),
+			style = MaterialTheme.typography.labelMedium,
+			color = MaterialTheme.colorScheme.onSurfaceVariant
+		)
 	}
 }

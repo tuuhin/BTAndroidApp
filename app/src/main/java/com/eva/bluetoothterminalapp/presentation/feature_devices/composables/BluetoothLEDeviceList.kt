@@ -4,16 +4,19 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -36,48 +39,62 @@ fun BluetoothLeDeviceList(
 		label = "Location Permission",
 		animationSpec = tween(400),
 	) { isGranted ->
-		when {
-			!isGranted -> LocationPermissionBox(
-				onLocationPermsGranted = onLocationPermissionChanged,
-				modifier = modifier.fillMaxSize()
-			)
+		Box(
+			modifier = modifier.fillMaxSize()
+		) {
+			when {
+				!isGranted -> LocationPermissionBox(
+					onLocationPermsGranted = onLocationPermissionChanged,
+					modifier = Modifier.align(Alignment.Center)
+				)
 
-			else -> LazyColumn(
-				modifier = modifier.fillMaxSize(),
-				verticalArrangement = Arrangement.spacedBy(8.dp),
-				contentPadding = contentPadding,
-			) {
-				stickyHeader {
-					Column(
-						modifier = Modifier
-							.wrapContentHeight()
-							.fillMaxWidth(),
-					) {
-						Text(
-							text = stringResource(id = R.string.bt_le_device),
-							style = MaterialTheme.typography.titleMedium,
-							color = MaterialTheme.colorScheme.onSurface
-						)
-						Text(
-							text = stringResource(id = R.string.bt_le_device_desc),
-							style = MaterialTheme.typography.bodySmall,
-							color = MaterialTheme.colorScheme.onSurfaceVariant
-						)
+				else -> {
+					Column(modifier = Modifier.matchParentSize()) {
+						BLEDevicesHeader()
+						LazyColumn(
+							verticalArrangement = Arrangement.spacedBy(8.dp),
+							contentPadding = contentPadding,
+							modifier = Modifier.weight(1f)
+						) {
+							itemsIndexed(
+								items = leDevices,
+								key = { _, leDevice -> leDevice.deviceModel.address },
+								contentType = { _, device -> device.javaClass.simpleName },
+							) { _, item ->
+								BluetoothLEDeviceCard(
+									leDeviceModel = item,
+									modifier = Modifier
+										.fillMaxWidth()
+										.animateItemPlacement()
+								)
+							}
+						}
 					}
-				}
-				itemsIndexed(
-					items = leDevices,
-					key = { _, leDevice -> leDevice.deviceModel.address },
-					contentType = { _, device -> device.javaClass.simpleName },
-				) { _, item ->
-					BluetoothLEDeviceCard(
-						leDeviceModel = item,
-						modifier = Modifier
-							.fillMaxWidth()
-							.animateItemPlacement()
-					)
 				}
 			}
 		}
 	}
+}
+
+@Composable
+private fun BLEDevicesHeader(modifier: Modifier = Modifier) {
+	ListItem(
+		headlineContent = {
+			Text(
+				text = stringResource(id = R.string.bt_le_device),
+				style = MaterialTheme.typography.titleMedium,
+				color = MaterialTheme.colorScheme.onSurface
+			)
+		},
+		supportingContent = {
+			Text(
+				text = stringResource(id = R.string.bt_le_device_desc),
+				style = MaterialTheme.typography.bodySmall,
+				color = MaterialTheme.colorScheme.onSurfaceVariant
+			)
+		},
+		colors = ListItemDefaults
+			.colors(containerColor = MaterialTheme.colorScheme.surface),
+		modifier = modifier,
+	)
 }

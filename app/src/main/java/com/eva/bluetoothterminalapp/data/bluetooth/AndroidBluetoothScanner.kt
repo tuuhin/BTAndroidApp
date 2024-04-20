@@ -115,7 +115,7 @@ class AndroidBluetoothScanner(
 
 			val scanDiscoveryReceiver = ScanDiscoveryReceiver(
 				onchange = { result ->
-					Log.d(BLUETOOTH_SCANNER, "SCAN RESULTS $result")
+					Log.d(BLUETOOTH_SCANNER, "$result")
 					when (result) {
 						BTScanDiscoveryStatus.SCAN_STATED -> trySend(true)
 						BTScanDiscoveryStatus.SCAN_ENDED -> trySend(false)
@@ -195,6 +195,7 @@ class AndroidBluetoothScanner(
 		)
 		// start discovery for bluetooth devices
 		// it will listen for 12 seconds
+		Log.d(BLUETOOTH_SCANNER, "SCAN INITIATED")
 		val status = _bluetoothAdapter?.startDiscovery() ?: false
 		return Result.success(status)
 	}
@@ -204,7 +205,7 @@ class AndroidBluetoothScanner(
 		if (!_hasConnectPermission)
 			return Result.failure(BluetoothPermissionNotProvided())
 		// stop discovery
-		Log.d(BLUETOOTH_SCANNER, "SCAN STOPPED")
+		Log.d(BLUETOOTH_SCANNER, "SCAN CANCELED")
 		val status = _bluetoothAdapter?.cancelDiscovery() ?: false
 		return Result.success(status)
 	}

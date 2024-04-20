@@ -1,5 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -55,98 +56,120 @@ fun BTDevicesTopBarDropDownMenu(
 
 	val interactionSource = remember { MutableInteractionSource() }
 
-	TooltipBox(
-		positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-		tooltip = {
-			PlainTooltip(
-				modifier = Modifier.padding(4.dp),
-				shape = MaterialTheme.shapes.medium
-			) {
-				Text(
-					text = stringResource(id = R.string.settings_tooltip_text),
-					style = MaterialTheme.typography.labelMedium
+	Box(
+		modifier = modifier
+			.clip(CircleShape)
+			.defaultMinSize(minWidth = 32.dp, minHeight = 32.dp)
+			.indication(interactionSource, LocalIndication.current)
+			.pointerInput(Unit) {
+				detectTapGestures(
+					onPress = {
+						val press = PressInteraction.Press(it)
+						interactionSource.emit(press)
+						// set the offset when pressed
+						menuOffset = DpOffset(it.x.toDp(), it.y.toDp())
+						tryAwaitRelease()
+						val release = PressInteraction.Release(press)
+						interactionSource.emit(release)
+						// open the menu when released
+						isMenuExpanded = true
+					},
 				)
-			}
-		},
-		state = rememberTooltipState()
+			},
+		contentAlignment = Alignment.Center
 	) {
-		Box(
-			modifier = modifier
-				.defaultMinSize(minHeight = 32.dp, minWidth = 32.dp)
-				.clip(CircleShape)
-				.indication(interactionSource, LocalIndication.current)
-				.pointerInput(Unit) {
-					detectTapGestures(
-						onPress = {
-							val press = PressInteraction.Press(it)
-							interactionSource.emit(press)
-							isMenuExpanded = true
-
-							tryAwaitRelease()
-							val release = PressInteraction.Release(press)
-							interactionSource.emit(release)
-						},
-						onTap = {
-							menuOffset = DpOffset(it.x.toDp(), it.y.toDp())
-						},
+		TooltipBox(
+			positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+			tooltip = {
+				PlainTooltip(
+					modifier = Modifier.padding(4.dp),
+					shape = MaterialTheme.shapes.medium
+				) {
+					Text(
+						text = stringResource(id = R.string.settings_tooltip_text),
+						style = MaterialTheme.typography.labelMedium
 					)
-				},
-			contentAlignment = Alignment.Center
+				}
+			},
+			state = rememberTooltipState()
 		) {
 			Icon(
 				imageVector = Icons.Default.Settings,
 				contentDescription = null,
 			)
 		}
-	}
-	DropdownMenu(
-		expanded = isMenuExpanded,
-		onDismissRequest = { isMenuExpanded = false },
-		offset = menuOffset
-	) {
-		DropdownMenuItem(
-			text = { Text(text = stringResource(id = R.string.permission_settings)) },
-			onClick = {
-				val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-					data = Uri.fromParts("package", context.packageName, null)
-				}
-				context.startActivity(intent)
-			},
-			leadingIcon = {
-				Icon(
-					painter = painterResource(id = R.drawable.ic_bl_settings),
-					contentDescription = stringResource(id = R.string.permission_settings)
-				)
-			},
-			colors = MenuDefaults
-				.itemColors(leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer)
-		)
-		DropdownMenuItem(
-			text = { Text(text = stringResource(id = R.string.bluetooth_settings)) },
-			onClick = {
-				val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
-				context.startActivity(intent)
-			},
-			leadingIcon = {
-				Icon(
-					painter = painterResource(id = R.drawable.ic_bluetooth_settings),
-					contentDescription = stringResource(id = R.string.bluetooth_settings)
-				)
-			},
-			colors = MenuDefaults
-				.itemColors(leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer)
-		)
-		DropdownMenuItem(
-			text = { Text(text = stringResource(id = R.string.allow_discover)) },
-			onClick = onStartDiscovery,
-			leadingIcon = {
-				Icon(
-					painter = painterResource(id = R.drawable.ic_radar),
-					contentDescription = stringResource(id = R.string.allow_discover)
-				)
-			},
-			colors = MenuDefaults
-				.itemColors(leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer)
-		)
+		DropdownMenu(
+			expanded = isMenuExpanded,
+			onDismissRequest = { isMenuExpanded = false },
+			offset = menuOffset
+		) {
+			DropdownMenuItem(
+				text = { Text(text = stringResource(id = R.string.permission_settings)) },
+				onClick = {
+					val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+						data = Uri.fromParts("package", context.packageName, null)
+					}
+					context.startActivity(intent)
+				},
+				leadingIcon = {
+					Icon(
+						painter = painterResource(id = R.drawable.ic_bl_settings),
+						contentDescription = stringResource(id = R.string.permission_settings)
+					)
+				},
+				colors = MenuDefaults
+					.itemColors(leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer)
+			)
+			DropdownMenuItem(
+				text = { Text(text = stringResource(id = R.string.bluetooth_settings)) },
+				onClick = {
+					try {
+						val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+						context.startActivity(intent)
+					} catch (_: ActivityNotFoundException) {
+
+					}
+				},
+				leadingIcon = {
+					Icon(
+						painter = painterResource(id = R.drawable.ic_bluetooth_settings),
+						contentDescription = stringResource(id = R.string.bluetooth_settings)
+					)
+				},
+				colors = MenuDefaults
+					.itemColors(leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer)
+			)
+			DropdownMenuItem(
+				text = { Text(text = stringResource(id = R.string.location_settings)) },
+				onClick = {
+					try {
+						val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+						context.startActivity(intent)
+					} catch (_: ActivityNotFoundException) {
+
+					}
+				},
+				leadingIcon = {
+					Icon(
+						painter = painterResource(id = R.drawable.ic_location_pin),
+						contentDescription = stringResource(id = R.string.location_settings)
+					)
+				},
+				colors = MenuDefaults
+					.itemColors(leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer)
+			)
+			DropdownMenuItem(
+				text = { Text(text = stringResource(id = R.string.allow_discover)) },
+				onClick = onStartDiscovery,
+				leadingIcon = {
+					Icon(
+						painter = painterResource(id = R.drawable.ic_radar),
+						contentDescription = stringResource(id = R.string.allow_discover)
+					)
+				},
+				colors = MenuDefaults
+					.itemColors(leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer)
+			)
+		}
 	}
 }
