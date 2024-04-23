@@ -1,0 +1,15 @@
+package com.eva.bluetoothterminalapp.domain.bluetooth_le.enums
+
+enum class BLEPropertyTypes {
+
+	PROPERTY_BROADCAST,
+	PROPERTY_READ,
+	PROPERTY_WRITE_NO_RESPONSE,
+	PROPERTY_WRITE,
+	PROPERTY_NOTIFY,
+	PROPERTY_INDICATE,
+	PROPERTY_SIGNED_WRITE,
+	PROPERTY_EXTENDED_PROPS,
+	UNKNOWN,
+
+}

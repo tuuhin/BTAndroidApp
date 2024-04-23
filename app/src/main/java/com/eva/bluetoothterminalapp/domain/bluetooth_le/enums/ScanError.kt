@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.domain.bluetooth_le
+package com.eva.bluetoothterminalapp.domain.bluetooth_le.enums
 
 
 enum class ScanError {

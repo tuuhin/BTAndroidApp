@@ -17,9 +17,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEScanner
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.ScanError
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.ScanError
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothLEDeviceNotSupportedException
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothNotEnabled
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
