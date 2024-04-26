@@ -3,6 +3,9 @@ agp = "8.3.1"
 compose_destination_animation_version = "1.9.50"
 compose_destination_core_version = "1.9.63"
 coreSplashscreen = "1.0.1"
+datastore = "1.0.0"
+jacksonDataformatYaml = "2.17.0"
+jacksonModuleKotlin = "2.17.0"
 kotlin = "1.9.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
@@ -13,10 +16,12 @@ kotlinxDatetime = "0.6.0-RC.2"
 ksp = "1.9.63"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.8.2"
-composeBom = "2024.03.00"
+composeBom = "2024.04.00"
 koinBom = "3.5.3"
-materialIconsExtended = "1.6.4"
+materialIconsExtended = "1.6.5"
 ksp_version = "1.9.0-1.0.13"
+protobufJavalite = "3.25.1"
+protobuf_version = "0.9.4"
 
 [libraries]
 #core
@@ -39,6 +44,8 @@ androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-ru
 #icons
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 #kotlinx immutable
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jacksonDataformatYaml" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jacksonModuleKotlin" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 #navigation
 compose_destination_animation = { module = "io.github.raamcosta.compose-destinations:animations-core", version.ref = "compose_destination_animation_version" }
@@ -55,9 +62,13 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 #datetime
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+# protobuf and datastore
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufJavalite" }
 
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google_devtools_ksp = { id = "com.google.devtools.ksp", version.ref = "ksp_version" }
+google_protobuf = { id = "com.google.protobuf", version.ref = "protobuf_version" }

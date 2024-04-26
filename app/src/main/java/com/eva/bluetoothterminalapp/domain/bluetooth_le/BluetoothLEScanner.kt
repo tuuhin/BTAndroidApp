@@ -1,5 +1,7 @@
 package com.eva.bluetoothterminalapp.domain.bluetooth_le
 
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.ScanError
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.Duration

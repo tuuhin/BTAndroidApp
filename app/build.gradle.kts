@@ -78,6 +78,9 @@ dependencies {
 	implementation(libs.koin.core)
 	implementation(libs.koin.android)
 	implementation(libs.koin.compose)
+	// jackson for reading yaml
+	implementation(libs.jackson.module.kotlin)
+	implementation(libs.jackson.dataformat.yaml)
 	//icons
 	implementation(libs.androidx.material.icons.extended)
 	//tests

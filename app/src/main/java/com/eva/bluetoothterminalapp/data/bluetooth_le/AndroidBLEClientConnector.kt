@@ -4,29 +4,39 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
-import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.util.Log
 import androidx.core.content.getSystemService
+import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
 import com.eva.bluetoothterminalapp.data.mapper.toModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.samples.SampleUUIDReader
+import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 private const val BLE_CLIENT_LOGGER = "BLE_CLIENT_LOGGER"
 
 @SuppressLint("MissingPermission")
 class AndroidBLEClientConnector(
-	private val context: Context
+	private val context: Context,
+	private val reader: SampleUUIDReader,
 ) : BluetoothLEClientConnector {
 
 	private val _bluetoothManager by lazy { context.getSystemService<BluetoothManager>() }
+
+	private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
 	private val _btAdapter: BluetoothAdapter?
 		get() = _bluetoothManager?.adapter
@@ -42,9 +52,15 @@ class AndroidBLEClientConnector(
 	override val deviceRssi: StateFlow<Int>
 		get() = _deviceRssi.asStateFlow()
 
+	private var _connectedDevice: BluetoothDeviceModel? = null
+	override val connectedDevice: BluetoothDeviceModel?
+		get() = _connectedDevice
+
+
 	private val _bleServices = MutableStateFlow<List<BLEServiceModel>>(emptyList())
 	override val bleServices: StateFlow<List<BLEServiceModel>>
 		get() = _bleServices.asStateFlow()
+
 
 	private val _gattCallback = object : BluetoothGattCallback() {
 
@@ -66,12 +82,10 @@ class AndroidBLEClientConnector(
 			if (connectionState != BLEConnectionState.CONNECTED) return
 
 			// signal strength this can change
-			val isRssiReadSuccess = gatt?.readRemoteRssi()
-			if (isRssiReadSuccess != true) Log.d(BLE_CLIENT_LOGGER, "RSSI READ FAILED")
-			//discover services
-			val isDiscoverStarted = gatt?.discoverServices()
-			if (isDiscoverStarted != true) Log.d(BLE_CLIENT_LOGGER, "DISCOVERY ERROR")
+			gatt?.readRemoteRssi()
 
+			//discover services
+			gatt?.discoverServices()
 
 		}
 
@@ -80,6 +94,7 @@ class AndroidBLEClientConnector(
 			super.onReadRemoteRssi(gatt, rssi, status)
 
 			if (status != BluetoothGatt.GATT_SUCCESS) return
+			Log.d(BLE_CLIENT_LOGGER, "RSSI UPDATED $rssi")
 			_deviceRssi.update { rssi }
 		}
 
@@ -89,9 +104,14 @@ class AndroidBLEClientConnector(
 			if (status != BluetoothGatt.GATT_SUCCESS) return
 			val services = gatt?.services ?: emptyList()
 
-			val bleServices = services.map(BluetoothGattService::toModel)
-			// TODO: Error prone code please check later
-			_bleServices.update { bleServices }
+			scope.launch {
+				val bleServices = services.map { gattService ->
+					val uuidName = reader.findNameForUUID(gattService.uuid)
+					gattService.toModel(sampleName = uuidName)
+				}
+				// TODO: Error prone code please check later
+				_bleServices.update { bleServices }
+			}
 
 		}
 
@@ -108,8 +128,11 @@ class AndroidBLEClientConnector(
 
 			val device = _btAdapter?.getRemoteDevice(address)
 				?: return Result.success(false)
+			// update the device
+			_connectedDevice = device.toDomainModel()
 			// connect to the gatt server
 			_bLEGatt = device.connectGatt(context, false, _gattCallback)
+			Log.d(BLE_CLIENT_LOGGER, "CONNECT GATT")
 			// return success if there is no error
 			Result.success(true)
 		} catch (e: Exception) {
@@ -120,6 +143,7 @@ class AndroidBLEClientConnector(
 	override fun reconnect(): Result<Boolean> {
 		return try {
 			val result = _bLEGatt?.connect() ?: false
+			Log.d(BLE_CLIENT_LOGGER, "CLIENT RE-CONNECTED")
 			Result.success(result)
 		} catch (e: Exception) {
 			Result.failure(e)
@@ -129,6 +153,7 @@ class AndroidBLEClientConnector(
 	override fun disconnect(): Result<Unit> {
 		return try {
 			_bLEGatt?.disconnect()
+			Log.d(BLE_CLIENT_LOGGER, "CLIENT DISCONNECTED")
 			// disconnects the gatt client
 			Result.success(Unit)
 		} catch (e: Exception) {
@@ -137,7 +162,16 @@ class AndroidBLEClientConnector(
 	}
 
 	override fun close() {
-		_bLEGatt?.close()
-		_bLEGatt = null
+		try {
+			_connectedDevice = null
+			// close the gatt server
+			_bLEGatt?.close()
+			_bLEGatt = null
+			// cancels the scope
+			scope.cancel()
+			Log.d(BLE_CLIENT_LOGGER, "GATT CLIENT CLOSED")
+		} catch (e: Exception) {
+			e.printStackTrace()
+		}
 	}
 }
