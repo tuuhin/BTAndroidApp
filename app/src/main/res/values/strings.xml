@@ -29,7 +29,7 @@
   <string name="device_discoverable_success">Device is now discoverable %d seconds</string>
   <string name="device_discoverable_denied">Device Discoverability denied</string>
   <string name="close_connection_dialog_title">Close Connection</string>
-  <string name="close_connection_dialog_text">Close connection between the clients</string>
+  <string name="close_connection_dialog_text">Are you sure you want to cancel the connection, its always better to disconnect then leave the device</string>
   <string name="dialog_action_close">Close</string>
   <string name="dialog_action_cancel">Cancel</string>
   <string name="text_field_placeholder">Enter Text to Send</string>
@@ -41,7 +41,6 @@
   <string name="connection_init">Connecting to device…</string>
   <string name="connection_init_server">Starting Server…</string>
   <string name="connection_accepted">Device Connected</string>
-  <string name="clear_terminal_tooltip_text">Clear Terminal</string>
   <string name="devices_image_type">Device Image type %s</string>
   <string name="connection_server_listening">Listening for connection…</string>
   <string name="bt_server_route">Bluetooth Server</string>
@@ -59,4 +58,14 @@
   <string name="bt_le_device">Bluetooth LE Devices</string>
   <string name="bt_le_device_desc">Bluetooth low energy devices in your range</string>
   <string name="location_settings">Location Settings</string>
+  <string name="le_device_info">Device Information</string>
+  <string name="le_available_devices">Available Services</string>
+  <string name="bl_connect_profile_server_uuid_text">Special UUID</string>
+  <string name="bl_connect_profile_server_uuid_desc">This UUID can be used to connect to a server started by this app, on other phone</string>
+  <string name="bl_connect_profile_server_uuid">Connect to Server</string>
+  <string name="bl_connect_profile_device_uuid_text">Available UUIDs</string>
+  <string name="bl_connect_profile_device_uuid_desc">This option is used when you want to connect to a particular uuid for the selected device</string>
+  <string name="bl_connect_profile_device_uuid_fetching">Fetching device information...</string>
+  <string name="bl_connect_profile_device_uuids_not_found">No UUIDs found</string>
+  <string name="bl_connect_profile_title">Connection Profile</string>
 </resources>

@@ -3,19 +3,20 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.eva.bluetoothterminalapp.data.bluetooth.BTConstants
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteState
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.ClientTypeState
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.CloseConnectionEvent
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.StartConnectionEvents
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.util.ClientConnectType
-import com.eva.bluetoothterminalapp.presentation.navigation.args.ConnectionRouteArgs
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.ConnectProfileState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.EndConnectionEvents
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.InitiateConnectionEvent
+import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothDeviceArgs
 import com.eva.bluetoothterminalapp.presentation.navigation.screens.navArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,14 +42,14 @@ class BTClientViewModel(
 	private val _showCloseDialog = MutableStateFlow(false)
 	val showCloseDialog = _showCloseDialog.asStateFlow()
 
-	private val _connectionType = MutableStateFlow(ClientTypeState())
-	val connectionType = _connectionType.asStateFlow()
+	private val _connectionProfile = MutableStateFlow(ConnectProfileState())
+	val connectProfile = _connectionProfile.asStateFlow()
 
 	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	override val uiEvents: SharedFlow<UiEvents>
 		get() = _uiEvents.asSharedFlow()
 
-	private val connectionDevice: ConnectionRouteArgs
+	private val connectionDevice: BluetoothDeviceArgs
 		get() = savedStateHandle.navArgs()
 
 	private var _connectAsClientJob: Job? = null
@@ -56,32 +57,31 @@ class BTClientViewModel(
 	private val _textFieldValue: String
 		get() = _clientState.value.textFieldValue
 
-	private val _isConnectAsClient: Boolean
-		get() = _connectionType.value.connectType == ClientConnectType.CONNECT_TO_SERVER
 
 	init {
 		// reads for incoming messages
 		readIncomingData()
 		// update connection mode
 		updateConnectionMode()
+		// load device uuids
+		loadUUIDs()
 	}
 
-	fun onCloseConnectionEvent(event: CloseConnectionEvent) {
+	fun onCloseConnectionEvent(event: EndConnectionEvents) {
 		when (event) {
-			CloseConnectionEvent.OnCancelAndCloseDialog -> toggleDialog(false)
-			CloseConnectionEvent.OnOpenDisconnectDialog -> toggleDialog(true)
-			CloseConnectionEvent.OnDisconnectAndNavigateBack -> onDisconnectAndClose()
+			EndConnectionEvents.OnCancelAndCloseDialog -> toggleDialog(false)
+			EndConnectionEvents.OnOpenDisconnectDialog -> toggleDialog(true)
+			EndConnectionEvents.OnDisconnectAndNavigateBack -> onDisconnectAndClose()
 		}
 	}
 
-	fun onStartConnectionEvents(event: StartConnectionEvents) {
+	fun onStartConnectionEvents(event: InitiateConnectionEvent) {
 		when (event) {
-			is StartConnectionEvents.OnConnectTypeChanged -> _connectionType.update { state ->
-				state.copy(connectType = event.type)
-			}
+			is InitiateConnectionEvent.OnSelectUUID -> _connectionProfile
+				.update { state -> state.copy(selectedUUID = event.uuid) }
 
-			StartConnectionEvents.OnAcceptConnection -> onConnectWithConnectionType()
-			StartConnectionEvents.OnCancelAndNavigateBack -> onDisconnectAndClose()
+			InitiateConnectionEvent.OnAcceptConnection -> onConnectWithConnectionType()
+			InitiateConnectionEvent.OnCancelAndNavigateBack -> onDisconnectAndClose()
 		}
 	}
 
@@ -96,9 +96,21 @@ class BTClientViewModel(
 		}
 	}
 
+	private fun loadUUIDs() = connector.fetchUUIDs(address = connectionDevice.address)
+		.catch { err -> err.printStackTrace() }
+		.onEach { deviceUUIDs ->
+			_connectionProfile.update { state ->
+				state.copy(
+					deviceUUIDS = deviceUUIDs.toImmutableList(),
+					isDiscovering = false
+				)
+			}
+		}
+		.launchIn(viewModelScope)
+
 
 	private fun onConnectWithConnectionType() {
-		_connectionType.update { state -> state.copy(showConnectDialog = false) }
+		_connectionProfile.update { state -> state.copy(showProfileDialog = false) }
 		startClientJob()
 	}
 
@@ -121,7 +133,7 @@ class BTClientViewModel(
 		_connectAsClientJob = viewModelScope.launch {
 			val connectionResults = connector.connectClient(
 				address = connectionDevice.address,
-				connectAsClient = _isConnectAsClient
+				connectUUID = _connectionProfile.value.selectedUUID ?: BTConstants.SERVICE_UUID
 			)
 			connectionResults.onFailure { err ->
 				_uiEvents.emit(UiEvents.ShowSnackBar(message = err.message ?: ""))
@@ -129,7 +141,7 @@ class BTClientViewModel(
 		}
 	}
 
-	private fun updateConnectionMode() = connector.isConnected
+	private fun updateConnectionMode() = connector.connectionState
 		.onEach { status ->
 			_clientState.update { state -> state.copy(connectionMode = status) }
 		}.launchIn(viewModelScope)

@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameter
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTDeviceRouteTopBar
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTDevicesTabsLayout
@@ -56,6 +57,7 @@ fun BTDevicesRoute(
 	modifier: Modifier = Modifier,
 	initialTab: BTDeviceTabs = BTDeviceTabs.CLASSIC,
 	onSelectDevice: (BluetoothDeviceModel) -> Unit = {},
+	onSelectLeDevice: (BluetoothLEDeviceModel) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
 ) {
 	val context = LocalContext.current
@@ -168,6 +170,7 @@ fun BTDevicesRoute(
 					BluetoothLeDeviceList(
 						hasLocationPermission = hasLocationPermission,
 						leDevices = state.leDevices,
+						onDeviceSelect = onSelectLeDevice,
 						contentPadding = PaddingValues(horizontal = dimensionResource(R.dimen.sc_padding)),
 						onLocationPermissionChanged = { isAccepted ->
 							hasLocationPermission = isAccepted

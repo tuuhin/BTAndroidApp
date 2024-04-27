@@ -8,8 +8,10 @@ import android.os.Build
 import android.util.Log
 import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
 
+typealias RemoteConnectionChangedCallback = (connected: ClientConnectionState, device: BluetoothDevice?) -> Unit
+
 class RemoteConnectionReceiver(
-	private val onResults: (connected: ClientConnectionState, device: BluetoothDevice?) -> Unit
+	private val onResults: RemoteConnectionChangedCallback
 ) : BroadcastReceiver() {
 
 	override fun onReceive(context: Context?, intent: Intent?) {
@@ -22,7 +24,7 @@ class RemoteConnectionReceiver(
 		else intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
 
 
-		val action = when (intent.action) {
+		val connectionState = when (intent.action) {
 			BluetoothDevice.ACTION_BOND_STATE_CHANGED -> bondStateToConnectionMode(bondState)
 			BluetoothDevice.ACTION_ACL_CONNECTED -> ClientConnectionState.CONNECTION_DEVICE_FOUND
 			BluetoothDevice.ACTION_ACL_DISCONNECTED -> ClientConnectionState.CONNECTION_DISCONNECTED
@@ -31,7 +33,7 @@ class RemoteConnectionReceiver(
 
 		Log.d("ACTION", "ACTION:${intent.action} BOND_STATE:$bondState")
 
-		action?.let { mode -> onResults(mode, device) }
+		connectionState?.let { mode -> onResults(mode, device) }
 	}
 
 	private fun bondStateToConnectionMode(bondState: Int): ClientConnectionState? {

@@ -16,11 +16,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -45,13 +42,8 @@ import com.eva.bluetoothterminalapp.domain.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.BTClientTopBar
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.ClientConnectionStateChip
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.CloseConnectionDialog
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.ConnectTypeDialogPicker
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteState
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.ClientTypeState
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.CloseConnectionEvent
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.StartConnectionEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTMessagesList
 import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.SendCommandTextField
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
@@ -66,12 +58,9 @@ import kotlinx.collections.immutable.toPersistentList
 @Composable
 fun BTClientRoute(
 	state: BTClientRouteState,
-	connectTypeState: ClientTypeState,
 	onConnectionEvent: (BTClientRouteEvents) -> Unit,
-	onCloseEvent: (CloseConnectionEvent) -> Unit,
-	onStartEvent: (StartConnectionEvents) -> Unit,
 	modifier: Modifier = Modifier,
-	showCloseDialog: Boolean = false,
+	onBackPress: () -> Unit = {},
 	navigation: @Composable () -> Unit = {},
 ) {
 	val snackBarHostState = LocalSnackBarProvider.current
@@ -80,26 +69,9 @@ fun BTClientRoute(
 		derivedStateOf { state.connectionMode == ClientConnectionState.CONNECTION_ACCEPTED }
 	}
 
-
-	CloseConnectionDialog(
-		showDialog = showCloseDialog,
-		onConfirm = { onCloseEvent(CloseConnectionEvent.OnDisconnectAndNavigateBack) },
-		onDismiss = { onCloseEvent(CloseConnectionEvent.OnCancelAndCloseDialog) },
-	)
-
-	ConnectTypeDialogPicker(
-		connectType = connectTypeState.connectType,
-		showDialog = connectTypeState.showConnectDialog,
-		onConnectOptionChanged = { type ->
-			onStartEvent(StartConnectionEvents.OnConnectTypeChanged(type))
-		},
-		onCancel = { onStartEvent(StartConnectionEvents.OnCancelAndNavigateBack) },
-		onConnect = { onStartEvent(StartConnectionEvents.OnAcceptConnection) }
-	)
-
 	BackHandler(
 		enabled = isStatusAccepted,
-		onBack = { onCloseEvent(CloseConnectionEvent.OnOpenDisconnectDialog) },
+		onBack = onBackPress,
 	)
 
 	val topScrollState = TopAppBarDefaults.pinnedScrollBehavior()
@@ -111,7 +83,7 @@ fun BTClientRoute(
 				navigation = navigation,
 				onReconnect = { onConnectionEvent(BTClientRouteEvents.OnReconnectClient) },
 				onDisconnect = { onConnectionEvent(BTClientRouteEvents.OnDisconnectClient) },
-				scrollBehavior = topScrollState
+				scrollBehavior = topScrollState,
 			)
 		},
 		snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
@@ -205,15 +177,7 @@ private fun BTClientRoutePreview(
 ) = BlueToothTerminalAppTheme {
 	BTClientRoute(
 		state = state,
-		connectTypeState = ClientTypeState(showConnectDialog = false),
 		onConnectionEvent = {},
-		onCloseEvent = {},
-		onStartEvent = {},
-		navigation = {
-			Icon(
-				imageVector = Icons.AutoMirrored.Default.ArrowBack,
-				contentDescription = "Back Navigation Arrow",
-			)
-		},
+		onBackPress = {}
 	)
 }

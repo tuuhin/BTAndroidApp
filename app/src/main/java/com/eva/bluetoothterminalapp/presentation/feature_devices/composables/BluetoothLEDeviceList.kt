@@ -16,12 +16,14 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEDeviceModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
 import com.eva.bluetoothterminalapp.presentation.composables.LocationPermissionBox
 import kotlinx.collections.immutable.ImmutableList
 
@@ -31,9 +33,17 @@ fun BluetoothLeDeviceList(
 	hasLocationPermission: Boolean,
 	leDevices: ImmutableList<BluetoothLEDeviceModel>,
 	onLocationPermissionChanged: (Boolean) -> Unit,
+	onDeviceSelect: (BluetoothLEDeviceModel) -> Unit,
 	modifier: Modifier = Modifier,
 	contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
+	val isLocalInspectionMode = LocalInspectionMode.current
+
+	val devicesKey: ((Int, BluetoothLEDeviceModel) -> Any)? = remember {
+		if (isLocalInspectionMode) null
+		else { _, device -> device.deviceModel.address }
+	}
+
 	Crossfade(
 		targetState = hasLocationPermission,
 		label = "Location Permission",
@@ -48,30 +58,32 @@ fun BluetoothLeDeviceList(
 					modifier = Modifier.align(Alignment.Center)
 				)
 
-				else -> {
-					Column(modifier = Modifier.matchParentSize()) {
-						BLEDevicesHeader()
-						LazyColumn(
-							verticalArrangement = Arrangement.spacedBy(8.dp),
-							contentPadding = contentPadding,
-							modifier = Modifier.weight(1f)
-						) {
-							itemsIndexed(
-								items = leDevices,
-								key = { _, leDevice -> leDevice.deviceModel.address },
-								contentType = { _, device -> device.javaClass.simpleName },
-							) { _, item ->
-								BluetoothLEDeviceCard(
-									leDeviceModel = item,
-									modifier = Modifier
-										.fillMaxWidth()
-										.animateItemPlacement()
-								)
-							}
+				else -> Column(
+					modifier = Modifier.matchParentSize()
+				) {
+					BLEDevicesHeader()
+					LazyColumn(
+						verticalArrangement = Arrangement.spacedBy(8.dp),
+						contentPadding = contentPadding,
+						modifier = Modifier.weight(1f)
+					) {
+						itemsIndexed(
+							items = leDevices,
+							key = devicesKey,
+							contentType = { _, device -> device.javaClass.simpleName },
+						) { _, item ->
+							BluetoothLEDeviceCard(
+								leDeviceModel = item,
+								onItemSelect = { onDeviceSelect(item) },
+								modifier = Modifier
+									.fillMaxWidth()
+									.animateItemPlacement()
+							)
 						}
 					}
 				}
 			}
+
 		}
 	}
 }

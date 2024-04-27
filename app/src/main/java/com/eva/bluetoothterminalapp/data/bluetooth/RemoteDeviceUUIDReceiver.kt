@@ -12,6 +12,9 @@ class RemoteDeviceUUIDReceiver(
 	private val onReceivedUUIDs: (List<UUID>) -> Unit = {},
 ) : BroadcastReceiver() {
 
+	private val baseUUID: UUID
+		get() = UUID.fromString("00000000-0000-1000-8000-00805F9B34FB")
+
 	override fun onReceive(context: Context?, intent: Intent?) {
 		if (intent == null) return
 		if (intent.action != BluetoothDevice.ACTION_UUID) return
@@ -22,6 +25,8 @@ class RemoteDeviceUUIDReceiver(
 
 		val mappedUUID = uuid?.filterIsInstance<ParcelUuid>()
 			?.map(ParcelUuid::getUuid)
+			// base uuid is not connectable so removing it
+			?.filter { it != baseUUID }
 			?: emptyList()
 
 		onReceivedUUIDs(mappedUUID)

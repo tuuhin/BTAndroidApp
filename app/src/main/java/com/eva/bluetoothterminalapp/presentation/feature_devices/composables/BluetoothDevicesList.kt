@@ -17,6 +17,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,6 +42,14 @@ fun BluetoothDevicesList(
 		derivedStateOf(pairedDevices::isEmpty)
 	}
 
+	val isLocalInspectionMode = LocalInspectionMode.current
+
+	val devicesKey: ((Int, BluetoothDeviceModel) -> Any)? = remember {
+		if (isLocalInspectionMode) null
+		else { _, device -> device.address }
+	}
+
+
 	LazyColumn(
 		modifier = modifier.fillMaxSize(),
 		verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -61,7 +70,7 @@ fun BluetoothDevicesList(
 		}
 		itemsIndexed(
 			items = pairedDevices,
-			key = { _, device -> device.address },
+			key = devicesKey,
 			contentType = { _, device -> device.javaClass.simpleName }
 		) { _, device ->
 			BluetoothDeviceCard(
@@ -87,7 +96,7 @@ fun BluetoothDevicesList(
 		}
 		itemsIndexed(
 			items = availableDevices,
-			key = { _, device -> device.address },
+			key = devicesKey,
 			contentType = { _, device -> device.javaClass.simpleName }
 		) { _, device ->
 			BluetoothDeviceCard(

@@ -9,7 +9,8 @@ import com.eva.bluetoothterminalapp.presentation.navigation.UIEventsSideEffect
 import com.eva.bluetoothterminalapp.presentation.navigation.args.toArgs
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.destinations.BTClientScreenDestination
+import com.eva.bluetoothterminalapp.presentation.navigation.screens.destinations.BTClassicClientScreenDestination
+import com.eva.bluetoothterminalapp.presentation.navigation.screens.destinations.BTLEClientScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -42,7 +43,11 @@ fun BTDevicesScreen(
 		onEvent = viewModel::onEvents,
 		onSelectDevice = { device ->
 			val args = device.toArgs()
-			navigator.navigate(BTClientScreenDestination(args), onlyIfResumed = true)
+			navigator.navigate(BTClassicClientScreenDestination(args), onlyIfResumed = true)
 		},
+		onSelectLeDevice = { device ->
+			val args = device.toArgs()
+			navigator.navigate(BTLEClientScreenDestination(args), onlyIfResumed = true)
+		}
 	)
 }

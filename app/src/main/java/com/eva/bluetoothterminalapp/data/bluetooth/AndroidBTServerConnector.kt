@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.util.UUID
 
 private const val SERVER_LOGGER = "SERVER_LOGGER"
 
@@ -62,13 +61,18 @@ class AndroidBTServerConnector(
 		// if no permission provided return
 		if (!_hasBtPermission) return@withContext
 
-		val uuid = UUID.fromString(BTConstants.SERVICE_UUID)
 
 		//creating socket based on the choice
 		_serverSocket = if (secure)
-			_btAdapter?.listenUsingRfcommWithServiceRecord(BTConstants.SERVICE_NAME, uuid)
+			_btAdapter?.listenUsingRfcommWithServiceRecord(
+				BTConstants.SERVICE_NAME,
+				BTConstants.SERVICE_UUID
+			)
 		else
-			_btAdapter?.listenUsingRfcommWithServiceRecord(BTConstants.SERVICE_NAME, uuid)
+			_btAdapter?.listenUsingRfcommWithServiceRecord(
+				BTConstants.SERVICE_NAME,
+				BTConstants.SERVICE_UUID
+			)
 
 		Log.d(SERVER_LOGGER, "SOCKET CREATED LISTENING FOR CONNECTION")
 		_connectMode.update { ServerConnectionState.CONNECTION_LISTENING }

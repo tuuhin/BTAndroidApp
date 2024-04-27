@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BluetoothConnected
@@ -58,6 +59,7 @@ fun BluetoothDeviceCard(
 	var showDropDown by remember { mutableStateOf(false) }
 	var componentSize by remember { mutableStateOf(IntSize.Zero) }
 	var dpOffset by remember { mutableStateOf(DpOffset.Zero) }
+
 	val interactionSource = remember { MutableInteractionSource() }
 
 	val cardContainerColor by animateColorAsState(
@@ -68,7 +70,7 @@ fun BluetoothDeviceCard(
 		animationSpec = tween(durationMillis = 200)
 	)
 
-	Card(
+	Box(
 		modifier = modifier
 			.clip(shape)
 			.indication(interactionSource, LocalIndication.current)
@@ -81,78 +83,82 @@ fun BluetoothDeviceCard(
 						tryAwaitRelease()
 						val release = PressInteraction.Release(press)
 						interactionSource.emit(release)
-						// after release show the dialog
+					},
+					onTap = { offset ->
 						showDropDown = true
 						dpOffset = DpOffset(
 							x = offset.x.toDp(),
 							y = (offset.y - componentSize.height).toDp()
 						)
-					},
+					}
 				)
 			},
-		shape = shape,
-		colors = CardDefaults.cardColors(containerColor = cardContainerColor),
-		elevation = CardDefaults.elevatedCardElevation(),
 	) {
-		Row(
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.spacedBy(12.dp),
-			modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
+		Card(
+			shape = shape,
+			colors = CardDefaults.cardColors(containerColor = cardContainerColor),
+			elevation = CardDefaults.elevatedCardElevation(),
+			modifier = Modifier.fillMaxWidth()
 		) {
-			Box(
-				modifier = Modifier
-					.defaultMinSize(
-						minWidth = dimensionResource(id = R.dimen.min_device_image_size),
-						minHeight = dimensionResource(id = R.dimen.min_device_image_size),
-					)
-					.clip(MaterialTheme.shapes.medium)
-					.background(MaterialTheme.colorScheme.onPrimaryContainer),
-				contentAlignment = Alignment.Center
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.spacedBy(12.dp),
+				modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
 			) {
-				Icon(
-					imageVector = device.imageVector,
-					contentDescription = stringResource(
-						id = R.string.devices_image_type,
-						"${device.type}"
-					),
-					tint = MaterialTheme.colorScheme.primaryContainer,
-					modifier = Modifier.padding(8.dp)
-				)
-			}
-			Column {
-				Text(
-					text = device.name,
-					style = MaterialTheme.typography.titleMedium,
-					color = MaterialTheme.colorScheme.onSurface
-				)
-				Text(
-					text = device.address,
-					style = MaterialTheme.typography.bodyMedium,
-					color = MaterialTheme.colorScheme.onSurfaceVariant
-				)
-			}
-		}
-		DropdownMenu(
-			expanded = showDropDown,
-			onDismissRequest = { showDropDown = false },
-			offset = dpOffset
-		) {
-			DropdownMenuItem(
-				text = { Text(text = stringResource(R.string.bt_connection_type_client)) },
-				onClick = onConnect,
-				leadingIcon = {
+				Box(
+					modifier = Modifier
+						.defaultMinSize(
+							minWidth = dimensionResource(id = R.dimen.min_device_image_size),
+							minHeight = dimensionResource(id = R.dimen.min_device_image_size),
+						)
+						.clip(MaterialTheme.shapes.medium)
+						.background(MaterialTheme.colorScheme.onPrimaryContainer),
+					contentAlignment = Alignment.Center
+				) {
 					Icon(
-						imageVector = Icons.Outlined.BluetoothConnected,
-						contentDescription = stringResource(R.string.bt_connection_type_client)
+						imageVector = device.imageVector,
+						contentDescription = stringResource(
+							id = R.string.devices_image_type,
+							"${device.type}"
+						),
+						tint = MaterialTheme.colorScheme.primaryContainer,
+						modifier = Modifier.padding(8.dp)
 					)
-				},
-				colors = MenuDefaults.itemColors(
-					textColor = MaterialTheme.colorScheme.onSurface,
-					leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-				),
-			)
+				}
+				Column {
+					Text(
+						text = device.name,
+						style = MaterialTheme.typography.titleMedium,
+						color = MaterialTheme.colorScheme.onSurface
+					)
+					Text(
+						text = device.address,
+						style = MaterialTheme.typography.bodyMedium,
+						color = MaterialTheme.colorScheme.onSurfaceVariant
+					)
+				}
+			}
+			DropdownMenu(
+				expanded = showDropDown,
+				onDismissRequest = { showDropDown = false },
+				offset = dpOffset
+			) {
+				DropdownMenuItem(
+					text = { Text(text = stringResource(R.string.bt_connection_type_client)) },
+					onClick = onConnect,
+					leadingIcon = {
+						Icon(
+							imageVector = Icons.Outlined.BluetoothConnected,
+							contentDescription = stringResource(R.string.bt_connection_type_client)
+						)
+					},
+					colors = MenuDefaults.itemColors(
+						textColor = MaterialTheme.colorScheme.onSurface,
+						leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+					),
+				)
+			}
 		}
-
 	}
 }
 

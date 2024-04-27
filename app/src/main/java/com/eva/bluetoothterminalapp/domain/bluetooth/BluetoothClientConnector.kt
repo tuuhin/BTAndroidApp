@@ -7,6 +7,7 @@ import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import java.util.UUID
 
 interface BluetoothClientConnector {
 
@@ -15,19 +16,22 @@ interface BluetoothClientConnector {
 	 * is doing currently
 	 * @see [ClientConnectionState]
 	 */
-	val isConnected: StateFlow<ClientConnectionState>
+	val connectionState: StateFlow<ClientConnectionState>
 
 	/**
 	 * Connect the client either to a device via its UUID or current server via specified uuid
 	 * @param address Address of the [BluetoothDevice]
-	 * @param connectAsClient Determines if connection is device or server client
+	 * @param connectUUID client connection to the specified uuid
 	 * @param secure Is connection over secure RFComm socket
+	 * @return [Result] indicating is everything gone correct and socket is accepted.
 	 */
-	suspend fun connectClient(
-		address: String,
-		connectAsClient: Boolean = false,
-		secure: Boolean = true,
-	)
+	suspend fun connectClient(address: String, connectUUID: UUID, secure: Boolean = true)
+			: Result<Unit>
+
+	/**
+	 * Fetches the uuids from the device
+	 */
+	fun fetchUUIDs(address: String): Flow<List<UUID>>
 
 	/**
 	 * Reads the incoming data for the connect client
@@ -38,6 +42,7 @@ interface BluetoothClientConnector {
 	/**
 	 * Sends the information to the end server from this device
 	 * @param data [ByteArray] of the data to be sent
+	 * @return [Result] inculcating data is sent without any error
 	 */
 	suspend fun sendData(data: String): Result<Boolean>
 
