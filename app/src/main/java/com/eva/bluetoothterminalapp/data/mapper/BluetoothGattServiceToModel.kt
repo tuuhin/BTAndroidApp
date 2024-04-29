@@ -12,6 +12,14 @@ fun BluetoothGattService.toModel(): BLEServiceModel = BLEServiceModel(
 	characteristic = characteristics.map(BluetoothGattCharacteristic::toModel)
 )
 
+fun BluetoothGattService.toModel(sampleName: String? = null): BLEServiceModel = BLEServiceModel(
+	serviceId = instanceId,
+	serviceUUID = uuid,
+	serviceType = bleServiceType,
+	characteristic = characteristics.map(BluetoothGattCharacteristic::toModel),
+	bleServiceName = sampleName
+)
+
 private val BluetoothGattService.bleServiceType: BLEServicesTypes
 	get() = when (this.type) {
 		BluetoothGattService.SERVICE_TYPE_PRIMARY -> BLEServicesTypes.PRIMARY

@@ -3,7 +3,6 @@ package com.eva.bluetoothterminalapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -13,19 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.NavGraphs
+import com.eva.bluetoothterminalapp.presentation.navigation.AppNavigation
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
-import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
-import com.ramcosta.composedestinations.DestinationsNavHost
-import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 
-@OptIn(
-	ExperimentalMaterialNavigationApi::class,
-	ExperimentalAnimationApi::class
-)
 class MainActivity : ComponentActivity() {
-
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -46,9 +37,10 @@ class MainActivity : ComponentActivity() {
 					CompositionLocalProvider(
 						LocalSnackBarProvider provides snackBarHostState
 					) {
-						Surface(color = MaterialTheme.colorScheme.background) {
-							val engine = rememberAnimatedNavHostEngine()
-							DestinationsNavHost(navGraph = NavGraphs.root, engine = engine)
+						Surface(
+							color = MaterialTheme.colorScheme.background,
+						) {
+							AppNavigation()
 						}
 					}
 				}

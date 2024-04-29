@@ -2,6 +2,7 @@ plugins {
 	alias(libs.plugins.androidApplication)
 	alias(libs.plugins.jetbrainsKotlinAndroid)
 	alias(libs.plugins.google.devtools.ksp)
+	alias(libs.plugins.kotlinx.serialization)
 	id("kotlin-parcelize")
 }
 
@@ -23,8 +24,18 @@ android {
 	}
 
 	buildTypes {
-		release {
+
+		debug {
+			applicationIdSuffix = ".debug"
 			isMinifyEnabled = false
+			isShrinkResources = false
+		}
+
+		release {
+			applicationIdSuffix = ".release"
+			isMinifyEnabled = true
+			isShrinkResources = true
+			multiDexEnabled = true
 			proguardFiles(
 				getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
 			)
@@ -41,7 +52,7 @@ android {
 		compose = true
 	}
 	composeOptions {
-		kotlinCompilerExtensionVersion = "1.5.1"
+		kotlinCompilerExtensionVersion = "1.5.5"
 	}
 	packaging {
 		resources {
@@ -78,9 +89,8 @@ dependencies {
 	implementation(libs.koin.core)
 	implementation(libs.koin.android)
 	implementation(libs.koin.compose)
-	// jackson for reading yaml
-	implementation(libs.jackson.module.kotlin)
-	implementation(libs.jackson.dataformat.yaml)
+	// kotlinx-serialization
+	implementation(libs.kotlinx.serialization.json)
 	//icons
 	implementation(libs.androidx.material.icons.extended)
 	//tests
