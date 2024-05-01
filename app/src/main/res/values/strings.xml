@@ -65,7 +65,15 @@
   <string name="bl_connect_profile_server_uuid">Connect to Server</string>
   <string name="bl_connect_profile_device_uuid_text">Available UUIDs</string>
   <string name="bl_connect_profile_device_uuid_desc">This option is used when you want to connect to a particular uuid for the selected device</string>
-  <string name="bl_connect_profile_device_uuid_fetching">Fetching device information...</string>
+  <string name="bl_connect_profile_device_uuid_fetching">Fetching device information…</string>
   <string name="bl_connect_profile_device_uuids_not_found">No UUIDs found</string>
   <string name="bl_connect_profile_title">Connection Profile</string>
+  <string name="ble_service_unknown">Unknown Service</string>
+  <string name="ble_service_secondary">Secondary Service</string>
+  <string name="ble_service_primary">Primary Service</string>
+  <string name="ble_connection_connected">Connection Accepted</string>
+  <string name="ble_connection_connecting">COnnecting</string>
+  <string name="ble_connection_disconnecting">Disconnecting</string>
+  <string name="ble_connection_disconnnected">Disconnected</string>
+  <string name="ble_connection_unknown">Unknonwn</string>
 </resources>
