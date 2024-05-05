@@ -31,7 +31,4 @@ interface BluetoothLEClientConnector {
 
 	fun close()
 
-	companion object {
-		const val RSSI_UNIT = "dbM"
-	}
 }

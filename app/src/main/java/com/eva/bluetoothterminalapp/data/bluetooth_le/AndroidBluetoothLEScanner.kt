@@ -87,26 +87,34 @@ class AndroidBluetoothLEScanner(
 	override val scanErrorCode: Flow<ScanError>
 		get() = _scanError.receiveAsFlow()
 
+	private val _deviceAddresses: List<String>
+		get() = _devices.value.map { it.deviceModel.address }
+
 
 	private val _bLeScanCallback = object : ScanCallback() {
 
-		override fun onBatchScanResults(results: MutableList<ScanResult>?) {
-			super.onBatchScanResults(results)
-			val newDevices = results?.filter { it.isConnectable }
-				?.map(ScanResult::toDomainModel)
-				?.filter { model -> model !in _devices.value } ?: return
-
-			_devices.update { oldDevices -> oldDevices + newDevices }
-		}
-
 		override fun onScanResult(callbackType: Int, result: ScanResult?) {
 			super.onScanResult(callbackType, result)
+			// id its not connectable skip
 			if (result?.isConnectable == false) return
-			// add it to devices
-			val newDevice = result?.toDomainModel() ?: return
-			_devices.update { devices ->
-				if (newDevice !in devices) devices + newDevice else devices
+			// if results has no address skip
+			val address = result?.device?.address ?: return
+			// if its a new deivce
+			if (address !in _deviceAddresses) {
+				val newDevice = result.toDomainModel()
+				// add it to devices
+				_devices.update { devices -> devices + newDevice }
+				// then work is done
+				return
 			}
+			//if the address already present
+			val updatedList = _devices.value.map { device ->
+				// if address already present update the rssi of the device
+				if (device.deviceModel.address == address) device.copy(rssi = result.rssi)
+				// else return the normal device
+				else device
+			}
+			_devices.update { updatedList }
 		}
 
 		override fun onScanFailed(errorCode: Int) {
@@ -121,7 +129,7 @@ class AndroidBluetoothLEScanner(
 			}
 			val result = _scanError.trySend(error)
 			result.onFailure {
-				Log.d(LOGGER_TAG, "FAILED TO SEND ERROR CODE")
+				Log.d(LOGGER_TAG, "FAILED TO SEND ERROR CODE : $error")
 			}
 		}
 	}
@@ -132,11 +140,11 @@ class AndroidBluetoothLEScanner(
 		//checking for failures
 		val result = checkIfPermissionAndBTEnabled()
 		result.onFailure { err -> Log.d(LOGGER_TAG, err.message ?: "") }
+		if (result.isFailure) return
 		// if scan is running so don't do anything
 		if (_isScanning.value) return
 		// if normal scan is running then stop it
-		if (_btAdapter?.isDiscovering == true)
-			_btAdapter?.cancelDiscovery()
+		if (_btAdapter?.isDiscovering == true) _btAdapter?.cancelDiscovery()
 
 		withContext(Dispatchers.Default) {
 			try {
@@ -160,6 +168,7 @@ class AndroidBluetoothLEScanner(
 	override fun stopDiscovery() {
 		val result = checkIfPermissionAndBTEnabled()
 		result.onFailure { err -> Log.d(LOGGER_TAG, err.message ?: "") }
+		if (result.isFailure) return
 		stopScanCallback()
 	}
 

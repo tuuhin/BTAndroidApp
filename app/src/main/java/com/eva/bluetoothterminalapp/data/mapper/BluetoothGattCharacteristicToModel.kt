@@ -7,14 +7,16 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPropertyTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEWriteTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 
-fun BluetoothGattCharacteristic.toModel(): BLECharacteristicsModel = BLECharacteristicsModel(
-	characteristicsId = instanceId,
-	uuid = uuid,
-	permission = permission,
-	property = bleProperty,
-	writeType = bleWriteType,
-	descriptors = descriptors.map(BluetoothGattDescriptor::toModel)
-)
+fun BluetoothGattCharacteristic.toModel(probableName: String? = null): BLECharacteristicsModel =
+	BLECharacteristicsModel(
+		characteristicsId = instanceId,
+		uuid = uuid,
+		permission = permission,
+		property = bleProperty,
+		writeType = bleWriteType,
+		descriptors = descriptors.map(BluetoothGattDescriptor::toModel),
+		probableName = probableName
+	)
 
 
 private val BluetoothGattCharacteristic.permission: BLEPermission

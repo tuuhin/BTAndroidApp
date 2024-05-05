@@ -8,5 +8,9 @@ data class BLEServiceModel(
 	val serviceUUID: UUID,
 	val serviceType: BLEServicesTypes = BLEServicesTypes.UNKNOWN,
 	val characteristic: List<BLECharacteristicsModel> = emptyList(),
-	val bleServiceName: String? = null,
-)
+	val probableName: String? = null,
+) {
+
+	val charisticsCount: Int
+		get() = characteristic.size
+}

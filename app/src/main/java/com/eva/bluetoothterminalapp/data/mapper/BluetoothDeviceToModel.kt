@@ -10,7 +10,7 @@ import com.eva.bluetoothterminalapp.domain.models.BluetoothMode
 @SuppressLint("MissingPermission")
 fun BluetoothDevice.toDomainModel(): BluetoothDeviceModel = BluetoothDeviceModel(
 	// name can return null so there maybe an exception
-	name = name ?: "unnamed",
+	name = name ?: BluetoothDeviceModel.UNNAMED_DEVICE_NAME,
 	address = address,
 	mode = when (type) {
 		1 -> BluetoothMode.BLUETOOTH_DEVICE_CLASSIC

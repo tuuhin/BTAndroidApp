@@ -12,4 +12,5 @@ data class BLECharacteristicsModel(
 	val property: BLEPropertyTypes,
 	val writeType: BLEWriteTypes,
 	val descriptors: List<BLEDescriptor> = emptyList(),
+	val probableName: String? = null,
 )

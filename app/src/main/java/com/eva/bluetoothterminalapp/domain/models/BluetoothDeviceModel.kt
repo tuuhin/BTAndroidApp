@@ -5,4 +5,9 @@ data class BluetoothDeviceModel(
 	val address: String,
 	val mode: BluetoothMode,
 	val type: BluetoothDeviceType? = null,
-)
+) {
+	companion object {
+		const val UNNAMED_DEVICE_NAME = "unnamed"
+		const val RSSI_UNIT = "dbM"
+	}
+}

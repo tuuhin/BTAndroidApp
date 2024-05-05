@@ -1,10 +1,21 @@
 package com.eva.bluetoothterminalapp.presentation.util
 
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPermission
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPropertyTypes
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEServicesTypes
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEWriteTypes
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceType
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMode
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenState
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceProfileState
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import java.util.UUID
 
 
 object PreviewFakes {
@@ -17,24 +28,51 @@ object PreviewFakes {
 		type = BluetoothDeviceType.AUDIO_VIDEO
 	)
 
-	val FAKE_DEVICE_SCREEN_STATE_WITH_BL_OFF = BTDevicesScreenState(
-		isBtActive = false,
+	val FAKE_BLE_DEVICE_MODEL = BluetoothLEDeviceModel(
+		deviceName = "Android Headset", deviceModel = FAKE_DEVICE_MODEL
 	)
 
-	val FAKE_DEVICE_SCREEN_STATE_WITH_BL_ON_AND_PAIRED_DEVICES = BTDevicesScreenState(
-		isBtActive = true,
-		pairedDevices = List(3) {
-			FAKE_DEVICE_MODEL.copy(name = "THIS $it", address = "SOME $it")
-		}.toPersistentList()
+
+	val FAKE_DEVICE_STATE_WITH_NO_DEVICE = BTDevicesScreenState()
+
+	val FAKE_DEVICE_STATE_WITH_PAIRED_DEVICE = BTDevicesScreenState(
+		pairedDevices = List(3) { FAKE_DEVICE_MODEL }.toPersistentList()
 	)
 
-	val FAKE_DEVICE_SCREEN_STATE_WITH_SCANNING_AND_CONNECTED_DEVICE = BTDevicesScreenState(
-		isBtActive = true,
-		pairedDevices = List(3) {
-			FAKE_DEVICE_MODEL.copy(name = "THIS $it", address = "PAIRED SOME $it")
-		}.toPersistentList(),
-		availableDevices = List(2) {
-			FAKE_DEVICE_MODEL.copy(name = "THIS $it", address = "AVAILABLE $it")
-		}.toPersistentList()
+	val FAKE_DEVICE_STATE_WITH_PAIRED_AND_AVAILABLE_DEVICES = BTDevicesScreenState(
+		pairedDevices = List(3) { FAKE_DEVICE_MODEL }.toPersistentList(),
+		availableDevices = List(2) { FAKE_DEVICE_MODEL }.toPersistentList()
+	)
+
+	val FAKE_DEVICE_STATE_WITH_SOME_BLE_DEVICES = BTDevicesScreenState(
+		leDevices = List(2) { FAKE_BLE_DEVICE_MODEL }.toPersistentList()
+	)
+
+	val FAKE_BLE_SERVICE = BLEServiceModel(
+		serviceId = 1,
+		serviceUUID = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
+		serviceType = BLEServicesTypes.UNKNOWN
+	)
+
+	val FAKE_BLE_PROFILE_STATE = BLEDeviceProfileState(
+		device = FAKE_DEVICE_MODEL,
+		connectionState = BLEConnectionState.CONNECTED,
+		signalStrength = 100,
+		services = List(4) { FAKE_BLE_SERVICE }.toImmutableList()
+	)
+
+	val FAKE_BLE_PROFILE_STATE_CONNECTING = BLEDeviceProfileState(
+		device = FAKE_DEVICE_MODEL,
+		connectionState = BLEConnectionState.CONNECTING,
+		signalStrength = 100,
+	)
+
+	val FAKE_BLE_CHARACTERISTIC_MODEL = BLECharacteristicsModel(
+		characteristicsId = 1,
+		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
+		permission = BLEPermission.PERMISSION_WRITE,
+		writeType = BLEWriteTypes.TYPE_UNKNOWN,
+		property = BLEPropertyTypes.PROPERTY_WRITE,
+		probableName = "Compose"
 	)
 }

@@ -2,6 +2,7 @@ package com.eva.bluetoothterminalapp.data.bluetooth_le
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothManager
@@ -11,14 +12,15 @@ import android.util.Log
 import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
 import com.eva.bluetoothterminalapp.data.mapper.toModel
+import com.eva.bluetoothterminalapp.data.samples.SampleUUIDReader
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.samples.SampleUUIDReader
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +45,7 @@ class AndroidBLEClientConnector(
 
 	private var _bLEGatt: BluetoothGatt? = null
 
-	private val _connectionState = MutableStateFlow(BLEConnectionState.UNKNOWN)
+	private val _connectionState = MutableStateFlow(BLEConnectionState.CONNECTING)
 	override val connectionState: StateFlow<BLEConnectionState>
 		get() = _connectionState.asStateFlow()
 
@@ -64,17 +66,24 @@ class AndroidBLEClientConnector(
 
 	private val _gattCallback = object : BluetoothGattCallback() {
 
+
 		override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
 			super.onConnectionStateChange(gatt, status, newState)
 
-			if (status != BluetoothGatt.GATT_SUCCESS) return
+			Log.d(BLE_CLIENT_LOGGER, "STATUS :$status")
+
+			if (status != BluetoothGatt.GATT_SUCCESS) {
+				_connectionState.update { BLEConnectionState.FAILED }
+				return
+			}
+
 
 			val connectionState = when (newState) {
 				BluetoothProfile.STATE_CONNECTED -> BLEConnectionState.CONNECTED
 				BluetoothProfile.STATE_DISCONNECTED -> BLEConnectionState.DISCONNECTED
 				BluetoothProfile.STATE_CONNECTING -> BLEConnectionState.CONNECTING
 				BluetoothProfile.STATE_DISCONNECTING -> BLEConnectionState.DISCONNECTING
-				else -> BLEConnectionState.UNKNOWN
+				else -> BLEConnectionState.FAILED
 			}
 
 			_connectionState.update { connectionState }
@@ -106,10 +115,21 @@ class AndroidBLEClientConnector(
 
 			scope.launch {
 				val bleServices = services.map { gattService ->
-					val uuidName = reader.findNameForUUID(gattService.uuid)
-					gattService.toModel(sampleName = uuidName)
+					// get the service name if available
+					val sampleServiceName = reader.findServiceNameForUUID(gattService.uuid)
+
+					val characteristics = async {
+						gattService.characteristics.map { characteristic ->
+							val sample = reader.findCharacteristicsNameForUUID(characteristic.uuid)
+							characteristic.toModel(probableName = sample?.name)
+						}
+					}.await()
+
+					gattService.toModel(
+						sampleName = sampleServiceName?.name,
+						characteristic = characteristics
+					)
 				}
-				// TODO: Error prone code please check later
 				_bleServices.update { bleServices }
 			}
 
@@ -131,7 +151,8 @@ class AndroidBLEClientConnector(
 			// update the device
 			_connectedDevice = device.toDomainModel()
 			// connect to the gatt server
-			_bLEGatt = device.connectGatt(context, false, _gattCallback)
+			_bLEGatt = device
+				.connectGatt(context, false, _gattCallback, BluetoothDevice.TRANSPORT_LE)
 			Log.d(BLE_CLIENT_LOGGER, "CONNECT GATT")
 			// return success if there is no error
 			Result.success(true)

@@ -1,0 +1,870 @@
+[
+  {
+    "name": "Device Name",
+    "code": "0x2A00"
+  },
+  {
+    "name": "Appearance",
+    "code": "0x2A01"
+  },
+  {
+    "name": "Peripheral Privacy Flag",
+    "code": "0x2A02"
+  },
+  {
+    "name": "Reconnection Address",
+    "code": "0x2A03"
+  },
+  {
+    "name": "Peripheral Preferred Connection Parameters",
+    "code": "0x2A04"
+  },
+  {
+    "name": "Service Changed",
+    "code": "0x2A05"
+  },
+  {
+    "name": "Alert Level",
+    "code": "0x2A06"
+  },
+  {
+    "name": "Tx Power Level",
+    "code": "0x2A07"
+  },
+  {
+    "name": "Date Time",
+    "code": "0x2A08"
+  },
+  {
+    "name": "Day of Week",
+    "code": "0x2A09"
+  },
+  {
+    "name": "Day Date Time",
+    "code": "0x2A0A"
+  },
+  {
+    "name": "Exact Time 100",
+    "code": "0x2A0B"
+  },
+  {
+    "name": "Exact Time 256",
+    "code": "0x2A0C"
+  },
+  {
+    "name": "DST Offset",
+    "code": "0x2A0D"
+  },
+  {
+    "name": "Time Zone",
+    "code": "0x2A0E"
+  },
+  {
+    "name": "Local Time Information",
+    "code": "0x2A0F"
+  },
+  {
+    "name": "Secondary Time Zone",
+    "code": "0x2A10"
+  },
+  {
+    "name": "Time with DST",
+    "code": "0x2A11"
+  },
+  {
+    "name": "Time Accuracy",
+    "code": "0x2A12"
+  },
+  {
+    "name": "Time Source",
+    "code": "0x2A13"
+  },
+  {
+    "name": "Reference Time Information",
+    "code": "0x2A14"
+  },
+  {
+    "name": "Time Broadcast",
+    "code": "0x2A15"
+  },
+  {
+    "name": "Time Update Control Point",
+    "code": "0x2A16"
+  },
+  {
+    "name": "Time Update State",
+    "code": "0x2A17"
+  },
+  {
+    "name": "Glucose Measurement",
+    "code": "0x2A18"
+  },
+  {
+    "name": "Battery Level",
+    "code": "0x2A19"
+  },
+  {
+    "name": "Battery Power State",
+    "code": "0x2A1A"
+  },
+  {
+    "name": "Battery Level State",
+    "code": "0x2A1B"
+  },
+  {
+    "name": "Temperature Measurement",
+    "code": "0x2A1C"
+  },
+  {
+    "name": "Temperature Type",
+    "code": "0x2A1D"
+  },
+  {
+    "name": "Intermediate Temperature",
+    "code": "0x2A1E"
+  },
+  {
+    "name": "Temperature Celsius",
+    "code": "0x2A1F"
+  },
+  {
+    "name": "Temperature Fahrenheit",
+    "code": "0x2A20"
+  },
+  {
+    "name": "Measurement Interval",
+    "code": "0x2A21"
+  },
+  {
+    "name": "Boot Keyboard Input Report",
+    "code": "0x2A22"
+  },
+  {
+    "name": "System ID",
+    "code": "0x2A23"
+  },
+  {
+    "name": "Model Number String",
+    "code": "0x2A24"
+  },
+  {
+    "name": "Serial Number String",
+    "code": "0x2A25"
+  },
+  {
+    "name": "Firmware Revision String",
+    "code": "0x2A26"
+  },
+  {
+    "name": "Hardware Revision String",
+    "code": "0x2A27"
+  },
+  {
+    "name": "Software Revision String",
+    "code": "0x2A28"
+  },
+  {
+    "name": "Manufacturer Name String",
+    "code": "0x2A29"
+  },
+  {
+    "name": "IEEE 11073-20601 Regulatory Certification Data List",
+    "code": "0x2A2A"
+  },
+  {
+    "name": "Current Time",
+    "code": "0x2A2B"
+  },
+  {
+    "name": "Magnetic Declination",
+    "code": "0x2A2C"
+  },
+  {
+    "name": "Position 2D",
+    "code": "0x2A2F"
+  },
+  {
+    "name": "Position 3D",
+    "code": "0x2A30"
+  },
+  {
+    "name": "Scan Refresh",
+    "code": "0x2A31"
+  },
+  {
+    "name": "Boot Keyboard Output Report",
+    "code": "0x2A32"
+  },
+  {
+    "name": "Boot Mouse Input Report",
+    "code": "0x2A33"
+  },
+  {
+    "name": "Glucose Measurement Context",
+    "code": "0x2A34"
+  },
+  {
+    "name": "Blood Pressure Measurement",
+    "code": "0x2A35"
+  },
+  {
+    "name": "Intermediate Cuff Pressure",
+    "code": "0x2A36"
+  },
+  {
+    "name": "Heart Rate Measurement",
+    "code": "0x2A37"
+  },
+  {
+    "name": "Body Sensor Location",
+    "code": "0x2A38"
+  },
+  {
+    "name": "Heart Rate Control Point",
+    "code": "0x2A39"
+  },
+  {
+    "name": "Removable",
+    "code": "0x2A3A"
+  },
+  {
+    "name": "Service Required",
+    "code": "0x2A3B"
+  },
+  {
+    "name": "Scientific Temperature Celsius",
+    "code": "0x2A3C"
+  },
+  {
+    "name": "String",
+    "code": "0x2A3D"
+  },
+  {
+    "name": "Network Availability",
+    "code": "0x2A3E"
+  },
+  {
+    "name": "Alert Status",
+    "code": "0x2A3F"
+  },
+  {
+    "name": "Ringer Control point",
+    "code": "0x2A40"
+  },
+  {
+    "name": "Ringer Setting",
+    "code": "0x2A41"
+  },
+  {
+    "name": "Alert Category ID Bit Mask",
+    "code": "0x2A42"
+  },
+  {
+    "name": "Alert Category ID",
+    "code": "0x2A43"
+  },
+  {
+    "name": "Alert Notification Control Point",
+    "code": "0x2A44"
+  },
+  {
+    "name": "Unread Alert Status",
+    "code": "0x2A45"
+  },
+  {
+    "name": "New Alert",
+    "code": "0x2A46"
+  },
+  {
+    "name": "Supported New Alert Category",
+    "code": "0x2A47"
+  },
+  {
+    "name": "Supported Unread Alert Category",
+    "code": "0x2A48"
+  },
+  {
+    "name": "Blood Pressure Feature",
+    "code": "0x2A49"
+  },
+  {
+    "name": "HID Information",
+    "code": "0x2A4A"
+  },
+  {
+    "name": "Report Map",
+    "code": "0x2A4B"
+  },
+  {
+    "name": "HID Control Point",
+    "code": "0x2A4C"
+  },
+  {
+    "name": "Report",
+    "code": "0x2A4D"
+  },
+  {
+    "name": "Protocol Mode",
+    "code": "0x2A4E"
+  },
+  {
+    "name": "Scan Interval Window",
+    "code": "0x2A4F"
+  },
+  {
+    "name": "PnP ID",
+    "code": "0x2A50"
+  },
+  {
+    "name": "Glucose Feature",
+    "code": "0x2A51"
+  },
+  {
+    "name": "Record Access Control Point",
+    "code": "0x2A52"
+  },
+  {
+    "name": "RSC Measurement",
+    "code": "0x2A53"
+  },
+  {
+    "name": "RSC Feature",
+    "code": "0x2A54"
+  },
+  {
+    "name": "SC Control Point",
+    "code": "0x2A55"
+  },
+  {
+    "name": "Digital",
+    "code": "0x2A56"
+  },
+  {
+    "name": "Digital Output",
+    "code": "0x2A57"
+  },
+  {
+    "name": "Analog",
+    "code": "0x2A58"
+  },
+  {
+    "name": "Analog Output",
+    "code": "0x2A59"
+  },
+  {
+    "name": "Aggregate",
+    "code": "0x2A5A"
+  },
+  {
+    "name": "CSC Measurement",
+    "code": "0x2A5B"
+  },
+  {
+    "name": "CSC Feature",
+    "code": "0x2A5C"
+  },
+  {
+    "name": "Sensor Location",
+    "code": "0x2A5D"
+  },
+  {
+    "name": "PLX Spot-Check Measurement",
+    "code": "0x2A5E"
+  },
+  {
+    "name": "PLX Continuous Measurement Characteristic",
+    "code": "0x2A5F"
+  },
+  {
+    "name": "PLX Features",
+    "code": "0x2A60"
+  },
+  {
+    "name": "Pulse Oximetry Control Point",
+    "code": "0x2A62"
+  },
+  {
+    "name": "Cycling Power Measurement",
+    "code": "0x2A63"
+  },
+  {
+    "name": "Cycling Power Vector",
+    "code": "0x2A64"
+  },
+  {
+    "name": "Cycling Power Feature",
+    "code": "0x2A65"
+  },
+  {
+    "name": "Cycling Power Control Point",
+    "code": "0x2A66"
+  },
+  {
+    "name": "Location and Speed Characteristic",
+    "code": "0x2A67"
+  },
+  {
+    "name": "Navigation",
+    "code": "0x2A68"
+  },
+  {
+    "name": "Position Quality",
+    "code": "0x2A69"
+  },
+  {
+    "name": "LN Feature",
+    "code": "0x2A6A"
+  },
+  {
+    "name": "LN Control Point",
+    "code": "0x2A6B"
+  },
+  {
+    "name": "Elevation",
+    "code": "0x2A6C"
+  },
+  {
+    "name": "Pressure",
+    "code": "0x2A6D"
+  },
+  {
+    "name": "Temperature",
+    "code": "0x2A6E"
+  },
+  {
+    "name": "Humidity",
+    "code": "0x2A6F"
+  },
+  {
+    "name": "True Wind Speed",
+    "code": "0x2A70"
+  },
+  {
+    "name": "True Wind Direction",
+    "code": "0x2A71"
+  },
+  {
+    "name": "Apparent Wind Speed",
+    "code": "0x2A72"
+  },
+  {
+    "name": "Apparent Wind Direction",
+    "code": "0x2A73"
+  },
+  {
+    "name": "Gust Factor",
+    "code": "0x2A74"
+  },
+  {
+    "name": "Pollen Concentration",
+    "code": "0x2A75"
+  },
+  {
+    "name": "UV Index",
+    "code": "0x2A76"
+  },
+  {
+    "name": "Irradiance",
+    "code": "0x2A77"
+  },
+  {
+    "name": "Rainfall",
+    "code": "0x2A78"
+  },
+  {
+    "name": "Wind Chill",
+    "code": "0x2A79"
+  },
+  {
+    "name": "Heat Index",
+    "code": "0x2A7A"
+  },
+  {
+    "name": "Dew Point",
+    "code": "0x2A7B"
+  },
+  {
+    "name": "Descriptor Value Changed",
+    "code": "0x2A7D"
+  },
+  {
+    "name": "Aerobic Heart Rate Lower Limit",
+    "code": "0x2A7E"
+  },
+  {
+    "name": "Aerobic Threshold",
+    "code": "0x2A7F"
+  },
+  {
+    "name": "Age",
+    "code": "0x2A80"
+  },
+  {
+    "name": "Anaerobic Heart Rate Lower Limit",
+    "code": "0x2A81"
+  },
+  {
+    "name": "Anaerobic Heart Rate Upper Limit",
+    "code": "0x2A82"
+  },
+  {
+    "name": "Anaerobic Threshold",
+    "code": "0x2A83"
+  },
+  {
+    "name": "Aerobic Heart Rate Upper Limit",
+    "code": "0x2A84"
+  },
+  {
+    "name": "Date of Birth",
+    "code": "0x2A85"
+  },
+  {
+    "name": "Date of Threshold Assessment",
+    "code": "0x2A86"
+  },
+  {
+    "name": "Email Address",
+    "code": "0x2A87"
+  },
+  {
+    "name": "Fat Burn Heart Rate Lower Limit",
+    "code": "0x2A88"
+  },
+  {
+    "name": "Fat Burn Heart Rate Upper Limit",
+    "code": "0x2A89"
+  },
+  {
+    "name": "First Name",
+    "code": "0x2A8A"
+  },
+  {
+    "name": "Five Zone Heart Rate Limits",
+    "code": "0x2A8B"
+  },
+  {
+    "name": "Gender",
+    "code": "0x2A8C"
+  },
+  {
+    "name": "Heart Rate Max",
+    "code": "0x2A8D"
+  },
+  {
+    "name": "Height",
+    "code": "0x2A8E"
+  },
+  {
+    "name": "Hip Circumference",
+    "code": "0x2A8F"
+  },
+  {
+    "name": "Last Name",
+    "code": "0x2A90"
+  },
+  {
+    "name": "Maximum Recommended Heart Rate",
+    "code": "0x2A91"
+  },
+  {
+    "name": "Resting Heart Rate",
+    "code": "0x2A92"
+  },
+  {
+    "name": "Sport Type for Aerobic and Anaerobic Thresholds",
+    "code": "0x2A93"
+  },
+  {
+    "name": "Three Zone Heart Rate Limits",
+    "code": "0x2A94"
+  },
+  {
+    "name": "Two Zone Heart Rate Limit",
+    "code": "0x2A95"
+  },
+  {
+    "name": "VO2 Max",
+    "code": "0x2A96"
+  },
+  {
+    "name": "Waist Circumference",
+    "code": "0x2A97"
+  },
+  {
+    "name": "Weight",
+    "code": "0x2A98"
+  },
+  {
+    "name": "Database Change Increment",
+    "code": "0x2A99"
+  },
+  {
+    "name": "User Index",
+    "code": "0x2A9A"
+  },
+  {
+    "name": "Body Composition Feature",
+    "code": "0x2A9B"
+  },
+  {
+    "name": "Body Composition Measurement",
+    "code": "0x2A9C"
+  },
+  {
+    "name": "Weight Measurement",
+    "code": "0x2A9D"
+  },
+  {
+    "name": "Weight Scale Feature",
+    "code": "0x2A9E"
+  },
+  {
+    "name": "User Control Point",
+    "code": "0x2A9F"
+  },
+  {
+    "name": "Magnetic Flux Density - 2D",
+    "code": "0x2AA0"
+  },
+  {
+    "name": "Magnetic Flux Density - 3D",
+    "code": "0x2AA1"
+  },
+  {
+    "name": "Language",
+    "code": "0x2AA2"
+  },
+  {
+    "name": "Barometric Pressure Trend",
+    "code": "0x2AA3"
+  },
+  {
+    "name": "Bond Management Control Point",
+    "code": "0x2AA4"
+  },
+  {
+    "name": "Bond Management Features",
+    "code": "0x2AA5"
+  },
+  {
+    "name": "Central Address Resolution",
+    "code": "0x2AA6"
+  },
+  {
+    "name": "CGM Measurement",
+    "code": "0x2AA7"
+  },
+  {
+    "name": "CGM Feature",
+    "code": "0x2AA8"
+  },
+  {
+    "name": "CGM Status",
+    "code": "0x2AA9"
+  },
+  {
+    "name": "CGM Session Start Time",
+    "code": "0x2AAA"
+  },
+  {
+    "name": "CGM Session Run Time",
+    "code": "0x2AAB"
+  },
+  {
+    "name": "CGM Specific Ops Control Point",
+    "code": "0x2AAC"
+  },
+  {
+    "name": "Indoor Positioning Configuration",
+    "code": "0x2AAD"
+  },
+  {
+    "name": "Latitude",
+    "code": "0x2AAE"
+  },
+  {
+    "name": "Longitude",
+    "code": "0x2AAF"
+  },
+  {
+    "name": "Local North Coordinate",
+    "code": "0x2AB0"
+  },
+  {
+    "name": "Local East Coordinate",
+    "code": "0x2AB1"
+  },
+  {
+    "name": "Floor Number",
+    "code": "0x2AB2"
+  },
+  {
+    "name": "Altitude",
+    "code": "0x2AB3"
+  },
+  {
+    "name": "Uncertainty",
+    "code": "0x2AB4"
+  },
+  {
+    "name": "Location Name",
+    "code": "0x2AB5"
+  },
+  {
+    "name": "URI",
+    "code": "0x2AB6"
+  },
+  {
+    "name": "HTTP Headers",
+    "code": "0x2AB7"
+  },
+  {
+    "name": "HTTP Status Code",
+    "code": "0x2AB8"
+  },
+  {
+    "name": "HTTP Entity Body",
+    "code": "0x2AB9"
+  },
+  {
+    "name": "HTTP Control Point",
+    "code": "0x2ABA"
+  },
+  {
+    "name": "HTTPS Security",
+    "code": "0x2ABB"
+  },
+  {
+    "name": "TDS Control Point",
+    "code": "0x2ABC"
+  },
+  {
+    "name": "OTS Feature",
+    "code": "0x2ABD"
+  },
+  {
+    "name": "Object Name",
+    "code": "0x2ABE"
+  },
+  {
+    "name": "Object Type",
+    "code": "0x2ABF"
+  },
+  {
+    "name": "Object Size",
+    "code": "0x2AC0"
+  },
+  {
+    "name": "Object First-Created",
+    "code": "0x2AC1"
+  },
+  {
+    "name": "Object Last-Modified",
+    "code": "0x2AC2"
+  },
+  {
+    "name": "Object ID",
+    "code": "0x2AC3"
+  },
+  {
+    "name": "Object Properties",
+    "code": "0x2AC4"
+  },
+  {
+    "name": "Object Action Control Point",
+    "code": "0x2AC5"
+  },
+  {
+    "name": "Object List Control Point",
+    "code": "0x2AC6"
+  },
+  {
+    "name": "Object List Filter",
+    "code": "0x2AC7"
+  },
+  {
+    "name": "Object Changed",
+    "code": "0x2AC8"
+  },
+  {
+    "name": "Resolvable Private Address Only",
+    "code": "0x2AC9"
+  },
+  {
+    "name": "Fitness Machine Feature",
+    "code": "0x2ACC"
+  },
+  {
+    "name": "Treadmill Data",
+    "code": "0x2ACD"
+  },
+  {
+    "name": "Cross Trainer Data",
+    "code": "0x2ACE"
+  },
+  {
+    "name": "Step Climber Data",
+    "code": "0x2ACF"
+  },
+  {
+    "name": "Stair Climber Data",
+    "code": "0x2AD0"
+  },
+  {
+    "name": "Rower Data",
+    "code": "0x2AD1"
+  },
+  {
+    "name": "Indoor Bike Data",
+    "code": "0x2AD2"
+  },
+  {
+    "name": "Training Status",
+    "code": "0x2AD3"
+  },
+  {
+    "name": "Supported Speed Range",
+    "code": "0x2AD4"
+  },
+  {
+    "name": "Supported Inclination Range",
+    "code": "0x2AD5"
+  },
+  {
+    "name": "Supported Resistance Level Range",
+    "code": "0x2AD6"
+  },
+  {
+    "name": "Supported Heart Rate Range",
+    "code": "0x2AD7"
+  },
+  {
+    "name": "Supported Power Range",
+    "code": "0x2AD8"
+  },
+  {
+    "name": "Fitness Machine Control Point",
+    "code": "0x2AD9"
+  },
+  {
+    "name": "Fitness Machine Status",
+    "code": "0x2ADA"
+  },
+  {
+    "name": "Date UTC",
+    "code": "0x2AED"
+  },
+  {
+    "name": "RC Feature",
+    "code": "0x2B1D"
+  },
+  {
+    "name": "RC Settings",
+    "code": "0x2B1E"
+  },
+  {
+    "name": "Reconnection Configuration Control Point",
+    "code": "0x2B1F"
+  }
+]
