@@ -3,7 +3,7 @@
   <string name="enable_bluetooth_button_text">Enable Bluetooth</string>
   <string name="allow_location_button_text">Allow</string>
   <string name="bluetooth_permission_not_found_title">Bluetooth Permission Not granted</string>
-  <string name="bluetooth_permission_not_found_desc">App required bluetooth scan and connect permissions</string>
+  <string name="bluetooth_permission_not_found_desc">Some bluetooth permissions are required to use the app, please grant those in order to continue</string>
   <string name="bluetooth_permission_not_found">No Bluetooth Permission</string>
   <string name="bluetooth_not_enable_title">Bluetooth Not Enabled</string>
   <string name="bluetooth_not_enable_desc">Seems bluetooth is not turned on, bluetooth functionally is required please turn it on</string>
@@ -71,9 +71,22 @@
   <string name="ble_service_unknown">Unknown Service</string>
   <string name="ble_service_secondary">Secondary Service</string>
   <string name="ble_service_primary">Primary Service</string>
-  <string name="ble_connection_connected">Connection Accepted</string>
-  <string name="ble_connection_connecting">COnnecting</string>
+  <string name="ble_connection_connected">Connected</string>
+  <string name="ble_connection_connecting">Connecting</string>
   <string name="ble_connection_disconnecting">Disconnecting</string>
   <string name="ble_connection_disconnnected">Disconnected</string>
   <string name="ble_connection_unknown">Unknonwn</string>
+  <string name="ble_device_rssi">Ble Device Rssi %dBm</string>
+  <string name="ble_property_broadcast">BroadCast</string>
+  <string name="ble_property_read">Read</string>
+  <string name="ble_property_write_no_resp">Write (No Response)</string>
+  <string name="ble_property_write">Write</string>
+  <string name="ble_property_notify">Notify</string>
+  <string name="ble_property_indicate">Indicate</string>
+  <string name="ble_property_signed_write">Write (Signed)</string>
+  <string name="ble_property_extended">Extended Props</string>
+  <string name="ble_characteristic_name_unknown">Unknown</string>
+  <string name="ble_device_info_title">BLE Device</string>
+  <string name="le_charactertics_not_present">No characteristics found with this service</string>
+  <string name="ble_device_profile">LE Device Profile</string>
 </resources>

@@ -5,5 +5,5 @@ enum class BLEConnectionState {
 	CONNECTED,
 	DISCONNECTING,
 	DISCONNECTED,
-	UNKNOWN,
+	FAILED,
 }

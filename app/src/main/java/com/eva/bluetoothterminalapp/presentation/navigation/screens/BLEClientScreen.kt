@@ -30,6 +30,7 @@ fun BTLEClientScreen(
 ) {
 	val viewmodel = koinViewModel<BLEConnectionViewmodel>()
 	val bleProfile by viewmodel.bLEProfile.collectAsStateWithLifecycle()
+	val selectedCharacteristic by viewmodel.selectedCharacteric.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(
 		viewModel = viewmodel,
@@ -38,6 +39,8 @@ fun BTLEClientScreen(
 
 	BTLEDeviceProfileRoute(
 		profile = bleProfile,
+		selectedCharacteristic = selectedCharacteristic,
+		onProfileEvent = viewmodel::onEvent,
 		navigation = {
 			IconButton(onClick = navigator::popBackStack) {
 				Icon(

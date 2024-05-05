@@ -7,8 +7,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class BLEDeviceProfileState(
-	val connectionState: BLEConnectionState = BLEConnectionState.UNKNOWN,
+	val connectionState: BLEConnectionState = BLEConnectionState.FAILED,
 	val device: BluetoothDeviceModel? = null,
 	val signalStrength: Int = 0,
-	val services: ImmutableList<BLEServiceModel> = persistentListOf()
+	val services: ImmutableList<BLEServiceModel> = persistentListOf(),
 )
