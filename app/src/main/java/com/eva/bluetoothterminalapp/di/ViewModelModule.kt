@@ -1,6 +1,7 @@
 package com.eva.bluetoothterminalapp.di
 
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.BTClientViewModel
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.BluetoothProfileViewModel
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.BTServerViewModel
 import com.eva.bluetoothterminalapp.presentation.feature_devices.BTDeviceViewmodel
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.BLEConnectionViewmodel
@@ -20,5 +21,8 @@ val viewModelModule = module {
 
 	// btle viewmodel
 	viewModelOf(::BLEConnectionViewmodel)
+
+	// profile viewmodel
+	viewModelOf(::BluetoothProfileViewModel)
 
 }

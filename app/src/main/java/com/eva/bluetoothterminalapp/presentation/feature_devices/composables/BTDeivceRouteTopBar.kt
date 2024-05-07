@@ -43,6 +43,7 @@ fun BTDeviceRouteTopBar(
 
 	}
 
+
 	TopAppBar(
 		title = { Text(text = stringResource(id = R.string.devices_route)) },
 		navigationIcon = navigation,
@@ -53,7 +54,10 @@ fun BTDeviceRouteTopBar(
 				startScan = startScan,
 				stopScan = stopScan
 			)
-			BTDevicesTopBarDropDownMenu(onStartDiscovery = launcher::launch)
+			BTDevicesTopBarDropDownMenu(
+				hasDiscoverPermission = canShowScanOption,
+				onStartDiscovery = launcher::launch
+			)
 		},
 		colors = colors,
 		scrollBehavior = scrollBehavior,

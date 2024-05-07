@@ -11,6 +11,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDevice
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceType
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMode
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileScreenState
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenState
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceProfileState
 import kotlinx.collections.immutable.toImmutableList
@@ -74,5 +75,14 @@ object PreviewFakes {
 		writeType = BLEWriteTypes.TYPE_UNKNOWN,
 		property = BLEPropertyTypes.PROPERTY_WRITE,
 		probableName = "Compose"
+	)
+
+	val FAKE_UUID_LIST = List(10) {
+		UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a")
+	}
+
+	val FAKE_BT_DEVICE_PROFILE = BTProfileScreenState(
+		isDiscovering = false,
+		deviceUUIDS = FAKE_UUID_LIST.toImmutableList()
 	)
 }

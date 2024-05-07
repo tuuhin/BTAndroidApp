@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_connect.state
+package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state
 
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.models.ServerConnectionState

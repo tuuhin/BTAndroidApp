@@ -2,8 +2,8 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server
 
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothServerConnector
-import com.eva.bluetoothterminalapp.presentation.feature_connect.state.BTServerRouteEvents
-import com.eva.bluetoothterminalapp.presentation.feature_connect.state.BTServerRouteState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerRouteEvents
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerRouteState
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
 import kotlinx.coroutines.Job
@@ -45,13 +45,27 @@ class BTServerViewModel(
 		when (event) {
 			BTServerRouteEvents.StopServer -> stopServerAndClearResources()
 			BTServerRouteEvents.OnSendEvents -> sendText(_serverState.value.textFieldValue)
+			BTServerRouteEvents.CloseDialogAndStopServer -> closeAndStopServer()
+			BTServerRouteEvents.OpenDisconnectDialog -> toggleDialog(true)
+			BTServerRouteEvents.CloseDisconnectDialog -> toggleDialog(false)
+			BTServerRouteEvents.RestartServer -> restartServer()
 			is BTServerRouteEvents.OnTextFieldValue -> _serverState.update { state ->
 				state.copy(textFieldValue = event.message)
 			}
-
-			BTServerRouteEvents.CloseDialogAndStopServer -> toggleDialog(false)
-			BTServerRouteEvents.OpenStopServerDialog -> toggleDialog(true)
 		}
+	}
+
+	private fun closeAndStopServer() {
+		toggleDialog(false)
+		stopServerAndClearResources()
+	}
+
+
+	private fun restartServer() {
+		// stops and clear resources
+		stopServerAndClearResources()
+		//starts the server
+		startServer()
 	}
 
 	private fun toggleDialog(isOpen: Boolean) = _serverState.update { state ->

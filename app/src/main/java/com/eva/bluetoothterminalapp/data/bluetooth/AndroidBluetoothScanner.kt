@@ -44,9 +44,12 @@ class AndroidBluetoothScanner(
 		get() = _bluetoothAdapter?.isEnabled ?: false
 
 	override val isBTDiscovering: Boolean
-		get() = _bluetoothAdapter?.isDiscovering ?: false
+		get() = if (_hasScanPermission)
+			_bluetoothAdapter?.isDiscovering ?: false
+		else false
 
-	private val _hasConnectPermission: Boolean
+
+	private val _hasScanPermission: Boolean
 		get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 			ContextCompat.checkSelfPermission(
 				context, Manifest.permission.BLUETOOTH_SCAN
@@ -70,27 +73,31 @@ class AndroidBluetoothScanner(
 	override val pairedDevices: StateFlow<BluetoothDeviceModels>
 		get() = _bondedDevices.asStateFlow()
 
+	private val bondedDeviceAddress: List<String>
+		get() = _bondedDevices.value.map(BluetoothDeviceModel::address)
+
+	private val scanedDevicesAddress: List<String>
+		get() = _availableDevices.value.map(BluetoothDeviceModel::address)
+
 
 	private val _scanReceiver = ScanResultsReceiver { device ->
-		_availableDevices.update { devices ->
-			// if device in available devices or device in paired devices then don't update
-			if (devices.contains(device) || _bondedDevices.value.contains(device)) devices
-			else devices + device
-		}
+		// if the device address is already in bonded list skip
+		if (device.address in bondedDeviceAddress) return@ScanResultsReceiver
+		// if the address already contains in the scan devices then also skip
+		if (device.address in scanedDevicesAddress) return@ScanResultsReceiver
+		// otherwise add this device
+		_availableDevices.update { devices -> devices + device }
 	}
 
 	private val _bondDeviceUpdatedReceiver = BondStateChangedReceiver(
 		onNewDeviceBonded = { newDevice ->
 			// if no new device so do nothing
 			val deviceModel = newDevice?.toDomainModel() ?: return@BondStateChangedReceiver
-			// if the device already in bonded devices list then also do nothing
-			if (deviceModel in _bondedDevices.value) return@BondStateChangedReceiver
-			// if the device in available device remove it
-			if (deviceModel in _availableDevices.value) {
-				_availableDevices.update { devices ->
-					devices.filter { it.address != deviceModel.address }
-				}
-			}
+			// if the device address already in bonded devices list then also do nothing
+			if (newDevice.address in bondedDeviceAddress) return@BondStateChangedReceiver
+			// if the device address in available device remove it from scan devices
+			if (newDevice.address in scanedDevicesAddress)
+				_availableDevices.update { devices -> devices.filter { it.address != newDevice.address } }
 			// otherwise add it
 			_bondedDevices.update { devices -> devices + deviceModel }
 		},
@@ -98,10 +105,9 @@ class AndroidBluetoothScanner(
 			// if no new device so do nothing
 			val deviceModel = oldDevice?.toDomainModel() ?: return@BondStateChangedReceiver
 			// if the device address matches the old devices address then remove it
-			if (deviceModel !in _bondedDevices.value) return@BondStateChangedReceiver
-			_bondedDevices.update { devices ->
-				devices.filter { it.address != deviceModel.address }
-			}
+			if (oldDevice.address !in bondedDeviceAddress) return@BondStateChangedReceiver
+			// remove the item and update the list
+			_bondedDevices.update { devices -> devices.filter { it.address != deviceModel.address } }
 		},
 	)
 
@@ -158,7 +164,7 @@ class AndroidBluetoothScanner(
 
 	@SuppressLint("MissingPermission")
 	override fun findPairedDevices(): Result<Unit> {
-		if (!_hasConnectPermission)
+		if (!_hasScanPermission)
 			return Result.failure(BluetoothPermissionNotProvided())
 
 		val pairedDevices =
@@ -181,7 +187,7 @@ class AndroidBluetoothScanner(
 
 
 	override fun startScan(): Result<Boolean> {
-		if (!_hasConnectPermission)
+		if (!_hasScanPermission)
 			return Result.failure(BluetoothPermissionNotProvided())
 		// checks only for android 11 and lower otherwise its always false
 		if (!_hasLocationPermission)
@@ -202,7 +208,7 @@ class AndroidBluetoothScanner(
 
 
 	override fun stopScan(): Result<Boolean> {
-		if (!_hasConnectPermission)
+		if (!_hasScanPermission)
 			return Result.failure(BluetoothPermissionNotProvided())
 		// stop discovery
 		Log.d(BLUETOOTH_SCANNER, "SCAN CANCELED")

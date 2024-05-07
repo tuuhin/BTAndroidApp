@@ -77,9 +77,7 @@ class AndroidBTClientConnector(
 	 * disconnect etc
 	 */
 	private val remoteConnectInfoReceiver = RemoteConnectionReceiver(
-		onResults = { connected, _ ->
-			_connectState.update { connected }
-		},
+		onResults = { connected, _ -> _connectState.update { connected } },
 	)
 
 	override suspend fun connectClient(
@@ -128,6 +126,9 @@ class AndroidBTClientConnector(
 
 	override fun fetchUUIDs(address: String): Flow<List<UUID>> = callbackFlow {
 		val device = _btAdapter?.getRemoteDevice(address)
+
+		if (device?.bondState == BluetoothDevice.BOND_NONE)
+			device.createBond()
 
 		val remoteDeviceUUIDReceiver = RemoteDeviceUUIDReceiver(
 			onReceivedUUIDs = { uuids ->

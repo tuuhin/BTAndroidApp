@@ -37,7 +37,7 @@ import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BTLEDeviceProfileRoute(
+fun BTLEProfileDialogContent(
 	profile: BLEDeviceProfileState,
 	onProfileEvent: (BLEDeviceProfileEvent) -> Unit,
 	modifier: Modifier = Modifier,
@@ -106,7 +106,7 @@ private fun BTLEDevicesProfileRoute(
 	@PreviewParameter(BTLEDevicesProfilePreviewParams::class)
 	profile: BLEDeviceProfileState,
 ) = BlueToothTerminalAppTheme {
-	BTLEDeviceProfileRoute(
+	BTLEProfileDialogContent(
 		profile = profile,
 		onProfileEvent = {},
 		navigation = {
