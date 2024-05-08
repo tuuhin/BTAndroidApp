@@ -89,4 +89,6 @@
   <string name="ble_device_info_title">BLE Device</string>
   <string name="le_charactertics_not_present">No characteristics found with this service</string>
   <string name="ble_device_profile">LE Device Profile</string>
+  <string name="back_arrow">Arrow back</string>
+  <string name="refresh_tooltip_text">Refresh</string>
 </resources>

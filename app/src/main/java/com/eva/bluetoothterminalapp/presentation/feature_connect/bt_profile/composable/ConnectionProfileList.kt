@@ -1,12 +1,11 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.composable
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -39,6 +37,7 @@ fun ConnectionProfileList(
 	isDiscovering: Boolean = false,
 	onUUIDSelect: (UUID) -> Unit = {},
 	contentPadding: PaddingValues = PaddingValues(0.dp),
+	verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(0.dp)
 ) {
 	val isNoUUIDFound by remember(foundUUIDs) {
 		derivedStateOf(foundUUIDs::isEmpty)
@@ -47,28 +46,18 @@ fun ConnectionProfileList(
 	val isLocalInspectionMode = LocalInspectionMode.current
 
 	val uuidsKey: ((Int, UUID) -> Any)? = remember {
-		if (isLocalInspectionMode) null
-		else { _, uuid -> uuid }
+		if (isLocalInspectionMode) null else { _, uuid -> uuid }
 	}
 
 	LazyColumn(
 		modifier = modifier,
-		contentPadding = contentPadding
+		contentPadding = contentPadding,
+		verticalArrangement = verticalArrangement
 	) {
-		item {
+		stickyHeader {
 			ListItem(
-				headlineContent = {
-					Text(
-						text = stringResource(id = R.string.bl_connect_profile_server_uuid_text),
-						style = MaterialTheme.typography.bodyLarge
-					)
-				},
-				supportingContent = {
-					Text(
-						text = stringResource(id = R.string.bl_connect_profile_server_uuid_desc),
-						style = MaterialTheme.typography.labelMedium
-					)
-				},
+				headlineContent = { Text(text = stringResource(id = R.string.bl_connect_profile_server_uuid_text)) },
+				supportingContent = { Text(text = stringResource(id = R.string.bl_connect_profile_server_uuid_desc)) },
 			)
 		}
 		item(
@@ -80,20 +69,13 @@ fun ConnectionProfileList(
 				namedUUID = stringResource(id = R.string.bl_connect_profile_server_uuid),
 				isSelected = selectedUUID == BTConstants.SERVICE_UUID,
 				onSelect = { onUUIDSelect(BTConstants.SERVICE_UUID) },
+				modifier = Modifier.fillMaxWidth()
 			)
 		}
-		item { HorizontalDivider(modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.lazy_colum_content_padding))) }
-		item {
+		stickyHeader {
 			ListItem(
-				headlineContent = {
-					Text(
-						text = stringResource(id = R.string.bl_connect_profile_device_uuid_text),
-						style = MaterialTheme.typography.bodyLarge
-					)
-				},
-				supportingContent = {
-					Text(text = stringResource(R.string.bl_connect_profile_device_uuid_desc))
-				},
+				headlineContent = { Text(text = stringResource(id = R.string.bl_connect_profile_device_uuid_text)) },
+				supportingContent = { Text(text = stringResource(R.string.bl_connect_profile_device_uuid_desc)) },
 			)
 		}
 

@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -30,7 +33,10 @@ import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 @Composable
 fun EnableLocationButton(
 	onFineLocationAccess: (Boolean) -> Unit,
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
+	shape: Shape = MaterialTheme.shapes.medium,
+	contentPaddingValues: PaddingValues = ButtonDefaults.ContentPadding,
+	colors: ButtonColors = ButtonDefaults.buttonColors()
 ) {
 	val context = LocalContext.current
 
@@ -71,9 +77,10 @@ fun EnableLocationButton(
 				)
 			)
 		},
+		shape = shape,
+		contentPadding = contentPaddingValues,
+		colors = colors,
 		modifier = modifier,
-		shape = MaterialTheme.shapes.medium,
-		contentPadding = PaddingValues(4.dp)
 	) {
 		Icon(
 			imageVector = Icons.Outlined.LocationOn,

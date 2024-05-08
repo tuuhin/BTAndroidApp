@@ -69,7 +69,7 @@ class AndroidBTServerConnector(
 				BTConstants.SERVICE_UUID
 			)
 		else
-			_btAdapter?.listenUsingRfcommWithServiceRecord(
+			_btAdapter?.listenUsingInsecureRfcommWithServiceRecord(
 				BTConstants.SERVICE_NAME,
 				BTConstants.SERVICE_UUID
 			)

@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
@@ -21,30 +22,38 @@ fun BTMessagesList(
 	modifier: Modifier = Modifier,
 	lazyListState: LazyListState = rememberLazyListState(),
 	isReversed: Boolean = false,
-	scrollToEnd: Boolean = false,
+	scrollToEnd: Boolean = true,
 	contentPadding: PaddingValues = PaddingValues(0.dp),
 	verticalArrangement: Arrangement.Vertical = Arrangement.Bottom,
 ) {
 
+	val isInspectionMode = LocalInspectionMode.current
+
+	val listKeys: ((Int, BluetoothMessage) -> Unit)? = remember {
+		if (!isInspectionMode) { _, message -> message.logTime.toEpochMilliseconds() }
+		else null
+	}
+
 	LaunchedEffect(key1 = messages) {
 		if (!scrollToEnd) return@LaunchedEffect
+		// check if there is any item
+		if (lazyListState.layoutInfo.totalItemsCount < 1) return@LaunchedEffect
 		// otherwise animate to the end of the list
 		lazyListState.animateScrollToItem(lazyListState.layoutInfo.totalItemsCount - 1)
 	}
 
-	val isInspectionMode = LocalInspectionMode.current
 
 	LazyColumn(
 		state = lazyListState,
 		modifier = modifier,
 		verticalArrangement = verticalArrangement,
 		contentPadding = contentPadding,
-		reverseLayout = isReversed
+		reverseLayout = isReversed,
 	) {
 		itemsIndexed(
 			items = messages,
-			key = if (!isInspectionMode) { _, message -> message.logTime.toEpochMilliseconds() }
-			else null,
+			key = listKeys,
+			contentType = { _, _ -> BluetoothMessage::class.simpleName }
 		) { _, message ->
 			BTMessageText(
 				message = message,

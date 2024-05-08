@@ -21,9 +21,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -39,10 +43,14 @@ fun SendCommandTextField(
 	modifier: Modifier = Modifier,
 	isEnable: Boolean = true,
 	onImeAction: () -> Unit = {},
+	maxLines: Int = 2,
+	shape: Shape = MaterialTheme.shapes.large,
+	cursorColor: Brush = SolidColor(MaterialTheme.colorScheme.primary),
+	textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+	color: Color = MaterialTheme.colorScheme.onSurface
 ) {
 	val interaction = remember { MutableInteractionSource() }
 	val isFocused by interaction.collectIsFocusedAsState()
-
 
 	val surfaceColor by animateColorAsState(
 		targetValue = if (isFocused) MaterialTheme.colorScheme.surfaceContainerHighest
@@ -65,13 +73,12 @@ fun SendCommandTextField(
 			) {
 				Surface(
 					color = surfaceColor,
-					shape = MaterialTheme.shapes.extraLarge,
-					contentColor = MaterialTheme.colorScheme.onSurface,
+					shape = shape,
+					contentColor = color,
 					modifier = Modifier.weight(1f),
 				) {
 					Box(
-						modifier = Modifier
-							.padding(horizontal = 16.dp, vertical = 12.dp),
+						modifier = Modifier.padding(all = 16.dp),
 					) {
 						when {
 							value.isBlank() ->
@@ -100,17 +107,11 @@ fun SendCommandTextField(
 			}
 		},
 		enabled = isEnable,
-		textStyle = MaterialTheme.typography.bodyMedium
-			.copy(color = MaterialTheme.colorScheme.onSurface),
-		cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-		keyboardActions = KeyboardActions(
-			onSend = { onImeAction() },
-		),
-		keyboardOptions = KeyboardOptions(
-			autoCorrect = false,
-			imeAction = ImeAction.Send
-		),
-		maxLines = 4,
+		textStyle = textStyle.copy(color = color),
+		cursorBrush = cursorColor,
+		keyboardActions = KeyboardActions(onSend = { onImeAction() }),
+		keyboardOptions = KeyboardOptions(autoCorrect = false, imeAction = ImeAction.Send),
+		maxLines = maxLines,
 		interactionSource = interaction,
 		modifier = modifier.focusable(enabled = true)
 	)

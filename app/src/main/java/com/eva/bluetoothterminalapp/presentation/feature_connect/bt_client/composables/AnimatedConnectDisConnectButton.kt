@@ -11,7 +11,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,10 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
-import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
 fun AnimatedConnectDisconnectButton(
@@ -34,7 +31,6 @@ fun AnimatedConnectDisconnectButton(
 	colors: ButtonColors = ButtonDefaults.textButtonColors(),
 	style: TextStyle = MaterialTheme.typography.titleMedium
 ) {
-
 	AnimatedContent(
 		targetState = clientState,
 		label = "Connect and disconnect states",
@@ -71,19 +67,6 @@ fun AnimatedConnectDisconnectButton(
 
 			else -> {}
 		}
-	}
-
-}
-
-@Preview
-@Composable
-private fun AnimatedConnectDisconnectButtonPreview() = BlueToothTerminalAppTheme {
-	Surface {
-		AnimatedConnectDisconnectButton(
-			clientState = ClientConnectionState.CONNECTION_ACCEPTED,
-			onConnect = { },
-			onDisConnect = { },
-		)
 	}
 }
 

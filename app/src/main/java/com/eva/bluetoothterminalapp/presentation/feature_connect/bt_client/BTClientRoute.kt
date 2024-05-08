@@ -16,8 +16,11 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -31,10 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
@@ -97,7 +100,6 @@ fun BTClientRoute(
 					vertical = dimensionResource(id = R.dimen.sc_padding_secondary)
 				)
 				.fillMaxSize(),
-			verticalArrangement = Arrangement.spacedBy(4.dp)
 		) {
 			Box(
 				modifier = Modifier
@@ -117,13 +119,18 @@ fun BTClientRoute(
 				BTMessagesList(
 					messages = state.messages,
 					verticalArrangement = Arrangement.Bottom,
-					contentPadding = PaddingValues(horizontal = 4.dp),
+					contentPadding = PaddingValues(
+						horizontal = dimensionResource(id = R.dimen.messages_list_horizontal_padding),
+						vertical = dimensionResource(id = R.dimen.messages_list_vertical_padding)
+					),
 					modifier = Modifier.fillMaxSize()
 				)
 			}
 			HorizontalDivider(
 				color = MaterialTheme.colorScheme.outlineVariant,
-				modifier = Modifier.fillMaxWidth()
+				modifier = Modifier.padding(
+					vertical = dimensionResource(id = R.dimen.messages_text_field_spacing)
+				)
 			)
 			SendCommandTextField(
 				value = state.textFieldValue,
@@ -162,7 +169,7 @@ private class BTClientRoutePreviewParams : CollectionPreviewParameterProvider<BT
 		),
 		BTClientRouteState(
 			connectionMode = ClientConnectionState.CONNECTION_ACCEPTED,
-			messages = List(30) {
+			messages = List(10) {
 				BluetoothMessage("Hello", BluetoothMessageType.MESSAGE_FROM_CLIENT)
 			}.toPersistentList(),
 		)
@@ -178,6 +185,12 @@ private fun BTClientRoutePreview(
 	BTClientRoute(
 		state = state,
 		onConnectionEvent = {},
-		onBackPress = {}
+		onBackPress = {},
+		navigation = {
+			Icon(
+				imageVector = Icons.AutoMirrored.Default.ArrowBack,
+				contentDescription = stringResource(id = R.string.back_arrow)
+			)
+		},
 	)
 }

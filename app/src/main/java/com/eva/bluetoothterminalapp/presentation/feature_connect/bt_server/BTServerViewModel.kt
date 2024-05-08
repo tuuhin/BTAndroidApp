@@ -29,6 +29,9 @@ class BTServerViewModel(
 	override val uiEvents: SharedFlow<UiEvents>
 		get() = _uiEvents.asSharedFlow()
 
+	val _messageBoxText: String
+		get() = _serverState.value.textFieldValue.trim()
+
 	private var _startServer: Job? = null
 
 	init {
@@ -44,7 +47,7 @@ class BTServerViewModel(
 	fun onEvent(event: BTServerRouteEvents) {
 		when (event) {
 			BTServerRouteEvents.StopServer -> stopServerAndClearResources()
-			BTServerRouteEvents.OnSendEvents -> sendText(_serverState.value.textFieldValue)
+			BTServerRouteEvents.OnSendEvents -> sendText()
 			BTServerRouteEvents.CloseDialogAndStopServer -> closeAndStopServer()
 			BTServerRouteEvents.OpenDisconnectDialog -> toggleDialog(true)
 			BTServerRouteEvents.CloseDisconnectDialog -> toggleDialog(false)
@@ -77,9 +80,14 @@ class BTServerViewModel(
 		_startServer = viewModelScope.launch { connector.startServer() }
 	}
 
-	private fun sendText(message: String) = viewModelScope.launch {
-		val messageAsByteArray = message.trim()
-		val result = connector.sendData(messageAsByteArray)
+	private fun sendText() = viewModelScope.launch {
+
+		val message = _messageBoxText
+		if (message.isBlank()) {
+			_uiEvents.emit(UiEvents.ShowSnackBar("Cannot send empty message"))
+			return@launch
+		}
+		val result = connector.sendData(message)
 		result.onFailure { err ->
 			_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "MESSAGE"))
 		}

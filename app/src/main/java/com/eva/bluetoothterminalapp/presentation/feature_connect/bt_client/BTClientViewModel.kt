@@ -54,9 +54,9 @@ class BTClientViewModel(
 	init {
 		// reads for incoming messages
 		readIncomingData()
-		// update connection mode
+//		// update connection mode
 		updateConnectionMode()
-		// start client connection
+//		// start client connection
 		startClientJob()
 	}
 

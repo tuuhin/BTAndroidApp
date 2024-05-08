@@ -11,6 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.BluetoothProfileRoute
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.BluetoothProfileViewModel
+import com.eva.bluetoothterminalapp.presentation.navigation.UIEventsSideEffect
 import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothDeviceArgs
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
@@ -34,6 +35,11 @@ fun BTDeviceProfileScreen(
 
 	val viewmodel = koinViewModel<BluetoothProfileViewModel>()
 	val profile by viewmodel.profile.collectAsStateWithLifecycle()
+
+	UIEventsSideEffect(
+		viewModel = viewmodel,
+		navigator = navigator
+	)
 
 	BluetoothProfileRoute(
 		state = profile,

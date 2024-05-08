@@ -24,7 +24,6 @@ fun BTMessageText(
 	message: BluetoothMessage,
 	modifier: Modifier = Modifier
 ) {
-
 	Row(
 		modifier = modifier.padding(4.dp),
 		horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -43,13 +42,12 @@ fun BTMessageText(
 				BluetoothMessageType.MESSAGE_FROM_SERVER -> MaterialTheme.colorScheme.primary
 				BluetoothMessageType.MESSAGE_FROM_CLIENT -> MaterialTheme.colorScheme.secondary
 			},
-			fontWeight = FontWeight.SemiBold
 		)
 	}
 }
 
-private class BTMessageTextPreviewParams :
-	CollectionPreviewParameterProvider<BluetoothMessageType>(BluetoothMessageType.entries)
+private class BTMessageTextPreviewParams
+	: CollectionPreviewParameterProvider<BluetoothMessageType>(BluetoothMessageType.entries)
 
 
 @PreviewLightDark

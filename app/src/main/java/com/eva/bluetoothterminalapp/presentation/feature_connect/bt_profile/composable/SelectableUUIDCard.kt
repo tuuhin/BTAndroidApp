@@ -13,7 +13,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import java.util.UUID
@@ -25,6 +27,7 @@ fun SelectableUUIDCard(
 	modifier: Modifier = Modifier,
 	isSelected: Boolean = false,
 	namedUUID: String? = null,
+	shape: Shape = MaterialTheme.shapes.medium
 ) {
 
 	val uuidName = remember(uuid, namedUUID) {
@@ -33,9 +36,9 @@ fun SelectableUUIDCard(
 
 	Row(
 		modifier = modifier
-			.clip(MaterialTheme.shapes.medium)
 			.padding(horizontal = dimensionResource(id = R.dimen.lazy_colum_content_padding))
-			.clickable(onClick = onSelect),
+			.clip(shape = shape)
+			.clickable(onClick = onSelect, role = Role.Checkbox),
 		horizontalArrangement = Arrangement.spacedBy(4.dp),
 		verticalAlignment = Alignment.CenterVertically
 	) {

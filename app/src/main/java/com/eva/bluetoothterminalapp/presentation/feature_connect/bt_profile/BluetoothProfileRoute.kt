@@ -8,31 +8,34 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.composable.ConnectionProfileList
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.composable.ConnectionProfileTopBar
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileScreenState
+import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 import java.util.UUID
@@ -47,33 +50,38 @@ fun BluetoothProfileRoute(
 	navigation: @Composable () -> Unit = {},
 ) {
 
-	val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+	val isInspectionMode = LocalInspectionMode.current
+	val snackBarHost = LocalSnackBarProvider.current
+
+	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
 	var selectedUUID by rememberSaveable(stateSaver = uuidSaver) {
 		mutableStateOf(null)
 	}
 
+	val showConnectButton by remember(selectedUUID, state.isDiscovering) {
+		derivedStateOf { selectedUUID != null && !state.isDiscovering }
+	}
+
 	Scaffold(
 		topBar = {
-			TopAppBar(
-				title = { Text(text = stringResource(id = R.string.bl_connect_profile_title)) },
-				scrollBehavior = scrollBehavior,
-				navigationIcon = navigation,
-				actions = {
-					AnimatedVisibility(visible = !state.isDiscovering) {
-						IconButton(onClick = { onEvent(BTProfileEvents.OnRetryFetchUUID) }) {
-							Icon(
-								imageVector = Icons.Default.Cached,
-								contentDescription = null
-							)
-						}
-					}
+			ConnectionProfileTopBar(
+				showRefresh = !state.isDiscovering,
+				onRefresh = {
+					onEvent(BTProfileEvents.OnRetryFetchUUID)
+					selectedUUID = null
 				},
+				navigation = navigation,
+				scrollBehavior = scrollBehavior,
+				colors = TopAppBarDefaults.mediumTopAppBarColors(
+					scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+					actionIconContentColor = MaterialTheme.colorScheme.primary
+				)
 			)
 		},
 		floatingActionButton = {
 			AnimatedVisibility(
-				visible = selectedUUID != null,
+				visible = showConnectButton || isInspectionMode,
 				enter = slideInVertically() + fadeIn(),
 				exit = slideOutVertically() + fadeOut()
 			) {
@@ -86,13 +94,14 @@ fun BluetoothProfileRoute(
 				}
 			}
 		},
+		snackbarHost = { SnackbarHost(hostState = snackBarHost) },
 		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
 	) { scPadding ->
 		ConnectionProfileList(
 			selectedUUID = selectedUUID,
+			isDiscovering = state.isDiscovering,
 			foundUUIDs = state.deviceUUIDS,
 			onUUIDSelect = { uuid -> selectedUUID = uuid },
-			isDiscovering = state.isDiscovering,
 			contentPadding = scPadding
 		)
 	}
@@ -108,7 +117,7 @@ private val uuidSaver = object : Saver<UUID?, ParcelUuid> {
 	}
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 private fun BluetoothProfileRoutePreview() = BlueToothTerminalAppTheme {
 	BluetoothProfileRoute(

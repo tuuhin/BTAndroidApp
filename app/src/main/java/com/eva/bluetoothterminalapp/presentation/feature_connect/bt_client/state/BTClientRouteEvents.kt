@@ -17,6 +17,10 @@ sealed interface BTClientRouteEvents {
 	 */
 	data object OnSendEvents : BTClientRouteEvents
 
+
+	/**
+	 * Send certain string value to the server
+	 */
 	data class OnSendFieldTextChanged(val text: String) : BTClientRouteEvents
 
 }
