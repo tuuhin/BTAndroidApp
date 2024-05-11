@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Characteristic Extended Properties",
+    "code": "0x2900"
+  },
+  {
+    "name": "Characteristic User Description",
+    "code": "0x2901"
+  },
+  {
+    "name": "Client Characteristic Configuration",
+    "code": "0x2902"
+  },
+  {
+    "name": "Server Characteristic Configuration",
+    "code": "0x2903"
+  },
+  {
+    "name": "Characteristic Presentation Format",
+    "code": "0x2904"
+  },
+  {
+    "name": "Characteristic Aggregate Format",
+    "code": "0x2905"
+  },
+  {
+    "name": "Valid Range",
+    "code": "0x2906"
+  },
+  {
+    "name": "External Report Reference",
+    "code": "0x2907"
+  },
+  {
+    "name": "Report Reference",
+    "code": "0x2908"
+  },
+  {
+    "name": "Number of Digitals",
+    "code": "0x2909"
+  },
+  {
+    "name": "Value Trigger Setting",
+    "code": "0x290A"
+  },
+  {
+    "name": "Environmental Sensing Configuration",
+    "code": "0x290B"
+  },
+  {
+    "name": "Environmental Sensing Measurement",
+    "code": "0x290C"
+  },
+  {
+    "name": "Environmental Sensing Trigger Setting",
+    "code": "0x290D"
+  },
+  {
+    "name": "Time Trigger Setting",
+    "code": "0x290E"
+  }
+]

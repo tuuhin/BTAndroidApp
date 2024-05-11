@@ -5,24 +5,28 @@ import android.bluetooth.BluetoothGattService
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEServicesTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
+import kotlinx.collections.immutable.toPersistentList
 
-fun BluetoothGattService.toModel(): BLEServiceModel = BLEServiceModel(
+fun BluetoothGattService.toDomainModel(): BLEServiceModel = BLEServiceModel(
 	serviceId = instanceId,
 	serviceUUID = uuid,
 	serviceType = bleServiceType,
-	characteristic = characteristics.map(BluetoothGattCharacteristic::toModel)
-)
+).apply {
+	this.characteristic = characteristics.map(BluetoothGattCharacteristic::toDomainModel)
+		.toPersistentList()
+}
 
-fun BluetoothGattService.toModel(
-	sampleName: String? = null,
-	characteristic: List<BLECharacteristicsModel>? = null
+fun BluetoothGattService.toDomainModel(
+	probableName: String? = null,
+	characteristic: List<BLECharacteristicsModel> = emptyList()
 ): BLEServiceModel = BLEServiceModel(
 	serviceId = instanceId,
 	serviceUUID = uuid,
 	serviceType = bleServiceType,
-	characteristic = characteristic ?: characteristics.map(BluetoothGattCharacteristic::toModel),
-	probableName = sampleName
-)
+).apply {
+	this.characteristic = characteristic.toPersistentList()
+	this.probableName = probableName
+}
 
 private val BluetoothGattService.bleServiceType: BLEServicesTypes
 	get() = when (this.type) {

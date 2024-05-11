@@ -6,6 +6,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPropertyTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEServicesTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEWriteTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
@@ -68,14 +69,39 @@ object PreviewFakes {
 		signalStrength = 100,
 	)
 
+	val FAKE_BLE_DESCRIPTOR_MODEL = BLEDescriptorModel(
+		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
+		permissions = listOf(BLEPermission.PERMISSION_WRITE),
+	)
+
 	val FAKE_BLE_CHARACTERISTIC_MODEL = BLECharacteristicsModel(
 		characteristicsId = 1,
 		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
 		permission = BLEPermission.PERMISSION_WRITE,
 		writeType = BLEWriteTypes.TYPE_UNKNOWN,
-		property = BLEPropertyTypes.PROPERTY_WRITE,
+		properties = listOf(
+			BLEPropertyTypes.PROPERTY_WRITE,
+			BLEPropertyTypes.PROPERTY_READ,
+			BLEPropertyTypes.PROPERTY_INDICATE,
+			BLEPropertyTypes.PROPERTY_NOTIFY
+		),
+
+		).apply {
 		probableName = "Compose"
-	)
+		descriptors = listOf(FAKE_BLE_DESCRIPTOR_MODEL).toPersistentList()
+	}
+
+	val FAKE_BLE_CHAR_MODEL_SECOND = BLECharacteristicsModel(
+		characteristicsId = 1,
+		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
+		permission = BLEPermission.PERMISSION_WRITE,
+		writeType = BLEWriteTypes.TYPE_NO_RESPONSE,
+		properties = listOf(BLEPropertyTypes.PROPERTY_WRITE),
+
+		).apply {
+		probableName = "Compose 2"
+	}
+
 
 	val FAKE_UUID_LIST = List(10) {
 		UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a")
