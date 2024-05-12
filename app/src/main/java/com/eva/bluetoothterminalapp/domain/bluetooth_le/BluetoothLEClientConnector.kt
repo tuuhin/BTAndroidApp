@@ -2,8 +2,8 @@ package com.eva.bluetoothterminalapp.domain.bluetooth_le
 
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.CharacteristicsReadValue
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,9 +26,9 @@ interface BluetoothLEClientConnector {
 
 	val connectedDevice: BluetoothDeviceModel?
 
-	val readValue: StateFlow<CharacteristicsReadValue>
+	val readForCharacteristic: Flow<BLECharacteristicsModel?>
 
-	fun connect(address: String): Result<Boolean>
+	fun connect(address: String, autoConnect: Boolean = false): Result<Boolean>
 
 	fun read(
 		service: BLEServiceModel,
@@ -39,6 +39,12 @@ interface BluetoothLEClientConnector {
 		service: BLEServiceModel,
 		characteristic: BLECharacteristicsModel,
 		value: String
+	): Result<Boolean>
+
+	fun readDescriptor(
+		service: BLEServiceModel,
+		characteristic: BLECharacteristicsModel,
+		descriptor: BLEDescriptorModel,
 	): Result<Boolean>
 
 	fun setNotification(

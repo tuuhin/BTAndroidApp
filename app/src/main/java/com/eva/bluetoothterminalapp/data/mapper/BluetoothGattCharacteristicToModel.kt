@@ -11,29 +11,38 @@ import kotlinx.collections.immutable.toPersistentList
 
 fun BluetoothGattCharacteristic.toDomainModel(probableName: String? = null): BLECharacteristicsModel =
 	BLECharacteristicsModel(
-		characteristicsId = instanceId,
+		instanceId = instanceId,
 		uuid = uuid,
 		permission = permission,
 		properties = bleProperties,
 		writeType = bleWriteType,
+		descriptors = descriptors.map(BluetoothGattDescriptor::toModel).toPersistentList()
 	).apply {
 		this.probableName = probableName
-		this.descriptors = getDescriptors().map(BluetoothGattDescriptor::toModel).toPersistentList()
 	}
 
 fun BluetoothGattCharacteristic.toDomainModel(
 	probableName: String? = null,
 	descriptors: List<BLEDescriptorModel> = emptyList()
 ): BLECharacteristicsModel = BLECharacteristicsModel(
-	characteristicsId = instanceId,
+	instanceId = instanceId,
 	uuid = uuid,
 	permission = permission,
 	properties = bleProperties,
 	writeType = bleWriteType,
+	descriptors = descriptors.toPersistentList()
 ).apply {
 	this.probableName = probableName
-	this.descriptors = descriptors.toPersistentList()
 }
+
+val BLECharacteristicsModel.isIndicating: Boolean
+	get() = BLEPropertyTypes.PROPERTY_INDICATE in properties
+
+val BLECharacteristicsModel.isNotifying: Boolean
+	get() = BLEPropertyTypes.PROPERTY_NOTIFY in properties
+
+val BLECharacteristicsModel.canRead: Boolean
+	get() = BLEPropertyTypes.PROPERTY_READ in properties
 
 
 private val BluetoothGattCharacteristic.permission: BLEPermission

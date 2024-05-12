@@ -6,7 +6,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorMode
 
 fun BluetoothGattDescriptor.toModel(probableName: String? = null): BLEDescriptorModel =
 	BLEDescriptorModel(
-	uuid = uuid,
+		uuid = uuid,
 		permissions = gattPermissions,
 	).apply {
 		this.probableName = probableName

@@ -6,7 +6,9 @@ import java.util.UUID
 data class BLEDescriptorModel(
 	val uuid: UUID,
 	val permissions: List<BLEPermission>,
-) {
+	val byteArray: ByteArray = byteArrayOf()
+) : BLEValueModel(byteArray) {
+
 	private var _probableName: String? = null
 
 	var probableName: String?
@@ -14,4 +16,6 @@ data class BLEDescriptorModel(
 		set(value) {
 			_probableName = value
 		}
+
+
 }

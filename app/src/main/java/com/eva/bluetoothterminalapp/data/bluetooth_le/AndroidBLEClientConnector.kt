@@ -11,11 +11,12 @@ import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
+import com.eva.bluetoothterminalapp.data.samples.SampleUUIDReader
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.CharacteristicsReadValue
 import com.eva.bluetoothterminalapp.domain.exceptions.BLEServiceCharacteristicMissingException
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import kotlinx.coroutines.flow.Flow
@@ -26,8 +27,10 @@ private const val BLE_CLIENT_LOGGER = "BLE_CLIENT_LOGGER"
 @SuppressLint("MissingPermission")
 class AndroidBLEClientConnector(
 	private val context: Context,
-	private val gattCallback: BLEClientGattCallback,
+	private val reader: SampleUUIDReader,
 ) : BluetoothLEClientConnector {
+
+	private val gattCallback = BLEClientGattCallback(reader)
 
 	private val _bluetoothManager by lazy { context.getSystemService<BluetoothManager>() }
 
@@ -43,8 +46,8 @@ class AndroidBLEClientConnector(
 	override val bleServices: Flow<List<BLEServiceModel>>
 		get() = gattCallback.bleServicesFlowAsDomainModel
 
-	override val readValue: StateFlow<CharacteristicsReadValue>
-		get() = gattCallback.readValue
+	override val readForCharacteristic: Flow<BLECharacteristicsModel?>
+		get() = gattCallback.readCharacteristicWithDescriptors
 
 	private var _connectedDevice: BluetoothDeviceModel? = null
 	override val connectedDevice: BluetoothDeviceModel?
@@ -52,7 +55,7 @@ class AndroidBLEClientConnector(
 
 	private var _bLEGatt: BluetoothGatt? = null
 
-	override fun connect(address: String): Result<Boolean> {
+	override fun connect(address: String, autoConnect: Boolean): Result<Boolean> {
 		return try {
 
 			val device = _btAdapter?.getRemoteDevice(address)
@@ -61,7 +64,7 @@ class AndroidBLEClientConnector(
 			_connectedDevice = device.toDomainModel()
 			// connect to the gatt server
 			_bLEGatt = device.connectGatt(
-				context, false, gattCallback, BluetoothDevice.TRANSPORT_LE
+				context, autoConnect, gattCallback, BluetoothDevice.TRANSPORT_LE
 			)
 
 			Log.d(BLE_CLIENT_LOGGER, "CONNECT GATT")
@@ -96,10 +99,11 @@ class AndroidBLEClientConnector(
 		characteristic: BLECharacteristicsModel
 	): Result<Boolean> {
 		return try {
-			val gattCharacteristic = gattCallback.checkCharacteristic(service, characteristic)
+			val _characteristic = gattCallback
+				.findCharacteristicFromDomainModel(service, characteristic)
 				?: return Result.failure(BLEServiceCharacteristicMissingException())
 
-			val isSuccess = _bLEGatt?.readCharacteristic(gattCharacteristic) ?: false
+			val isSuccess = _bLEGatt?.readCharacteristic(_characteristic) ?: false
 			Result.success(isSuccess)
 		} catch (e: Exception) {
 			e.printStackTrace()
@@ -115,8 +119,9 @@ class AndroidBLEClientConnector(
 	): Result<Boolean> {
 		return try {
 			val bytes = value.encodeToByteArray()
-			val gattCharacteristic = gattCallback.checkCharacteristic(service, characteristic)
-				?: return Result.failure(BLEServiceCharacteristicMissingException())
+			val gattCharacteristic =
+				gattCallback.findCharacteristicFromDomainModel(service, characteristic)
+					?: return Result.failure(BLEServiceCharacteristicMissingException())
 
 			val isSuccess = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 				val operation = _bLEGatt?.writeCharacteristic(
@@ -143,11 +148,31 @@ class AndroidBLEClientConnector(
 		enable: Boolean
 	): Result<Boolean> {
 		return try {
-			val gattCharacteristic = gattCallback.checkCharacteristic(service, characteristic)
-				?: return Result.failure(BLEServiceCharacteristicMissingException())
+			val gattCharacteristic =
+				gattCallback.findCharacteristicFromDomainModel(service, characteristic)
+					?: return Result.failure(BLEServiceCharacteristicMissingException())
 
 			val isSuccess = _bLEGatt?.setCharacteristicNotification(gattCharacteristic, enable)
 				?: false
+
+			Result.success(isSuccess)
+		} catch (e: Exception) {
+			e.printStackTrace()
+			Result.failure(e)
+		}
+	}
+
+	override fun readDescriptor(
+		service: BLEServiceModel,
+		characteristic: BLECharacteristicsModel,
+		descriptor: BLEDescriptorModel
+	): Result<Boolean> {
+		return try {
+
+			val gattDesc = gattCallback
+				.findDescriptorFromDomainModel(service, characteristic, descriptor)
+
+			val isSuccess = _bLEGatt?.readDescriptor(gattDesc) ?: false
 
 			Result.success(isSuccess)
 		} catch (e: Exception) {
@@ -170,14 +195,15 @@ class AndroidBLEClientConnector(
 	override fun close() {
 		try {
 			_connectedDevice = null
+			// cancels the scope
+			gattCallback.cancelAwaitingTasks()
 			// close the gatt server
 			_bLEGatt?.close()
 			_bLEGatt = null
-			// cancels the scope
-			gattCallback.cancel()
 			Log.d(BLE_CLIENT_LOGGER, "GATT CLIENT CLOSED")
 		} catch (e: Exception) {
 			e.printStackTrace()
 		}
 	}
+
 }

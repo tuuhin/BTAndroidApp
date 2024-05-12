@@ -9,19 +9,16 @@ import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothProfile
 import android.os.Build
 import android.util.Log
-import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
-import com.eva.bluetoothterminalapp.data.mapper.toModel
+import com.eva.bluetoothterminalapp.data.mapper.toDomainModelWithName
+import com.eva.bluetoothterminalapp.data.mapper.toDomainModelWithNames
 import com.eva.bluetoothterminalapp.data.samples.SampleUUIDReader
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.CharacteristicsReadValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,14 +27,15 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.withContext
-import org.koin.core.time.measureDuration
+import kotlinx.coroutines.launch
 
 private const val GATT_LOGGER = "BLE_GATT_CALLBACK"
 
+@Suppress("DEPRECATION")
 @SuppressLint("MissingPermission")
 class BLEClientGattCallback(
-	private val reader: SampleUUIDReader
+	private val reader: SampleUUIDReader,
+	private val echoWrite: Boolean = true,
 ) : BluetoothGattCallback() {
 
 	private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -48,21 +46,23 @@ class BLEClientGattCallback(
 	private val _connectionState = MutableStateFlow(BLEConnectionState.CONNECTING)
 	val connectionState = _connectionState.asStateFlow()
 
+
 	private val _bleGattServices = MutableStateFlow<List<BluetoothGattService>>(emptyList())
 	private val bleGattServicesValue: List<BluetoothGattService>
 		get() = _bleGattServices.value
 
 	val bleServicesFlowAsDomainModel = _bleGattServices
 		.map { services ->
-			services.toLocalModelWithProbableName(scope = scope, reader = reader)
+			services.toDomainModelWithNames(scope = scope, reader = reader)
 		}
 		.cancellable()
-		.catch { err -> Log.d(GATT_LOGGER, "${err.message}") }
+		.catch { err -> Log.d(GATT_LOGGER, "LOCAL MODEL CONVERTION :${err.message}") }
 		.flowOn(Dispatchers.IO)
 
+	private val _readCharacteristic = MutableStateFlow<BLECharacteristicsModel?>(null)
+	private val _readDescriptor = MutableStateFlow<BLEDescriptorModel?>(null)
 
-	private val _readValue = MutableStateFlow<CharacteristicsReadValue>(CharacteristicsReadValue())
-	val readValue = _readValue.asStateFlow()
+	val readCharacteristicWithDescriptors = _readCharacteristic.asStateFlow()
 
 	override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
 
@@ -113,7 +113,6 @@ class BLEClientGattCallback(
 		gatt.discoverServices()
 	}
 
-	@Suppress("DEPRECATION")
 	@Deprecated(
 		message = "Used natively in Android 12 and lower",
 		replaceWith = ReplaceWith("onCharacteristicChanged(gatt, characteristic, characteristic.value)")
@@ -123,7 +122,7 @@ class BLEClientGattCallback(
 		characteristic: BluetoothGattCharacteristic?,
 		status: Int
 	) {
-		if (gatt == null || characteristic == null) return
+		if (gatt == null || characteristic?.value == null) return
 		// only use this under API 32
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return
 		onCharacteristicRead(gatt, characteristic, characteristic.value, status)
@@ -136,22 +135,19 @@ class BLEClientGattCallback(
 		status: Int
 	) {
 		if (status != BluetoothGatt.GATT_SUCCESS) return
+		scope.launch {
+			try {
+				// decode the received value and decide it\
+				val domainModel = characteristic.toDomainModelWithNames(scope, reader)
+					.copy(byteArray = value)
+				// update the read value
+				_readCharacteristic.update { domainModel }
 
-		try {
-			// decode the received value and decide it
-			val receivedValue = value.decodeToString()
-			val domainModel = characteristic.toDomainModel()
-			// update the read value
-			val readValue = CharacteristicsReadValue(
-				characteristic = domainModel,
-				valueAsString = receivedValue
-			)
-
-			_readValue.update { readValue }
-			Log.d(GATT_LOGGER, "VALUE $receivedValue")
-		} catch (e: Exception) {
-			Log.e(GATT_LOGGER, "EXCEPTION", e)
-			e.printStackTrace()
+				Log.d(GATT_LOGGER, "VALUE ${domainModel.valueHexString}")
+			} catch (e: Exception) {
+				Log.e(GATT_LOGGER, "EXCEPTION", e)
+				e.printStackTrace()
+			}
 		}
 	}
 
@@ -162,23 +158,24 @@ class BLEClientGattCallback(
 	) {
 		if (status != BluetoothGatt.GATT_SUCCESS) return
 		Log.d(GATT_LOGGER, "WRITTEN SUCCESSFULLY")
+		if (characteristic == null || !echoWrite) return
+		val isSuccess = gatt?.readCharacteristic(characteristic) ?: false
+		Log.d(GATT_LOGGER, "UPDATING THE CHARACTERISITC VALUE $isSuccess")
 	}
 
-
-	fun cancel() = scope.cancel()
-
-	fun checkCharacteristic(
-		service: BLEServiceModel,
-		characteristic: BLECharacteristicsModel
-	): BluetoothGattCharacteristic? {
-		val gattService = bleGattServicesValue.find { gattService ->
-			gattService.instanceId == service.serviceId && gattService.uuid == service.serviceUUID
-		}
-		val gattCharacteristic = gattService?.characteristics?.find { char ->
-			char.instanceId == characteristic.characteristicsId && char.uuid == characteristic.uuid
-		}
-
-		return gattCharacteristic
+	@Deprecated(
+		message = "Used natively in Android 12 and lower",
+		replaceWith = ReplaceWith("onDescriptorRead(gatt, descriptor, descriptor.value)")
+	)
+	override fun onDescriptorRead(
+		gatt: BluetoothGatt?,
+		descriptor: BluetoothGattDescriptor?,
+		status: Int
+	) {
+		if (gatt == null || descriptor?.value == null) return
+		// only use this under API 32
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return
+		onDescriptorRead(gatt, descriptor, status, descriptor.value)
 	}
 
 	override fun onDescriptorRead(
@@ -187,54 +184,107 @@ class BLEClientGattCallback(
 		status: Int,
 		value: ByteArray
 	) {
-		super.onDescriptorRead(gatt, descriptor, status, value)
-	}
+		if (status != BluetoothGatt.GATT_SUCCESS) return
 
-}
+		scope.launch {
+			try {
+				// decode the received value and decide it
+				val domainModel = descriptor.toDomainModelWithName(scope, reader)
+					.copy(byteArray = value)
 
-@OptIn(ExperimentalCoroutinesApi::class)
-private suspend fun List<BluetoothGattService>.toLocalModelWithProbableName(
-	scope: CoroutineScope,
-	reader: SampleUUIDReader
-): List<BLEServiceModel> = withContext(scope.coroutineContext) {
-	// load the files for the first time it will load all the files in memeory
-	val time = measureDuration { reader.loadFromFiles() }
-	Log.d(GATT_LOGGER, "LOADING TIME $time millis")
+				_readDescriptor.update { domainModel }
 
-	return@withContext map { gattService ->
-		// reads the sample service name
-		// TODO: Check later which is more efficient in loading the samples
-		val sampleServiceNameDefered = async(coroutineContext) {
-			reader.findServiceNameForUUID(gattService.uuid)
-		}
-
-		val characteristicsDefered = gattService.characteristics.map { characteristic ->
-			async(coroutineContext) {
-				// get the characteristic name if available
-				val sampleNameChar = reader.findCharacteristicsNameForUUID(characteristic.uuid)
-
-				val descriptorsDefered = characteristic.descriptors.map { desc ->
-					async(coroutineContext) {
-						val name = reader.findDescriptorNameForUUID(desc.uuid)
-						desc.toModel(probableName = name?.name)
-					}
+				if (_readCharacteristic.value == null) {
+					// if characteristic is not read read the characteristic
+					gatt.readCharacteristic(descriptor.characteristic)
 				}
 
-				val descriptors = descriptorsDefered.awaitAll()
-
-				characteristic.toDomainModel(
-					probableName = sampleNameChar?.name,
-					descriptors = descriptors
-				)
+				// make sure characteristic is already read
+				_readCharacteristic.update { char ->
+					char?.copy(
+						descriptors = char.descriptors.map { desc ->
+							if (desc.uuid == domainModel.uuid) domainModel
+							else desc
+						},
+					)
+				}
+				// update the read value
+				Log.d(GATT_LOGGER, "VALUE DESC ${domainModel.valueAsString}")
+			} catch (e: Exception) {
+				Log.e(GATT_LOGGER, "EXCEPTION", e)
+				e.printStackTrace()
 			}
 		}
+	}
 
-		val serviceName = sampleServiceNameDefered.await()
-		val characteristics = characteristicsDefered.awaitAll()
-		// return completed results
-		gattService.toDomainModel(
-			probableName = serviceName?.name,
-			characteristic = characteristics
-		)
+	override fun onDescriptorWrite(
+		gatt: BluetoothGatt?,
+		descriptor: BluetoothGattDescriptor?,
+		status: Int
+	) {
+		if (status != BluetoothGatt.GATT_SUCCESS) return
+		Log.d(GATT_LOGGER, "WRITTEN VALUE ")
+		// re-validating the current value
+		if (descriptor == null || !echoWrite) return
+		val isSuccess = gatt?.readDescriptor(descriptor) ?: false
+		Log.d(GATT_LOGGER, "UPDATED DESCRIPTOR VALUE $isSuccess")
+	}
+
+
+	fun cancelAwaitingTasks() = scope.cancel()
+
+	fun findCharacteristicFromDomainModel(
+		service: BLEServiceModel,
+		characteristic: BLECharacteristicsModel
+	): BluetoothGattCharacteristic? {
+		val gattService = bleGattServicesValue.find { it.uuid == service.serviceUUID }
+		return gattService?.getCharacteristic(characteristic.uuid)
+	}
+
+	fun findDescriptorFromDomainModel(
+		service: BLEServiceModel,
+		characteristic: BLECharacteristicsModel,
+		descriptor: BLEDescriptorModel,
+	): BluetoothGattDescriptor? {
+
+		val gattService = bleGattServicesValue.find { it.uuid == service.serviceUUID }
+		val gattCharacteristic = gattService?.getCharacteristic(characteristic.uuid)
+		return gattCharacteristic?.getDescriptor(descriptor.uuid)
+	}
+
+
+	@Deprecated(
+		message = "Used natively in Android 12 and lower",
+		replaceWith = ReplaceWith("onCharacteristicChanged(gatt, characteristic, value)")
+	)
+	override fun onCharacteristicChanged(
+		gatt: BluetoothGatt?,
+		characteristic: BluetoothGattCharacteristic?
+	) {
+		if (gatt == null || characteristic == null) return
+		// only use this under API 32
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return
+		onCharacteristicChanged(gatt, characteristic, characteristic.value)
+	}
+
+	override fun onCharacteristicChanged(
+		gatt: BluetoothGatt,
+		characteristic: BluetoothGattCharacteristic,
+		value: ByteArray
+	) {
+		scope.launch {
+			try {
+				// decode the received value and decide it\
+				val domainModel = characteristic.toDomainModelWithNames(scope, reader)
+					.copy(byteArray = value)
+				// update the read value
+				_readCharacteristic.update { domainModel }
+
+				Log.d(GATT_LOGGER, "VALUE ${value.decodeToString()}")
+			} catch (e: Exception) {
+				Log.e(GATT_LOGGER, "EXCEPTION", e)
+				e.printStackTrace()
+			}
+		}
 	}
 }
