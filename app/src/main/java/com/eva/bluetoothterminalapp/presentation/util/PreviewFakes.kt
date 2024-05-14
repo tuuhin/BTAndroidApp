@@ -22,6 +22,24 @@ import java.util.UUID
 
 object PreviewFakes {
 
+	val ANDROID_NAME_AS_BYTEARRAY = byteArrayOf(
+		0x4A,
+		0x65,
+		0x74,
+		0x70,
+		0x61,
+		0x63,
+		0x6B,
+		0x20,
+		0x43,
+		0x6F,
+		0x6D,
+		0x70,
+		0x6F,
+		0x73,
+		0x65
+	)
+
 
 	val FAKE_DEVICE_MODEL = BluetoothDeviceModel(
 		name = "Android HeadSet",
@@ -74,8 +92,14 @@ object PreviewFakes {
 		permissions = listOf(BLEPermission.PERMISSION_WRITE),
 	)
 
+	val FAKE_BLE_DESCRIPTOR_MODEL_WITH_VALUE = BLEDescriptorModel(
+		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
+		permissions = listOf(BLEPermission.PERMISSION_READ),
+		byteArray = byteArrayOf(0x4B, 0x6F, 0x6C, 0x74, 0x69, 0x6E)
+	)
+
 	val FAKE_BLE_CHARACTERISTIC_MODEL = BLECharacteristicsModel(
-		characteristicsId = 1,
+		instanceId = 1,
 		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
 		permission = BLEPermission.PERMISSION_WRITE,
 		writeType = BLEWriteTypes.TYPE_UNKNOWN,
@@ -84,24 +108,38 @@ object PreviewFakes {
 			BLEPropertyTypes.PROPERTY_READ,
 			BLEPropertyTypes.PROPERTY_INDICATE,
 			BLEPropertyTypes.PROPERTY_NOTIFY
-		),
 
-		).apply {
+		),
+		descriptors = listOf(
+			FAKE_BLE_DESCRIPTOR_MODEL,
+
+			).toPersistentList()
+	).apply {
 		probableName = "Compose"
-		descriptors = listOf(FAKE_BLE_DESCRIPTOR_MODEL).toPersistentList()
+
 	}
 
-	val FAKE_BLE_CHAR_MODEL_SECOND = BLECharacteristicsModel(
-		characteristicsId = 1,
+	val FAKE_BLE_CHARACTERISTIC_MODEL_WITH_DATA = BLECharacteristicsModel(
+		instanceId = 1,
 		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
 		permission = BLEPermission.PERMISSION_WRITE,
-		writeType = BLEWriteTypes.TYPE_NO_RESPONSE,
-		properties = listOf(BLEPropertyTypes.PROPERTY_WRITE),
+		writeType = BLEWriteTypes.TYPE_UNKNOWN,
+		properties = listOf(
+			BLEPropertyTypes.PROPERTY_WRITE,
+			BLEPropertyTypes.PROPERTY_READ,
+			BLEPropertyTypes.PROPERTY_INDICATE,
+			BLEPropertyTypes.PROPERTY_NOTIFY
 
-		).apply {
-		probableName = "Compose 2"
+		),
+		descriptors = listOf(
+			FAKE_BLE_DESCRIPTOR_MODEL,
+			FAKE_BLE_DESCRIPTOR_MODEL_WITH_VALUE
+		).toPersistentList(),
+		byteArray = ANDROID_NAME_AS_BYTEARRAY
+	).apply {
+		probableName = "Compose"
+
 	}
-
 
 	val FAKE_UUID_LIST = List(10) {
 		UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a")

@@ -86,31 +86,43 @@ class SampleUUIDReader(private val context: Context) {
 	}
 
 	/**
-	 * Must call this funtion in order to continue
+	 * Loads all the files and save them on the hashmap
+	 * This should be used when you bulk check the uuids
+	 * this loades all the cache
 	 */
-	suspend fun loadFromFiles() = withContext(Dispatchers.IO) {
-		val loadServices = async {
-			if (_serviceUUIDCache.isEmpty()) loadServiceUUIDFromFile()
+	suspend fun loadFromFiles() {
+		withContext(Dispatchers.IO) {
+			val loadServices = async {
+				if (_serviceUUIDCache.isEmpty()) loadServiceUUIDFromFile()
+			}
+			val loadCharactetistics = async {
+				if (_characteristicsUUIDCache.isEmpty()) loadCharacteristicsFromFile()
+			}
+			val loadDescriptors = async {
+				if (_descriptorUUIDCache.isEmpty()) loadDescriptorsFromFile()
+			}
+			// all the loading will occur together
+			awaitAll(loadDescriptors, loadServices, loadCharactetistics)
 		}
-		val loadCharactetistics = async {
-			if (_characteristicsUUIDCache.isEmpty()) loadCharacteristicsFromFile()
-		}
-		val loadDescriptors = async {
-			if (_descriptorUUIDCache.isEmpty()) loadDescriptorsFromFile()
-		}
-		// all the loading will occur together
-		awaitAll(loadDescriptors, loadServices, loadCharactetistics)
 	}
 
-	fun findServiceNameForUUID(uuid: UUID): SampleBLEUUIDModel? =
-		_serviceUUIDCache.getOrDefault(uuid, null)
+	suspend fun findServiceNameForUUID(uuid: UUID): SampleBLEUUIDModel? {
+		// if the files are not loaded then services will be loaded in the memory
+		if (_serviceUUIDCache.isEmpty()) loadServiceUUIDFromFile()
+		return _serviceUUIDCache.getOrDefault(uuid, null)
+	}
 
 
-	fun findDescriptorNameForUUID(uuid: UUID): SampleBLEUUIDModel? =
-		_descriptorUUIDCache.getOrDefault(uuid, null)
+	suspend fun findDescriptorNameForUUID(uuid: UUID): SampleBLEUUIDModel? {
+		// if the files are not loaded then services will be loaded in the memory
+		if (_descriptorUUIDCache.isEmpty()) loadDescriptorsFromFile()
+		return _descriptorUUIDCache.getOrDefault(uuid, null)
+	}
 
 
-	fun findCharacteristicsNameForUUID(uuid: UUID): SampleBLEUUIDModel? =
-		_characteristicsUUIDCache.getOrDefault(uuid, null)
-
+	suspend fun findCharacteristicsNameForUUID(uuid: UUID): SampleBLEUUIDModel? {
+		// if the file is not loaded
+		if (_characteristicsUUIDCache.isEmpty()) loadCharacteristicsFromFile()
+		return _characteristicsUUIDCache.getOrDefault(uuid, null)
+	}
 }

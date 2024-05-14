@@ -11,23 +11,33 @@ import kotlinx.coroutines.flow.StateFlow
 interface BluetoothLEClientConnector {
 
 	/**
-	 * A flow which determines the device connection state
+	 * Checks the connection status of the device
 	 * @see [BLEConnectionState]
 	 */
 	val connectionState: StateFlow<BLEConnectionState>
 
 	/**
-	 * A flow determining the signal screenshot of the device
+	 * Receive signal strenght of the device
 	 */
 	val deviceRssi: StateFlow<Int>
 
-
+	/**
+	 * Available [BLEServiceModel] with the current selected service
+	 */
 	val bleServices: Flow<List<BLEServiceModel>>
 
 	val connectedDevice: BluetoothDeviceModel?
 
+	/**
+	 * Read value for [BLECharacteristicsModel]
+	 */
 	val readForCharacteristic: Flow<BLECharacteristicsModel?>
 
+	/**
+	 * Initiate a connection with a device
+	 * @param address Unique address of the deivce
+	 * @param autoConnect Whether the deivce should autoconnect if it comes inside the range
+	 */
 	fun connect(address: String, autoConnect: Boolean = false): Result<Boolean>
 
 	fun read(
@@ -47,11 +57,14 @@ interface BluetoothLEClientConnector {
 		descriptor: BLEDescriptorModel,
 	): Result<Boolean>
 
-	fun setNotification(
+	fun setIndicationOrNotification(
 		service: BLEServiceModel,
 		characteristic: BLECharacteristicsModel,
 		enable: Boolean,
 	): Result<Boolean>
+
+
+	fun discoverServices(): Result<Boolean>
 
 	/**
 	 * Re-evalutae the value of rssi

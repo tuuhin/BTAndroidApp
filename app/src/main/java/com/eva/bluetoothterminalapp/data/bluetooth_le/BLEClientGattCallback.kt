@@ -194,8 +194,8 @@ class BLEClientGattCallback(
 
 				_readDescriptor.update { domainModel }
 
-				if (_readCharacteristic.value == null) {
-					// if characteristic is not read read the characteristic
+				// TODO: Check it later if its required
+				if (_readCharacteristic.value?.uuid != descriptor.characteristic.uuid) {
 					gatt.readCharacteristic(descriptor.characteristic)
 				}
 
@@ -209,7 +209,7 @@ class BLEClientGattCallback(
 					)
 				}
 				// update the read value
-				Log.d(GATT_LOGGER, "VALUE DESC ${domainModel.valueAsString}")
+				Log.d(GATT_LOGGER, "VALUE DESC ${domainModel.valueHexString}")
 			} catch (e: Exception) {
 				Log.e(GATT_LOGGER, "EXCEPTION", e)
 				e.printStackTrace()
@@ -229,29 +229,6 @@ class BLEClientGattCallback(
 		val isSuccess = gatt?.readDescriptor(descriptor) ?: false
 		Log.d(GATT_LOGGER, "UPDATED DESCRIPTOR VALUE $isSuccess")
 	}
-
-
-	fun cancelAwaitingTasks() = scope.cancel()
-
-	fun findCharacteristicFromDomainModel(
-		service: BLEServiceModel,
-		characteristic: BLECharacteristicsModel
-	): BluetoothGattCharacteristic? {
-		val gattService = bleGattServicesValue.find { it.uuid == service.serviceUUID }
-		return gattService?.getCharacteristic(characteristic.uuid)
-	}
-
-	fun findDescriptorFromDomainModel(
-		service: BLEServiceModel,
-		characteristic: BLECharacteristicsModel,
-		descriptor: BLEDescriptorModel,
-	): BluetoothGattDescriptor? {
-
-		val gattService = bleGattServicesValue.find { it.uuid == service.serviceUUID }
-		val gattCharacteristic = gattService?.getCharacteristic(characteristic.uuid)
-		return gattCharacteristic?.getDescriptor(descriptor.uuid)
-	}
-
 
 	@Deprecated(
 		message = "Used natively in Android 12 and lower",
@@ -280,11 +257,35 @@ class BLEClientGattCallback(
 				// update the read value
 				_readCharacteristic.update { domainModel }
 
-				Log.d(GATT_LOGGER, "VALUE ${value.decodeToString()}")
+				Log.d(GATT_LOGGER, "VALUE ${domainModel.valueHexString}")
 			} catch (e: Exception) {
 				Log.e(GATT_LOGGER, "EXCEPTION", e)
 				e.printStackTrace()
 			}
 		}
 	}
+
+	fun cancelAwaitingTasks() = scope.cancel()
+
+	fun findCharacteristicFromDomainModel(
+		service: BLEServiceModel,
+		characteristic: BLECharacteristicsModel
+	): BluetoothGattCharacteristic? {
+		return bleGattServicesValue
+			.find { it.uuid == service.serviceUUID }
+			?.getCharacteristic(characteristic.uuid)
+	}
+
+	fun findDescriptorFromDomainModel(
+		service: BLEServiceModel,
+		characteristic: BLECharacteristicsModel,
+		descriptor: BLEDescriptorModel,
+	): BluetoothGattDescriptor? {
+
+		return bleGattServicesValue
+			.find { it.uuid == service.serviceUUID }
+			?.getCharacteristic(characteristic.uuid)
+			?.getDescriptor(descriptor.uuid)
+	}
+
 }
