@@ -25,44 +25,47 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEConnectionChip
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEConnectionStatusChip
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEDeviceProfile
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEProfileTopBar
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEDeviceRouteTopBar
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEServicesList
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceProfileEvent
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLECharacteristicEvent
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceConfigEvent
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceProfileState
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.SelectedCharacteristicState
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BTLEProfileDialogContent(
+fun BLEDeviceRoute(
 	profile: BLEDeviceProfileState,
-	onProfileEvent: (BLEDeviceProfileEvent) -> Unit,
+	selectedCharacteristic: SelectedCharacteristicState,
+	onSelectEvent: (BLECharacteristicEvent) -> Unit,
 	modifier: Modifier = Modifier,
-	selectedCharacteristic: BLECharacteristicsModel? = null,
+	onConfigEvent: (BLEDeviceConfigEvent) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
 ) {
 	val scrollConnection = TopAppBarDefaults.pinnedScrollBehavior()
 
+
 	Scaffold(
 		topBar = {
-			BLEProfileTopBar(
-				onSelect = { onProfileEvent(BLEDeviceProfileEvent.OnCharcteristicsConfirmed) },
+			BLEDeviceRouteTopBar(
 				scrollConnection = scrollConnection,
 				navigation = navigation,
-				showAction = selectedCharacteristic != null
+				onConfigEvent = onConfigEvent
 			)
 		},
 		modifier = modifier.nestedScroll(scrollConnection.nestedScrollConnection)
 	) { scPadding ->
 		Column(
 			modifier = Modifier
+				.fillMaxSize()
 				.padding(scPadding)
 				.padding(horizontal = dimensionResource(id = R.dimen.sc_padding)),
 		) {
-			BLEConnectionChip(
+			BLEConnectionStatusChip(
 				state = profile.connectionState,
 				modifier = Modifier.align(Alignment.CenterHorizontally)
 			)
@@ -81,9 +84,13 @@ fun BTLEProfileDialogContent(
 			) {
 				BLEServicesList(
 					services = profile.services,
-					selectedCharacteristic = selectedCharacteristic,
-					onCharacteristicSelect = { characteristics ->
-						onProfileEvent(BLEDeviceProfileEvent.OnSelectCharacteristic(characteristics))
+					selectedCharacteristic = selectedCharacteristic.characteristic,
+					onCharacteristicSelect = { service, characteristics ->
+						val event = BLECharacteristicEvent.OnSelectCharacteristic(
+							service,
+							characteristics
+						)
+						onSelectEvent(event)
 					},
 					modifier = Modifier.fillMaxSize()
 				)
@@ -102,13 +109,14 @@ private class BTLEDevicesProfilePreviewParams
 
 @PreviewLightDark
 @Composable
-private fun BTLEDevicesProfileRoute(
+private fun BLEDevicesRoutePreview(
 	@PreviewParameter(BTLEDevicesProfilePreviewParams::class)
 	profile: BLEDeviceProfileState,
 ) = BlueToothTerminalAppTheme {
-	BTLEProfileDialogContent(
+	BLEDeviceRoute(
 		profile = profile,
-		onProfileEvent = {},
+		selectedCharacteristic = SelectedCharacteristicState(),
+		onSelectEvent = {},
 		navigation = {
 			Icon(
 				imageVector = Icons.AutoMirrored.Default.ArrowBack,

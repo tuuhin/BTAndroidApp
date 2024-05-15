@@ -27,7 +27,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
-fun BLEConnectionChip(
+fun BLEConnectionStatusChip(
 	state: BLEConnectionState,
 	modifier: Modifier = Modifier,
 	shape: Shape = MaterialTheme.shapes.medium,
@@ -78,7 +78,7 @@ private val BLEConnectionState.textResource: String
 	@Composable
 	get() = when (this) {
 		BLEConnectionState.DISCONNECTED -> stringResource(id = R.string.ble_connection_disconnnected)
-		BLEConnectionState.FAILED -> stringResource(id = R.string.ble_connection_unknown)
+		BLEConnectionState.FAILED -> stringResource(id = R.string.ble_connection_failed)
 		BLEConnectionState.DISCONNECTING -> stringResource(id = R.string.ble_connection_disconnecting)
 		BLEConnectionState.CONNECTING -> stringResource(R.string.ble_connection_connecting)
 		BLEConnectionState.CONNECTED -> stringResource(id = R.string.ble_connection_connected)
@@ -89,9 +89,9 @@ class BLEConnectionStatesPreviewParams :
 
 @PreviewLightDark
 @Composable
-private fun BLEConnectionChipPreview(
+private fun BLEConnectionStatusChipPreview(
 	@PreviewParameter(BLEConnectionStatesPreviewParams::class)
 	state: BLEConnectionState,
 ) = BlueToothTerminalAppTheme {
-	BLEConnectionChip(state = state)
+	BLEConnectionStatusChip(state = state)
 }

@@ -6,7 +6,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,7 +22,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
@@ -39,6 +37,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristic
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun BLEDeviceServiceCard(
@@ -46,7 +45,7 @@ fun BLEDeviceServiceCard(
 	modifier: Modifier = Modifier,
 	selectedCharacteristic: BLECharacteristicsModel? = null,
 	onCharacteristicSelect: (BLECharacteristicsModel) -> Unit = {},
-	shape: Shape = MaterialTheme.shapes.large,
+	shape: Shape = MaterialTheme.shapes.medium,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer
 ) {
 	val context = LocalContext.current
@@ -72,13 +71,11 @@ fun BLEDeviceServiceCard(
 	}
 
 	Card(
+		onClick = { isSelected = !isSelected },
 		shape = shape,
 		colors = CardDefaults.cardColors(containerColor = containerColor),
-		elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-		modifier = modifier
-			.clip(MaterialTheme.shapes.large)
-			.clickable { isSelected = !isSelected }
-			.animateContentSize(),
+		elevation = CardDefaults.cardElevation(),
+		modifier = modifier.animateContentSize(),
 	) {
 		Column(
 			modifier = Modifier
@@ -144,8 +141,10 @@ fun BLEDeviceServiceCard(
 class BLEServicesPreviewParams : CollectionPreviewParameterProvider<BLEServiceModel>(
 	listOf(
 		PreviewFakes.FAKE_BLE_SERVICE,
-		PreviewFakes.FAKE_BLE_SERVICE
-			.copy(characteristic = listOf(PreviewFakes.FAKE_BLE_CHARACTERISTIC_MODEL))
+		PreviewFakes.FAKE_BLE_SERVICE.apply {
+			characteristic =
+				persistentListOf<BLECharacteristicsModel>(PreviewFakes.FAKE_BLE_CHARACTERISTIC_MODEL)
+		}
 	)
 )
 

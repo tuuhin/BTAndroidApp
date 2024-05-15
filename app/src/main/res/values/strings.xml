@@ -75,7 +75,7 @@
   <string name="ble_connection_connecting">Connecting</string>
   <string name="ble_connection_disconnecting">Disconnecting</string>
   <string name="ble_connection_disconnnected">Disconnected</string>
-  <string name="ble_connection_unknown">Unknonwn</string>
+  <string name="ble_connection_failed">Failed</string>
   <string name="ble_device_rssi">Ble Device Rssi %dBm</string>
   <string name="ble_property_broadcast">BroadCast</string>
   <string name="ble_property_read">Read</string>
@@ -85,10 +85,19 @@
   <string name="ble_property_indicate">Indicate</string>
   <string name="ble_property_signed_write">Write (Signed)</string>
   <string name="ble_property_extended">Extended Props</string>
-  <string name="ble_characteristic_name_unknown">Unknown</string>
-  <string name="ble_device_info_title">BLE Device</string>
+  <string name="ble_characteristic_name_unknown">Unknown Characteristic</string>
+  <string name="ble_device_info_title">Device</string>
   <string name="le_charactertics_not_present">No characteristics found with this service</string>
   <string name="ble_device_profile">LE Device Profile</string>
   <string name="back_arrow">Arrow back</string>
   <string name="refresh_tooltip_text">Refresh</string>
+  <string name="menu_option_more">Menu Option More</string>
+  <string name="ble_descriptor_unknown">Unknown Descriptor</string>
+  <string name="dialog_action_send">Send</string>
+  <string name="ble_selected_characteristic">Selected Characteristic</string>
+  <string name="ble_descriptor_title">Descriptors</string>
+  <string name="ble_characteristic_not_selected_title">No Selected Characteristic</string>
+  <string name="ble_characteristic_not_selected_desc">Select an characteristic in order to continue</string>
+  <string name="write_characteristic_dialog_title">Write Characteristic</string>
+  <string name="write_characteristic_dialog_desc">Enter text value in utf-8 to write to.</string>
 </resources>

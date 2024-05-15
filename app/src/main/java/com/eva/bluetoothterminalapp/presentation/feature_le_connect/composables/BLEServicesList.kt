@@ -26,9 +26,9 @@ import kotlinx.collections.immutable.ImmutableList
 @Composable
 fun BLEServicesList(
 	services: ImmutableList<BLEServiceModel>,
+	onCharacteristicSelect: (service: BLEServiceModel, characteristic: BLECharacteristicsModel) -> Unit,
 	modifier: Modifier = Modifier,
 	selectedCharacteristic: BLECharacteristicsModel? = null,
-	onCharacteristicSelect: (BLECharacteristicsModel) -> Unit = {},
 	contentPaddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
 
@@ -60,12 +60,12 @@ fun BLEServicesList(
 		itemsIndexed(
 			items = services,
 			key = lazyColumKeys,
-			contentType = { _, service -> service.javaClass.simpleName },
+			contentType = { _, _ -> BLEServiceModel::class.simpleName },
 		) { _, service ->
 			BLEDeviceServiceCard(
 				bleService = service,
 				selectedCharacteristic = selectedCharacteristic,
-				onCharacteristicSelect = onCharacteristicSelect,
+				onCharacteristicSelect = { onCharacteristicSelect(service, it) },
 				modifier = Modifier
 					.fillMaxWidth()
 					.animateItemPlacement()
