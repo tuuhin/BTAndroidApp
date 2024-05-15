@@ -6,8 +6,8 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
@@ -16,6 +16,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Composable
 fun <T : AppViewModel> UIEventsSideEffect(viewModel: T, navigator: DestinationsNavigator) {
+
 	val context = LocalContext.current
 	val lifecyleOwner = LocalLifecycleOwner.current
 	val snackBarHostState = LocalSnackBarProvider.current

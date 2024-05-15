@@ -10,6 +10,7 @@ import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
 
 typealias RemoteConnectionChangedCallback = (connected: ClientConnectionState, device: BluetoothDevice?) -> Unit
 
+@Suppress("DEPRECATION")
 class RemoteConnectionReceiver(
 	private val onResults: RemoteConnectionChangedCallback
 ) : BroadcastReceiver() {

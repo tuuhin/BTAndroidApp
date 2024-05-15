@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.ParcelUuid
 import java.util.UUID
 
+@Suppress("DEPRECATION")
 class RemoteDeviceUUIDReceiver(
 	private val onReceivedUUIDs: (List<UUID>) -> Unit = {},
 ) : BroadcastReceiver() {

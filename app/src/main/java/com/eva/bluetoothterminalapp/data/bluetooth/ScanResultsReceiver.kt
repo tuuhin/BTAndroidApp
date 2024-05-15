@@ -12,6 +12,7 @@ import androidx.core.content.PermissionChecker
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 
+@Suppress("DEPRECATION")
 class ScanResultsReceiver(
 	private val onDevice: (BluetoothDeviceModel) -> Unit
 ) : BroadcastReceiver() {
