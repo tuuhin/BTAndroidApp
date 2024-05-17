@@ -38,7 +38,9 @@ fun BLEReadWriteSheetContent(
 	onRead: () -> Unit,
 	onWrite: () -> Unit,
 	onIndicate: () -> Unit,
+	onStopIndicate: () -> Unit,
 	onNotify: () -> Unit,
+	onStopNotify: () -> Unit,
 	onDescriptorRead: (BLEDescriptorModel) -> Unit,
 	modifier: Modifier = Modifier,
 	isDeviceConnected: Boolean = true,
@@ -89,6 +91,8 @@ fun BLEReadWriteSheetContent(
 			onWrite = onWrite,
 			onNotify = onNotify,
 			onIndicate = onIndicate,
+			onStopIndicate = onStopIndicate,
+			onStopNotify = onStopNotify,
 			modifier = Modifier.fillMaxWidth(),
 		)
 
@@ -124,12 +128,14 @@ fun BLEReadWriteContentSheet(
 		onWrite = { onEvent(BLECharacteristicEvent.WriteCharacteristic) },
 		onIndicate = { onEvent(BLECharacteristicEvent.OnIndicateCharacteristic) },
 		onNotify = { onEvent(BLECharacteristicEvent.OnNotifyCharacteristic) },
+		onStopNotify = { onEvent(BLECharacteristicEvent.OnStopNotifyOrIndication) },
+		onStopIndicate = { onEvent(BLECharacteristicEvent.OnStopNotifyOrIndication) },
 		onDescriptorRead = { desc -> onEvent(BLECharacteristicEvent.OnDescriptorRead(desc)) },
 		modifier = modifier
 	)
 }
 
-class CharacteristicModelPreviewParams :
+private class CharacteristicModelPreviewParams :
 	CollectionPreviewParameterProvider<BLECharacteristicsModel?>(
 		listOf(
 			PreviewFakes.FAKE_BLE_CHARACTERISTIC_MODEL,
@@ -158,6 +164,8 @@ private fun BLEReadWriteSheetContentPreview(
 			onIndicate = {},
 			onNotify = {},
 			onDescriptorRead = {},
+			onStopIndicate = {},
+			onStopNotify = {},
 			modifier = Modifier
 				.padding(vertical = 16.dp, horizontal = 20.dp)
 				.fillMaxWidth()

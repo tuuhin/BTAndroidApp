@@ -10,13 +10,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceConfigEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BLEDeviceRouteTopBar(
-	modifier: Modifier = Modifier,
+	connectionState: BLEConnectionState,
 	onConfigEvent: (BLEDeviceConfigEvent) -> Unit,
+	modifier: Modifier = Modifier,
 	scrollConnection: TopAppBarScrollBehavior? = null,
 	navigation: @Composable () -> Unit = {},
 	colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors()
@@ -24,9 +26,15 @@ fun BLEDeviceRouteTopBar(
 	TopAppBar(
 		title = { Text(text = stringResource(id = R.string.ble_device_profile)) },
 		actions = {
+			ConnectReconnectButton(
+				connctionState = connectionState,
+				onDisconnect = { onConfigEvent(BLEDeviceConfigEvent.OnDisconnectEvent) },
+				onReconnect = { onConfigEvent(BLEDeviceConfigEvent.OnReconnectEvent) },
+			)
 			BLEdeviceTopBarMenuOptions(
 				onReDiscoverServices = { onConfigEvent(BLEDeviceConfigEvent.OnRefreshCharacteristics) },
-				onReadRemoteRssi = { onConfigEvent(BLEDeviceConfigEvent.OnReadRssiStrength) })
+				onReadRemoteRssi = { onConfigEvent(BLEDeviceConfigEvent.OnReadRssiStrength) },
+			)
 		},
 		scrollBehavior = scrollConnection,
 		modifier = modifier,

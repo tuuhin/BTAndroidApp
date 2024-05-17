@@ -23,16 +23,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.data.mapper.descriptorValue
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.util.BLEDescriptorValue
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
@@ -53,25 +51,19 @@ fun BLEDescriptorCard(
 		descriptor.probableName ?: context.getString(R.string.ble_descriptor_unknown)
 	}
 
-
-	val showStringValue = remember(descriptor.byteArray) {
-		descriptor.valueAsString != null
-				&& descriptor.valueAsString?.isNotBlank() == true
-
-	}
-
-	val showHexValue = remember(descriptor.byteArray) {
-		descriptor.valueHexString.isNotBlank()
-	}
+	val showHexValue = remember(descriptor.byteArray) { descriptor.valueHexString.isNotBlank() }
 
 	Card(
 		shape = shape,
-		colors = CardDefaults.cardColors(containerColor = containerColor),
+		colors = CardDefaults.cardColors(
+			containerColor = containerColor,
+			contentColor = contentColorFor(backgroundColor = containerColor)
+		),
 		elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
 		modifier = modifier,
 	) {
 		Column(
-			modifier = Modifier.padding(10.dp),
+			modifier = Modifier.padding(12.dp),
 			verticalArrangement = Arrangement.spacedBy(2.dp)
 		) {
 			Text(
@@ -79,14 +71,8 @@ fun BLEDescriptorCard(
 				style = MaterialTheme.typography.bodyMedium
 			)
 			Text(
-				text = buildAnnotatedString {
-					withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
-						append("UUID: ")
-					}
-					append("${descriptor.uuid}")
-				},
-				style = MaterialTheme.typography.bodySmall,
-				color = MaterialTheme.colorScheme.onSurfaceVariant
+				text = "UUID : ${descriptor.uuid}",
+				style = MaterialTheme.typography.labelMedium,
 			)
 			HorizontalDivider(
 				modifier = Modifier.padding(vertical = 2.dp),
@@ -98,29 +84,22 @@ fun BLEDescriptorCard(
 				exit = slideOutVertically { height -> -height } + fadeOut()
 			) {
 				Text(
-					text = buildAnnotatedString {
-						withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
-							append("Value As Hex: ")
-						}
-						append(descriptor.valueHexString)
-					},
+					text = stringResource(id = R.string.ble_value_hex, descriptor.valueHexString),
 					style = MaterialTheme.typography.labelMedium,
 					color = MaterialTheme.colorScheme.onSurfaceVariant,
 				)
 
 			}
 			AnimatedVisibility(
-				visible = showStringValue,
+				visible = descriptor.textValue.isNotBlank(),
 				enter = slideInVertically { height -> height } + fadeIn(),
 				exit = slideOutVertically { height -> -height } + fadeOut()
 			) {
 				Text(
-					text = buildAnnotatedString {
-						withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
-							append("Value : ")
-						}
-						descriptor.valueAsString?.let(::append)
-					},
+					text = stringResource(
+						id = R.string.ble_descriptor_readble_value,
+						descriptor.textValue
+					),
 					style = MaterialTheme.typography.labelMedium,
 					color = MaterialTheme.colorScheme.onSurfaceVariant,
 				)
@@ -135,16 +114,28 @@ fun BLEDescriptorCard(
 					labelColor = contentColorFor(backgroundColor = chipColors),
 					disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
 				),
-				border = SuggestionChipDefaults.suggestionChipBorder(enabled = true)
+				border = SuggestionChipDefaults.suggestionChipBorder(enabled = true),
+				shape = MaterialTheme.shapes.large
 			)
 		}
 	}
 }
 
+private val BLEDescriptorModel.textValue: String
+	@Composable
+	get() = when (descriptorValue) {
+		BLEDescriptorValue.DisableNotifcationOrIndication -> stringResource(id = R.string.ble_disable_notification)
+		BLEDescriptorValue.EnableIndication -> stringResource(id = R.string.ble_enable_indication)
+		BLEDescriptorValue.EnableNotifcation -> stringResource(id = R.string.ble_enable_notification)
+		is BLEDescriptorValue.ReadableValue -> valueAsString ?: ""
+
+	}
+
 private class BLEDescriptorPreviewParams : CollectionPreviewParameterProvider<BLEDescriptorModel>(
 	listOf(
 		PreviewFakes.FAKE_BLE_DESCRIPTOR_MODEL,
-		PreviewFakes.FAKE_BLE_DESCRIPTOR_MODEL_WITH_VALUE
+		PreviewFakes.FAKE_BLE_DESCRIPTOR_MODEL_WITH_VALUE,
+		PreviewFakes.FAKE_BLE_DESCRIPTOR_WITH_ENABLE_NOTIFICATION_VALUE
 	)
 )
 

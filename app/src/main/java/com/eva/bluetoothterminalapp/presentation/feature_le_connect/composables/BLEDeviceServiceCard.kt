@@ -16,6 +16,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
@@ -37,7 +39,6 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristic
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
-import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun BLEDeviceServiceCard(
@@ -67,13 +68,16 @@ fun BLEDeviceServiceCard(
 	}
 
 	val serviceNameReadable = remember(bleService.probableName) {
-		bleService.probableName ?: "Unknown Service"
+		bleService.probableName ?: context.getString(R.string.ble_service_unknown)
 	}
 
 	Card(
 		onClick = { isSelected = !isSelected },
 		shape = shape,
-		colors = CardDefaults.cardColors(containerColor = containerColor),
+		colors = CardDefaults.cardColors(
+			containerColor = containerColor,
+			contentColor = contentColorFor(containerColor)
+		),
 		elevation = CardDefaults.cardElevation(),
 		modifier = modifier.animateContentSize(),
 	) {
@@ -83,7 +87,6 @@ fun BLEDeviceServiceCard(
 				.padding(12.dp),
 			verticalArrangement = Arrangement.spacedBy(2.dp),
 		) {
-
 			Text(
 				text = serviceNameReadable,
 				color = MaterialTheme.colorScheme.onSurface,
@@ -91,14 +94,14 @@ fun BLEDeviceServiceCard(
 			)
 			Text(
 				text = "UUID: ${bleService.serviceUUID}",
-				style = MaterialTheme.typography.bodySmall,
-				color = MaterialTheme.colorScheme.onSurfaceVariant
+				style = MaterialTheme.typography.bodyMedium,
+				maxLines = 2,
+				overflow = TextOverflow.Clip
 			)
 			serviceTypeText?.let { serviceType ->
 				Text(
 					text = serviceType,
-					style = MaterialTheme.typography.labelMedium,
-					color = MaterialTheme.colorScheme.onSurface
+					style = MaterialTheme.typography.labelLarge,
 				)
 			}
 
@@ -141,10 +144,7 @@ fun BLEDeviceServiceCard(
 class BLEServicesPreviewParams : CollectionPreviewParameterProvider<BLEServiceModel>(
 	listOf(
 		PreviewFakes.FAKE_BLE_SERVICE,
-		PreviewFakes.FAKE_BLE_SERVICE.apply {
-			characteristic =
-				persistentListOf<BLECharacteristicsModel>(PreviewFakes.FAKE_BLE_CHARACTERISTIC_MODEL)
-		}
+		PreviewFakes.FAKE_SERVICE_WITH_CHARACTERISTICS
 	)
 )
 

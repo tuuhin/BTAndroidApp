@@ -16,7 +16,6 @@ import com.eva.bluetoothterminalapp.presentation.navigation.screens.navArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -42,7 +41,8 @@ class BLEDeviceViewModel(
 	val readCharacteristic = combine(
 		bleConnector.readForCharacteristic,
 		selectedCharacteristic,
-		transform = ::evalutateReadChar
+		bleConnector.isNotifyOrIndicationRunning,
+		transform = ::evalutateReadCharacteristics
 	).stateIn(
 		scope = viewModelScope,
 		started = SharingStarted.WhileSubscribed(2000),
@@ -73,6 +73,9 @@ class BLEDeviceViewModel(
 	private val navArgs: BluetoothDeviceArgs?
 		get() = savedStateHandle.navArgs()
 
+	private val isNotifyOrIndicationRunning: Boolean
+		get() = bleConnector.isNotifyOrIndicationRunning.value
+
 	init {
 		navArgs?.address?.let(bleConnector::connect)
 	}
@@ -84,19 +87,14 @@ class BLEDeviceViewModel(
 					char.copy(service = event.service, characteristic = event.characteristics)
 				}
 
-			BLECharacteristicEvent.OnUnSelectCharactetistic -> {
-				_selectedCharacteristic.update { SelectedCharacteristicState() }
-			}
+			BLECharacteristicEvent.OnUnSelectCharactetistic -> onUnselectCharacterisitc()
 
 			is BLECharacteristicEvent.OnDescriptorRead -> readBLEDescriptor(event.desc)
-			BLECharacteristicEvent.OnIndicateCharacteristic -> {}
-			BLECharacteristicEvent.OnNotifyCharacteristic -> {}
+			BLECharacteristicEvent.OnIndicateCharacteristic -> onIndicateOrNotifyBLECharacteristic()
+			BLECharacteristicEvent.OnNotifyCharacteristic -> onIndicateOrNotifyBLECharacteristic()
 			BLECharacteristicEvent.ReadCharacteristic -> onReadBLECharactetistics()
-			BLECharacteristicEvent.WriteCharacteristic -> {
-				onWriteEvent(WriteCharacteristicEvent.OpenDialog)
-			}
-
-			BLECharacteristicEvent.OnStopNotifyOrIndication -> {}
+			BLECharacteristicEvent.WriteCharacteristic -> onWriteEvent(WriteCharacteristicEvent.OpenDialog)
+			BLECharacteristicEvent.OnStopNotifyOrIndication -> stopIndications()
 		}
 	}
 
@@ -118,34 +116,38 @@ class BLEDeviceViewModel(
 		}
 	}
 
+	fun stopIndications() = onIndicateOrNotifyBLECharacteristic(false)
+
 	fun onConfigEvents(event: BLEDeviceConfigEvent) {
 		when (event) {
 			BLEDeviceConfigEvent.OnReadRssiStrength -> bleConnector.discoverServices()
 			BLEDeviceConfigEvent.OnRefreshCharacteristics -> bleConnector.checkRssi()
+			BLEDeviceConfigEvent.OnDisconnectEvent -> bleConnector.disconnect()
+			BLEDeviceConfigEvent.OnReconnectEvent -> bleConnector.reconnect()
 		}
 	}
 
-	private suspend fun evalutateReadChar(
+	private fun onUnselectCharacterisitc() {
+		if (isNotifyOrIndicationRunning)
+			onIndicateOrNotifyBLECharacteristic(isStart = false)
+
+		_selectedCharacteristic.update { SelectedCharacteristicState() }
+	}
+
+	private suspend fun evalutateReadCharacteristics(
 		readCharactertistic: BLECharacteristicsModel?,
-		selected: SelectedCharacteristicState
+		selected: SelectedCharacteristicState,
+		isSetNoticationActive: Boolean,
 	): BLECharacteristicsModel? {
-		// match the ids for the selected characteristic with the read one
-		return if (readCharactertistic?.uuid == selected.characteristic?.uuid
-			&& readCharactertistic?.instanceId == selected.characteristic?.instanceId
-		) {
-			// if match find out its desc
-			val desc = readCharactertistic?.let(BLECharacteristicsModel::descriptors)
-				?: emptyList()
-
-			val readValue = readCharactertistic?.byteArray ?: byteArrayOf()
-
-			// update the desc and read value
-			selected.characteristic?.copy(
-				byteArray = readValue,
-				descriptors = desc.toPersistentList()
-			)
-
-		} else selected.characteristic
+		// if not selected there is nothing to read to
+		if (selected.characteristic == null) return null
+		if (readCharactertistic == null)
+			return selected.characteristic.copy(isSetNotificationActive = isSetNoticationActive)
+		val isSameCharacteristic = readCharactertistic.uuid == selected.characteristic.uuid
+				&& readCharactertistic.instanceId == selected.characteristic.instanceId
+		// any of the reader is started match the uuids to check for data
+		val outResult = if (isSameCharacteristic) readCharactertistic else selected.characteristic
+		return outResult.copy(isSetNotificationActive = isSetNoticationActive)
 	}
 
 	private fun onWriteBLECharacteristic() {
@@ -164,6 +166,7 @@ class BLEDeviceViewModel(
 			characteristic = characteristic,
 			value = value
 		)
+
 		result.fold(
 			onFailure = { err ->
 				viewModelScope.launch {
@@ -171,10 +174,39 @@ class BLEDeviceViewModel(
 				}
 			},
 			onSuccess = {
-				_writeDialogState.update { state -> state.copy(writeTextFieldValue = "") }
+				_writeDialogState.update { state ->
+					state.copy(
+						writeTextFieldValue = "",
+						showWriteDialog = false
+					)
+				}
 			},
 		)
+	}
 
+
+	private fun onIndicateOrNotifyBLECharacteristic(isStart: Boolean = true) {
+		val characteristic = _selectedCharacteristic.value.characteristic ?: return
+		val service = _selectedCharacteristic.value.service ?: return
+
+		val results = bleConnector.startIndicationOrNotification(
+			service = service,
+			characteristic = characteristic,
+			enable = isStart
+		)
+		viewModelScope.launch {
+			results.fold(
+				onSuccess = { isOke ->
+					if (isOke) {
+						val message = if (isStart) "enabled" else "stopped"
+						_uiEvents.emit(UiEvents.ShowToast("Charcteristic Notifcation $message"))
+					}
+				},
+				onFailure = { err ->
+					_uiEvents.emit(UiEvents.ShowToast(err.message ?: "Cannot perform action"))
+				}
+			)
+		}
 	}
 
 	private fun readBLEDescriptor(descriptor: BLEDescriptorModel) {
@@ -203,7 +235,10 @@ class BLEDeviceViewModel(
 		val characteristic = _selectedCharacteristic.value.characteristic ?: return
 		val service = _selectedCharacteristic.value.service ?: return
 
-		val results = bleConnector.read(service = service, characteristic = characteristic)
+		val results = bleConnector.read(
+			service = service,
+			characteristic = characteristic
+		)
 
 		results.onFailure { err ->
 			viewModelScope.launch {

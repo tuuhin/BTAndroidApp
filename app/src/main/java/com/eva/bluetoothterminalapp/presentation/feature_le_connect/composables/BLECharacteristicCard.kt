@@ -9,17 +9,13 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -29,21 +25,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.data.mapper.canIndicate
-import com.eva.bluetoothterminalapp.data.mapper.canNotify
-import com.eva.bluetoothterminalapp.data.mapper.canRead
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPropertyTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.propertyRes
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.toReadbleProperties
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
@@ -55,54 +43,18 @@ fun BLECharacteristicsCard(
 	onRead: () -> Unit,
 	onWrite: () -> Unit,
 	onNotify: () -> Unit,
+	onStopNotify: () -> Unit,
+	onStopIndicate: () -> Unit,
 	onIndicate: () -> Unit,
 	modifier: Modifier = Modifier,
-	chipBordersEnabled: Boolean = false,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
 	shape: Shape = MaterialTheme.shapes.large,
-	chipColors: Color = MaterialTheme.colorScheme.primary,
 ) {
 
 	val context = LocalContext.current
 
 	val probableName = remember(characteristic.probableName) {
 		characteristic.probableName ?: context.getString(R.string.ble_characteristic_name_unknown)
-	}
-
-
-	val properites = remember(characteristic.properties) {
-		buildString {
-			append(" ")
-			characteristic.properties.forEachIndexed { idx, property ->
-				if (idx != 0) append(", ")
-				val res = property.propertyRes ?: return@forEachIndexed
-				append(context.getString(res))
-			}
-		}
-	}
-
-	val canWrite = remember(characteristic.properties) {
-		characteristic.let { model ->
-			model.properties.any { property ->
-				property in arrayOf(
-					BLEPropertyTypes.PROPERTY_WRITE,
-					BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE,
-					BLEPropertyTypes.PROPERTY_SIGNED_WRITE
-				)
-			}
-		}
-	}
-
-	val canNotify = remember(characteristic.properties) {
-		characteristic.canNotify
-	}
-
-	val canIndicate = remember(characteristic) {
-		characteristic.canIndicate
-	}
-
-	val canRead = remember(characteristic.properties) {
-		characteristic.canRead
 	}
 
 	val showStringValue = remember(characteristic.byteArray) {
@@ -112,12 +64,6 @@ fun BLECharacteristicsCard(
 	val showHexValue = remember(characteristic.byteArray) {
 		characteristic.valueHexString.isNotBlank()
 	}
-
-	val suggestionChipColors = SuggestionChipDefaults.suggestionChipColors(
-		containerColor = chipColors,
-		labelColor = contentColorFor(backgroundColor = chipColors),
-		disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-	)
 
 	Card(
 		elevation = CardDefaults.elevatedCardElevation(),
@@ -138,23 +84,15 @@ fun BLECharacteristicsCard(
 			)
 			Spacer(modifier = Modifier.height(2.dp))
 			Text(
-				text = buildAnnotatedString {
-					withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
-						append("UUID: ")
-					}
-					append("${characteristic.uuid}")
-				},
+				text = "UUID : ${characteristic.uuid}",
 				style = MaterialTheme.typography.bodySmall,
 			)
 			Text(
-				text = buildAnnotatedString {
-					withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
-						append("Properties: ")
-					}
-					append(properites)
-				},
+				text = stringResource(
+					R.string.ble_characteristic_properties,
+					characteristic.toReadbleProperties
+				),
 				style = MaterialTheme.typography.bodySmall,
-				color = MaterialTheme.colorScheme.onSurfaceVariant
 			)
 			HorizontalDivider(
 				modifier = Modifier.padding(vertical = 2.dp),
@@ -166,12 +104,10 @@ fun BLECharacteristicsCard(
 				exit = slideOutVertically { height -> -height } + fadeOut()
 			) {
 				Text(
-					text = buildAnnotatedString {
-						withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
-							append("Value As Hex: ")
-						}
-						append(characteristic.valueHexString)
-					},
+					text = stringResource(
+						id = R.string.ble_value_hex,
+						characteristic.valueHexString
+					),
 					style = MaterialTheme.typography.labelLarge,
 					color = MaterialTheme.colorScheme.onSurfaceVariant,
 				)
@@ -183,63 +119,30 @@ fun BLECharacteristicsCard(
 				exit = slideOutVertically { height -> -height } + fadeOut()
 			) {
 				Text(
-					text = buildAnnotatedString {
-						withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
-							append("Value : ")
-						}
-						characteristic.valueAsString?.let(::append)
-					},
+					text = stringResource(
+						R.string.ble_descriptor_readble_value,
+						characteristic.valueAsString ?: ""
+					),
 					style = MaterialTheme.typography.labelLarge,
 					color = MaterialTheme.colorScheme.onSurfaceVariant,
 				)
 
 			}
-			FlowRow(
-				horizontalArrangement = Arrangement.spacedBy(6.dp),
-				modifier = Modifier.fillMaxWidth()
-
-			) {
-				if (canRead) SuggestionChip(
-					onClick = onRead,
-					label = { Text(text = stringResource(id = R.string.ble_property_read)) },
-
-					enabled = isDeviceConnected,
-					colors = suggestionChipColors,
-					border = SuggestionChipDefaults
-						.suggestionChipBorder(enabled = chipBordersEnabled)
-				)
-
-				if (canWrite) SuggestionChip(
-					onClick = onWrite,
-					label = { Text(text = stringResource(id = R.string.ble_property_write)) },
-					enabled = isDeviceConnected,
-					colors = suggestionChipColors,
-					border = SuggestionChipDefaults
-						.suggestionChipBorder(enabled = chipBordersEnabled)
-				)
-
-				if (canNotify) SuggestionChip(
-					onClick = onNotify,
-					label = { Text(text = stringResource(id = R.string.ble_property_notify)) },
-					enabled = isDeviceConnected,
-					colors = suggestionChipColors,
-					border = SuggestionChipDefaults
-						.suggestionChipBorder(enabled = chipBordersEnabled)
-				)
-				if (canIndicate) SuggestionChip(
-					onClick = onIndicate,
-					label = { Text(text = stringResource(id = R.string.ble_property_indicate)) },
-					enabled = isDeviceConnected,
-					colors = suggestionChipColors,
-					border = SuggestionChipDefaults
-						.suggestionChipBorder(enabled = chipBordersEnabled)
-				)
-			}
+			BLECharacteristicsPropertiesOptions(
+				characteristic = characteristic,
+				isDeviceConnected = isDeviceConnected,
+				onRead = onRead,
+				onWrite = onWrite,
+				onNotify = onNotify,
+				onStopNotify = onStopNotify,
+				onStopIndicate = onStopIndicate,
+				onIndicate = onIndicate
+			)
 		}
 	}
 }
 
-private class BLECharacteristicsPreviewParams :
+class BLECharacteristicsPreviewParams :
 	CollectionPreviewParameterProvider<BLECharacteristicsModel>(
 		listOf(
 			PreviewFakes.FAKE_BLE_CHARACTERISTIC_MODEL,
@@ -258,7 +161,9 @@ private fun BLECharacteristicCardPreview(
 		onRead = {},
 		onWrite = { },
 		onNotify = { },
+		onStopNotify = {},
 		onIndicate = {},
+		onStopIndicate = {},
 		isDeviceConnected = true,
 	)
 }

@@ -100,4 +100,14 @@
   <string name="ble_characteristic_not_selected_desc">Select an characteristic in order to continue</string>
   <string name="write_characteristic_dialog_title">Write Characteristic</string>
   <string name="write_characteristic_dialog_desc">Enter text value in utf-8 to write to.</string>
+  <string name="device_rssi_value">Current Device RSSI value %d</string>
+  <string name="bluetooth_device_mac_address">MAC : %s</string>
+  <string name="ble_value_hex">Value Hex (0x) : %s</string>
+  <string name="ble_disable_notification">Notfication are dissabled</string>
+  <string name="ble_enable_indication">Indications are enabled</string>
+  <string name="ble_enable_notification">Notifcations are enabled</string>
+  <string name="ble_property_notify_stop">Stop Notify</string>
+  <string name="ble_descriptor_readble_value">Value (Readable) : %s</string>
+  <string name="ble_property_indicate_stop">Stop Indicate</string>
+  <string name="ble_characteristic_properties">Properties : %s</string>
 </resources>

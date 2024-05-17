@@ -103,14 +103,14 @@ fun BLEDeviceProfile(
 						modifier = Modifier
 							.defaultMinSize(80.dp, 80.dp)
 							.clip(MaterialTheme.shapes.large)
-							.background(MaterialTheme.colorScheme.surfaceContainerHighest),
+							.background(MaterialTheme.colorScheme.secondaryContainer),
 						contentAlignment = Alignment.Center
 					) {
 						Icon(
 							imageVector = device.imageVector,
 							contentDescription = device.name,
 							modifier = Modifier.defaultMinSize(40.dp, 40.dp),
-							tint = MaterialTheme.colorScheme.secondary,
+							tint = MaterialTheme.colorScheme.onSecondaryContainer,
 						)
 					}
 				}
@@ -127,7 +127,7 @@ private fun BLEDeviceProfilePreview() = BlueToothTerminalAppTheme {
 			device = PreviewFakes.FAKE_DEVICE_MODEL,
 			rssi = -50,
 			modifier = Modifier
-				.padding(4.dp)
+				.padding(12.dp)
 				.fillMaxWidth()
 		)
 	}
