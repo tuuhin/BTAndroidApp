@@ -1,6 +1,7 @@
 package com.eva.bluetoothterminalapp.domain.bluetooth_le.models
 
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPermission
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.util.BLEValueModel
 import java.util.UUID
 
 data class BLEDescriptorModel(
@@ -16,6 +17,5 @@ data class BLEDescriptorModel(
 		set(value) {
 			_probableName = value
 		}
-
 
 }

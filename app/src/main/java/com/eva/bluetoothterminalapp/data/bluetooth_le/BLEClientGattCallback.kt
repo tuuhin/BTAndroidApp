@@ -16,6 +16,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -46,30 +47,28 @@ class BLEClientGattCallback(
 	private val _connectionState = MutableStateFlow(BLEConnectionState.CONNECTING)
 	val connectionState = _connectionState.asStateFlow()
 
-
 	private val _bleGattServices = MutableStateFlow<List<BluetoothGattService>>(emptyList())
 	private val bleGattServicesValue: List<BluetoothGattService>
 		get() = _bleGattServices.value
 
 	val bleServicesFlowAsDomainModel = _bleGattServices
-		.map { services ->
-			services.toDomainModelWithNames(scope = scope, reader = reader)
-		}
+		.map { services -> services.toDomainModelWithNames(scope = scope, reader = reader) }
 		.cancellable()
 		.catch { err -> Log.d(GATT_LOGGER, "LOCAL MODEL CONVERTION :${err.message}") }
 		.flowOn(Dispatchers.IO)
 
 	private val _readCharacteristic = MutableStateFlow<BLECharacteristicsModel?>(null)
-	private val _readDescriptor = MutableStateFlow<BLEDescriptorModel?>(null)
-
-	val readCharacteristicWithDescriptors = _readCharacteristic.asStateFlow()
+	val readCharacteristics = _readCharacteristic.asStateFlow()
 
 	override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
 
 		if (status != BluetoothGatt.GATT_SUCCESS) {
 			_connectionState.update { BLEConnectionState.FAILED }
+			Log.e(GATT_LOGGER, "PROBLEM WITH CONNECTION STATUS CODE: $status")
 			return
 		}
+
+		Log.d(GATT_LOGGER, "CONNECTION STATE DISCOVERY")
 
 		val connectionState = when (newState) {
 			BluetoothProfile.STATE_CONNECTED -> BLEConnectionState.CONNECTED
@@ -93,6 +92,7 @@ class BLEClientGattCallback(
 	override fun onReadRemoteRssi(gatt: BluetoothGatt?, rssi: Int, status: Int) {
 
 		if (status != BluetoothGatt.GATT_SUCCESS) return
+		Log.d(GATT_LOGGER, "RSSI READ")
 		// update rssi value
 		_deviceRssi.update { rssi }
 	}
@@ -100,6 +100,7 @@ class BLEClientGattCallback(
 	override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
 
 		if (status != BluetoothGatt.GATT_SUCCESS) return
+		Log.d(GATT_LOGGER, "SERVICES DISCOVERED ")
 
 		val services = gatt?.services ?: emptyList()
 
@@ -110,6 +111,7 @@ class BLEClientGattCallback(
 
 	override fun onServiceChanged(gatt: BluetoothGatt) {
 		// re-discover services
+		Log.d(GATT_LOGGER, "DEVICES CHANGED")
 		gatt.discoverServices()
 	}
 
@@ -135,18 +137,22 @@ class BLEClientGattCallback(
 		status: Int
 	) {
 		if (status != BluetoothGatt.GATT_SUCCESS) return
+
 		scope.launch {
 			try {
-				// decode the received value and decide it\
+				// decode the received value and decide it
 				val domainModel = characteristic.toDomainModelWithNames(scope, reader)
 					.copy(byteArray = value)
-				// update the read value
-				_readCharacteristic.update { domainModel }
 
-				Log.d(GATT_LOGGER, "VALUE ${domainModel.valueHexString}")
+				_readCharacteristic.update { prev ->
+					if (prev?.uuid == domainModel.uuid) prev.copy(byteArray = value)
+					else domainModel
+				}
+
+				Log.d(GATT_LOGGER, "VALUE ON READ ${domainModel.byteArray}")
 			} catch (e: Exception) {
-				Log.e(GATT_LOGGER, "EXCEPTION", e)
 				e.printStackTrace()
+				Log.e(GATT_LOGGER, "EXCEPTION", e)
 			}
 		}
 	}
@@ -192,24 +198,21 @@ class BLEClientGattCallback(
 				val domainModel = descriptor.toDomainModelWithName(scope, reader)
 					.copy(byteArray = value)
 
-				_readDescriptor.update { domainModel }
-
-				// TODO: Check it later if its required
-				if (_readCharacteristic.value?.uuid != descriptor.characteristic.uuid) {
-					gatt.readCharacteristic(descriptor.characteristic)
-				}
-
 				// make sure characteristic is already read
-				_readCharacteristic.update { char ->
-					char?.copy(
-						descriptors = char.descriptors.map { desc ->
+				_readCharacteristic.update { characteristic ->
+					if (characteristic == null)
+						return@update characteristic
+					else if (characteristic.uuid != descriptor.characteristic.uuid)
+						return@update characteristic
+					else characteristic.copy(
+						descriptors = characteristic.descriptors.map { desc ->
 							if (desc.uuid == domainModel.uuid) domainModel
 							else desc
-						},
+						}.toPersistentList(),
 					)
 				}
 				// update the read value
-				Log.d(GATT_LOGGER, "VALUE DESC ${domainModel.valueHexString}")
+				Log.d(GATT_LOGGER, "VALUE ON DESC READ ${domainModel.valueHexString}")
 			} catch (e: Exception) {
 				Log.e(GATT_LOGGER, "EXCEPTION", e)
 				e.printStackTrace()
@@ -251,13 +254,22 @@ class BLEClientGattCallback(
 	) {
 		scope.launch {
 			try {
-				// decode the received value and decide it\
-				val domainModel = characteristic.toDomainModelWithNames(scope, reader)
-					.copy(byteArray = value)
-				// update the read value
-				_readCharacteristic.update { domainModel }
+				// decode the received value and decide it
+				if (_readCharacteristic.value == null) {
+					// read the value for the first time
+					val isSuccess = gatt.readCharacteristic(characteristic)
+					if (isSuccess) return@launch
+					val domainModel = characteristic.toDomainModelWithNames(scope, reader)
+						.copy(byteArray = value)
+					_readCharacteristic.update { domainModel }
+				}
 
-				Log.d(GATT_LOGGER, "VALUE ${domainModel.valueHexString}")
+				_readCharacteristic.update { prev ->
+					if (prev == null) return@update prev
+					prev.copy(byteArray = value)
+				}
+
+				Log.d(GATT_LOGGER, "VALUE ON CHANGE CHARACTERISTICS ${value.decodeToString()}")
 			} catch (e: Exception) {
 				Log.e(GATT_LOGGER, "EXCEPTION", e)
 				e.printStackTrace()

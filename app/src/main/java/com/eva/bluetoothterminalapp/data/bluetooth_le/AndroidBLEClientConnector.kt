@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothStatusCodes
@@ -22,12 +21,15 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
-import com.eva.bluetoothterminalapp.domain.exceptions.BLECharacteristicInvalidForIndicateOrNotify
-import com.eva.bluetoothterminalapp.domain.exceptions.BLEClientConfigDescriptorNotFound
-import com.eva.bluetoothterminalapp.domain.exceptions.BLEServiceCharacteristicMissingException
+import com.eva.bluetoothterminalapp.domain.exceptions.BLECharacteristicDontHaveIndicateOrNotifyProperties
+import com.eva.bluetoothterminalapp.domain.exceptions.BLEIndicationORNotificationAlraedyRunningException
+import com.eva.bluetoothterminalapp.domain.exceptions.BLEServiceAndCharacteristicMatchNotFoundException
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 private const val BLE_CLIENT_LOGGER = "BLE_CLIENT_LOGGER"
 
@@ -37,7 +39,7 @@ class AndroidBLEClientConnector(
 	private val reader: SampleUUIDReader,
 ) : BluetoothLEClientConnector {
 
-	private val gattCallback = BLEClientGattCallback(reader)
+	private val gattCallback = BLEClientGattCallback(reader, echoWrite = true)
 
 	private val _bluetoothManager by lazy { context.getSystemService<BluetoothManager>() }
 
@@ -54,15 +56,19 @@ class AndroidBLEClientConnector(
 		get() = gattCallback.bleServicesFlowAsDomainModel
 
 	override val readForCharacteristic: Flow<BLECharacteristicsModel?>
-		get() = gattCallback.readCharacteristicWithDescriptors
+		get() = gattCallback.readCharacteristics
 
 	private var _connectedDevice: BluetoothDeviceModel? = null
 	override val connectedDevice: BluetoothDeviceModel?
 		get() = _connectedDevice
 
 
+	private val _isNotifyOrIndicationRunning = MutableStateFlow(false)
+	override val isNotifyOrIndicationRunning: StateFlow<Boolean>
+		get() = _isNotifyOrIndicationRunning.asStateFlow()
+
+
 	private var _bLEGatt: BluetoothGatt? = null
-	private var _charWithNotfication: BluetoothGattCharacteristic? = null
 
 	override fun connect(address: String, autoConnect: Boolean): Result<Boolean> {
 		return try {
@@ -88,6 +94,7 @@ class AndroidBLEClientConnector(
 
 	override fun checkRssi(): Result<Boolean> {
 		return try {
+			Log.i(BLE_CLIENT_LOGGER, "CHECKING RSSI")
 			val isSuccess = _bLEGatt?.readRemoteRssi() ?: false
 			Result.success(isSuccess)
 		} catch (e: Exception) {
@@ -97,6 +104,7 @@ class AndroidBLEClientConnector(
 
 	override fun discoverServices(): Result<Boolean> {
 		return try {
+			Log.i(BLE_CLIENT_LOGGER, "DISCOVERING SERVICES")
 			val isSuccess = _bLEGatt?.discoverServices() ?: false
 			Result.success(isSuccess)
 		} catch (e: Exception) {
@@ -106,8 +114,8 @@ class AndroidBLEClientConnector(
 
 	override fun reconnect(): Result<Boolean> {
 		return try {
+			Log.i(BLE_CLIENT_LOGGER, "CLIENT RE-CONNECTED")
 			val result = _bLEGatt?.connect() ?: false
-			Log.d(BLE_CLIENT_LOGGER, "CLIENT RE-CONNECTED")
 			Result.success(result)
 		} catch (e: Exception) {
 			Result.failure(e)
@@ -123,9 +131,14 @@ class AndroidBLEClientConnector(
 			val _characteristic = gattCallback.findCharacteristicFromDomainModel(
 				service = service,
 				characteristic = characteristic
-			) ?: return Result.failure(BLEServiceCharacteristicMissingException())
+			) ?: return Result.failure(BLEServiceAndCharacteristicMatchNotFoundException())
 
 			val isSuccess = _bLEGatt?.readCharacteristic(_characteristic) ?: false
+
+			Log.i(
+				BLE_CLIENT_LOGGER,
+				"READ FOR CHARACTERISTIC ${characteristic.uuid}  SUCCESS:$isSuccess"
+			)
 
 			Result.success(isSuccess)
 		} catch (e: Exception) {
@@ -146,7 +159,7 @@ class AndroidBLEClientConnector(
 			val _characteristic = gattCallback.findCharacteristicFromDomainModel(
 				service = service,
 				characteristic = characteristic
-			) ?: return Result.failure(BLEServiceCharacteristicMissingException())
+			) ?: return Result.failure(BLEServiceAndCharacteristicMatchNotFoundException())
 
 			val isSuccess = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 				val operation = _bLEGatt?.writeCharacteristic(
@@ -154,12 +167,16 @@ class AndroidBLEClientConnector(
 					bytes,
 					_characteristic.writeType
 				)
-
 				operation == BluetoothStatusCodes.SUCCESS
 			} else {
 				_characteristic.value = bytes
 				_bLEGatt?.writeCharacteristic(_characteristic) ?: false
 			}
+
+			Log.i(
+				BLE_CLIENT_LOGGER,
+				"WRITE TO CHARACTERISTIC ${characteristic.uuid}  SUCCESS:$isSuccess"
+			)
 
 			Result.success(isSuccess)
 		} catch (e: Exception) {
@@ -168,48 +185,58 @@ class AndroidBLEClientConnector(
 		}
 	}
 
-	override fun setIndicationOrNotification(
+	override fun startIndicationOrNotification(
 		service: BLEServiceModel,
 		characteristic: BLECharacteristicsModel,
 		enable: Boolean
 	): Result<Boolean> {
 		return try {
+			// if enable true and notify or indication is already running then no need to
+			// start indication or notiy
+			if (enable && _isNotifyOrIndicationRunning.value) {
+				Log.i(BLE_CLIENT_LOGGER, "INDICATION OR NOTIFICATION ALREDY RUNNING")
+				return Result.failure(BLEIndicationORNotificationAlraedyRunningException())
+			}
+
 			val _characteristic = gattCallback.findCharacteristicFromDomainModel(
 				service = service,
 				characteristic = characteristic
-			) ?: return Result.failure(BLEServiceCharacteristicMissingException())
+			) ?: return Result.failure(BLEServiceAndCharacteristicMatchNotFoundException())
 
 			// set characteristic notifications
 			val isSuccess = _bLEGatt?.setCharacteristicNotification(_characteristic, enable)
 				?: false
 
-			// if characteristic notification enable success
-			if (isSuccess) {
-				// if any other is running stop it
-				// TODO: Check if its stoped in the correct position or not
-				if (_charWithNotfication != null) stopRunningNotificationOrIndication()
+			Log.d(
+				BLE_CLIENT_LOGGER,
+				"CHARACTERISTIC NOTIFICATION :$enable UUID ${characteristic.uuid} SUCCESS: $isSuccess"
+			)
 
-				val descriptorValue = when {
-					enable && characteristic.canNotify -> BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-					enable && characteristic.canIndicate -> BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
-					!enable -> BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
-					else -> return Result.failure(BLECharacteristicInvalidForIndicateOrNotify())
-				}
+			// if not success return isSuccess as false
+			if (!isSuccess) return Result.success(isSuccess)
 
-				// needs a client config descriptor if not found then its a failure
-				val descriptor = _characteristic
-					.getDescriptor(BTConstants.CLIENT_CONFIG_DESCRIPTOR_UUID)
-					?: return Result.failure(BLEClientConfigDescriptorNotFound())
+			// as its successfully started mark it as active
+			val isRunning = isSuccess && enable
+			_isNotifyOrIndicationRunning.update { isRunning }
+			Log.i(BLE_CLIENT_LOGGER, "INDICATION OR NOTIFICATION MARKED AS $isRunning")
 
-				val isWritten = writeToDescriptor(
-					descriptor = descriptor,
-					bytes = descriptorValue
-				)
 
-				val canStart = enable && isWritten.isSuccess
-				_charWithNotfication = if (canStart) _characteristic else null
+			// set the descriptor value for client config
+			val descriptorValue = when {
+				enable && characteristic.canNotify -> BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+				enable && characteristic.canIndicate -> BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+				!enable -> BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
+				else -> return Result.failure(BLECharacteristicDontHaveIndicateOrNotifyProperties())
 			}
 
+			// needs a client config descriptor if not found then its a failure
+			val isWriteDescriptor = _characteristic
+				.getDescriptor(BTConstants.CLIENT_CONFIG_DESCRIPTOR_UUID)
+				?.let { descriptor ->
+					writeToDescriptor(descriptor = descriptor, bytes = descriptorValue)
+				}
+
+			Log.d(BLE_CLIENT_LOGGER, "IS WRITE DESC SUCCESS ${isWriteDescriptor?.isSuccess}")
 
 			Result.success(isSuccess)
 		} catch (e: Exception) {
@@ -232,6 +259,8 @@ class AndroidBLEClientConnector(
 			)
 
 			val isSuccess = _bLEGatt?.readDescriptor(_descriptor) ?: false
+
+			Log.i(BLE_CLIENT_LOGGER, "READ DESCRIPTOR ${descriptor}  SUCCESS:$isSuccess")
 
 			Result.success(isSuccess)
 		} catch (e: Exception) {
@@ -283,19 +312,6 @@ class AndroidBLEClientConnector(
 			e.printStackTrace()
 			Result.failure(e)
 		}
-	}
-
-	private fun stopRunningNotificationOrIndication() {
-		val _characteristic = _charWithNotfication ?: return
-
-		val descriptor = _characteristic.getDescriptor(BTConstants.CLIENT_CONFIG_DESCRIPTOR_UUID)
-			?: return
-
-		writeToDescriptor(
-			descriptor = descriptor,
-			bytes = BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
-		)
-		_bLEGatt?.setCharacteristicNotification(_characteristic, false)
 	}
 
 }

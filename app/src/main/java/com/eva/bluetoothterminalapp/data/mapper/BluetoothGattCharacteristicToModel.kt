@@ -35,14 +35,38 @@ fun BluetoothGattCharacteristic.toDomainModel(
 	this.probableName = probableName
 }
 
-val BLECharacteristicsModel.isIndicating: Boolean
+/**
+ * Characteristic contains properties of indicate
+ * @see BLEPropertyTypes
+ */
+val BLECharacteristicsModel.canIndicate: Boolean
 	get() = BLEPropertyTypes.PROPERTY_INDICATE in properties
 
-val BLECharacteristicsModel.isNotifying: Boolean
+/**
+ * Characteristic contains properties of notify
+ * @see BLEPropertyTypes
+ */
+val BLECharacteristicsModel.canNotify: Boolean
 	get() = BLEPropertyTypes.PROPERTY_NOTIFY in properties
 
+/**
+ * Characteristic contains properties of read
+ * @see BLEPropertyTypes
+ */
 val BLECharacteristicsModel.canRead: Boolean
 	get() = BLEPropertyTypes.PROPERTY_READ in properties
+
+/**
+ * Characteristic contains properties of write and write no response
+ * @see BLEPropertyTypes
+ */
+val BLECharacteristicsModel.canWrite: Boolean
+	get() = properties.any { property ->
+		property in arrayOf(
+			BLEPropertyTypes.PROPERTY_WRITE,
+			BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE,
+		) && writeType in arrayOf(BLEWriteTypes.TYPE_NO_RESPONSE, BLEWriteTypes.TYPE_DEFAULT)
+	}
 
 
 private val BluetoothGattCharacteristic.permission: BLEPermission
@@ -60,20 +84,22 @@ private val BluetoothGattCharacteristic.permission: BLEPermission
 
 private val BluetoothGattCharacteristic.bleProperties: List<BLEPropertyTypes>
 	get() = buildList<BLEPropertyTypes> {
-		if (properties and BluetoothGattCharacteristic.PROPERTY_BROADCAST != 0) add(BLEPropertyTypes.PROPERTY_BROADCAST)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) add(BLEPropertyTypes.PROPERTY_INDICATE)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) add(BLEPropertyTypes.PROPERTY_INDICATE)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_READ != 0) add(BLEPropertyTypes.PROPERTY_READ)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0) add(BLEPropertyTypes.PROPERTY_WRITE)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_EXTENDED_PROPS != 0) add(
-			BLEPropertyTypes.PROPERTY_EXTENDED_PROPS
-		)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE != 0) add(
-			BLEPropertyTypes.PROPERTY_SIGNED_WRITE
-		)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0) add(
-			BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE
-		)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_BROADCAST != 0)
+			add(BLEPropertyTypes.PROPERTY_BROADCAST)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0)
+			add(BLEPropertyTypes.PROPERTY_INDICATE)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0)
+			add(BLEPropertyTypes.PROPERTY_NOTIFY)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_READ != 0)
+			add(BLEPropertyTypes.PROPERTY_READ)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0)
+			add(BLEPropertyTypes.PROPERTY_WRITE)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_EXTENDED_PROPS != 0)
+			add(BLEPropertyTypes.PROPERTY_EXTENDED_PROPS)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE != 0)
+			add(BLEPropertyTypes.PROPERTY_SIGNED_WRITE)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0)
+			add(BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE)
 	}
 
 

@@ -15,6 +15,7 @@ import com.eva.bluetoothterminalapp.domain.models.BluetoothMode
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileScreenState
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenState
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceProfileState
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import java.util.UUID
@@ -71,8 +72,19 @@ object PreviewFakes {
 	val FAKE_BLE_SERVICE = BLEServiceModel(
 		serviceId = 1,
 		serviceUUID = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
-		serviceType = BLEServicesTypes.UNKNOWN
+		serviceType = BLEServicesTypes.PRIMARY
 	)
+
+	val FAKE_SERVICE_WITH_CHARACTERISTICS = BLEServiceModel(
+		serviceId = 1,
+		serviceUUID = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
+		serviceType = BLEServicesTypes.SECONDARY
+	).apply {
+		characteristic = persistentListOf<BLECharacteristicsModel>(
+			FAKE_BLE_CHARACTERISTIC_MODEL,
+			FAKE_BLE_CHARACTERISTIC_MODEL_WITH_DATA
+		)
+	}
 
 	val FAKE_BLE_PROFILE_STATE = BLEDeviceProfileState(
 		device = FAKE_DEVICE_MODEL,
@@ -98,6 +110,12 @@ object PreviewFakes {
 		byteArray = byteArrayOf(0x4B, 0x6F, 0x6C, 0x74, 0x69, 0x6E)
 	)
 
+	val FAKE_BLE_DESCRIPTOR_WITH_ENABLE_NOTIFICATION_VALUE = BLEDescriptorModel(
+		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
+		permissions = listOf(BLEPermission.PERMISSION_READ),
+		byteArray = byteArrayOf(0x00, 0x00)
+	)
+
 	val FAKE_BLE_CHARACTERISTIC_MODEL = BLECharacteristicsModel(
 		instanceId = 1,
 		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
@@ -110,10 +128,7 @@ object PreviewFakes {
 			BLEPropertyTypes.PROPERTY_NOTIFY
 
 		),
-		descriptors = listOf(
-			FAKE_BLE_DESCRIPTOR_MODEL,
-
-			).toPersistentList()
+		descriptors = listOf(FAKE_BLE_DESCRIPTOR_MODEL).toPersistentList()
 	).apply {
 		probableName = "Compose"
 
@@ -128,7 +143,6 @@ object PreviewFakes {
 			BLEPropertyTypes.PROPERTY_WRITE,
 			BLEPropertyTypes.PROPERTY_READ,
 			BLEPropertyTypes.PROPERTY_INDICATE,
-			BLEPropertyTypes.PROPERTY_NOTIFY
 
 		),
 		descriptors = listOf(

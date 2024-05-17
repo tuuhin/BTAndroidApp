@@ -1,8 +1,8 @@
-package com.eva.bluetoothterminalapp.domain.bluetooth_le.models
+package com.eva.bluetoothterminalapp.domain.bluetooth_le.util
 
 import java.nio.charset.Charset
 
-abstract class BLEValueModel(private val value: ByteArray = byteArrayOf()) {
+abstract class BLEValueModel(private val value: ByteArray) {
 
 	private val charset: Charset
 		get() = Charsets.US_ASCII
