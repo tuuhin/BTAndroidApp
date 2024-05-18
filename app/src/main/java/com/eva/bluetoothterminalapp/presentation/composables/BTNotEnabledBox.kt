@@ -3,9 +3,7 @@ package com.eva.bluetoothterminalapp.presentation.composables
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +28,7 @@ fun BTNotEnabledBox(
 ) {
 	Column(
 		modifier = modifier,
-		verticalArrangement = Arrangement.Center,
+		verticalArrangement = Arrangement.spacedBy(6.dp),
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
 		Image(
@@ -39,20 +37,17 @@ fun BTNotEnabledBox(
 			colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
 			modifier = Modifier.sizeIn(maxWidth = 120.dp, maxHeight = 120.dp)
 		)
-		Spacer(modifier = Modifier.height(4.dp))
 		Text(
 			text = stringResource(id = R.string.bluetooth_not_enable_title),
 			style = MaterialTheme.typography.titleMedium,
 			color = MaterialTheme.colorScheme.onSurface
 		)
-		Spacer(modifier = Modifier.height(4.dp))
 		Text(
 			text = stringResource(id = R.string.bluetooth_not_enable_desc),
 			style = MaterialTheme.typography.bodySmall,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 			textAlign = TextAlign.Center
 		)
-		Spacer(modifier = Modifier.height(8.dp))
 		EnableBluetoothButton(
 			onResults = onResults,
 			modifier = Modifier.fillMaxWidth(.75f)

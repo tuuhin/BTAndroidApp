@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.BluetoothProfileRoute
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.BluetoothProfileViewModel
@@ -56,7 +57,8 @@ fun BTDeviceProfileScreen(
 			}
 		},
 		navigation = {
-			IconButton(onClick = navigator::popBackStack) {
+			val onBack = dropUnlessResumed(block = navigator::popBackStack)
+			IconButton(onClick = onBack) {
 				Icon(
 					imageVector = Icons.AutoMirrored.Default.ArrowBack,
 					contentDescription = stringResource(id = R.string.back_arrow)

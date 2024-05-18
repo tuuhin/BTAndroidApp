@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.navigation.screens
+package com.eva.bluetoothterminalapp.presentation.navigation.screens.bt_le
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -7,7 +7,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.dropUnlessResumed
+import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.BLEDeviceRoute
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.BLEDeviceViewModel
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLECharacteristicSheet
@@ -60,10 +63,11 @@ fun BTLEClientScreen(
 		onSelectEvent = viewmodel::onCharacteristicEvent,
 		onConfigEvent = viewmodel::onConfigEvents,
 		navigation = {
-			IconButton(onClick = navigator::popBackStack) {
+			val onBackPress = dropUnlessResumed(block = navigator::popBackStack)
+			IconButton(onClick = onBackPress) {
 				Icon(
 					imageVector = Icons.AutoMirrored.Default.ArrowBack,
-					contentDescription = "Arrow Back"
+					contentDescription = stringResource(id = R.string.back_arrow)
 				)
 			}
 		},

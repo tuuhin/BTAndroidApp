@@ -16,13 +16,12 @@
   <string name="start_bluetooth_scan">Scan</string>
   <string name="stop_bluetooth_scan">Stop</string>
   <string name="paired_device">Paired Devices</string>
-  <string name="paired_device_desc">These devices are already paired to this device</string>
+  <string name="paired_device_desc">Devices that had already paired to this device</string>
   <string name="paired_device_not_found">No paired Devices found</string>
   <string name="available_scan_devices">Available Devices</string>
-  <string name="available_scan_devices_desc">These devices found in your range string and after the scan</string>
+  <string name="available_scan_devices_desc">Devices found in the range after a scan</string>
   <string name="devices_route">Bluetooth Devices</string>
   <string name="bt_connection_type_server">Start Server</string>
-  <string name="bt_connection_type_client">Connect As Client</string>
   <string name="bt_connection_type_server_desc">Starts a Bluetooth server to let other devices to connect</string>
   <string name="bt_client_route">Bluetooth Client</string>
   <string name="allow_discover">Allow Discoverability</string>
@@ -110,4 +109,22 @@
   <string name="ble_descriptor_readble_value">Value (Readable) : %s</string>
   <string name="ble_property_indicate_stop">Stop Indicate</string>
   <string name="ble_characteristic_properties">Properties : %s</string>
+  <!--  Inforamtion Route-->
+  <string name="information_ble_assign_url">https://www.bluetooth.com/specifications/assigned-numbers/</string>
+  <string name="cannot_launch_activity">Cannot launch Activity</string>
+  <string name="ble_assigned_numbers_title">BLE Assignment Numbers</string>
+  <string name="ble_assigned_numbers_desc">Check assigned numbers for the bluetooth low energy.</string>
+  <string name="info_visit_link">Visit</string>
+  <string name="information_baud_rate">Baud Rate</string>
+  <string name="information_baud_rate_desc">Communication is done at full bluetooth speed so these properties are not configurable</string>
+  <string name="information_title_bluetooth_and_ble">Bluetooth and Bluetooth Low Energy</string>
+  <string name="information_title_development">Development</string>
+  <string name="information_source_code">Source Code</string>
+  <string name="information_source_code_desc">Check out source code for the app</string>
+  <string name="info_visit_github">GitHub</string>
+  <string name="information_source_code_link">https://github.com/tuuhin/BTAndroidApp</string>
+  <string name="information_route_title">Information</string>
+  <string name="settings_route_title">Settings</string>
+  <string name="cannot_find_email_clients">Cannot find any email clients</string>
+  <string name="send_email_via">Send Email Via</string>
 </resources>

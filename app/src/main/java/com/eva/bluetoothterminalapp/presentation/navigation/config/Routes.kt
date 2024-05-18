@@ -1,7 +1,7 @@
 package com.eva.bluetoothterminalapp.presentation.navigation.config
 
 object Routes {
-	// Show devices
+	// Base route to show the devices (both classic and low energy via a pager)
 	const val DEVICES_ROUTE = "devices_route"
 
 	// client terminal route
@@ -15,4 +15,9 @@ object Routes {
 
 	// ble client terminal route
 	const val BLE_CLIENT_ROUTE = "ble_client_route"
+
+	const val SETTINGS_ROUTE = "settings"
+
+	//info route
+	const val INFORMATION_ROUTE = "info"
 }
