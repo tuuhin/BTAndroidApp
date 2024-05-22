@@ -38,7 +38,7 @@ import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.Blu
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.DevicesScreenModeContainer
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenEvents
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenState
-import com.eva.bluetoothterminalapp.presentation.feature_devices.util.BTDeviceTabs
+import com.eva.bluetoothterminalapp.presentation.util.BluetoothTypes
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
@@ -55,7 +55,7 @@ fun BTDevicesRoute(
 	state: BTDevicesScreenState,
 	onEvent: (BTDevicesScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
-	initialTab: BTDeviceTabs = BTDeviceTabs.CLASSIC,
+	initialTab: BluetoothTypes = BluetoothTypes.CLASSIC,
 	onSelectDevice: (BluetoothDeviceModel) -> Unit = {},
 	onSelectLeDevice: (BluetoothLEDeviceModel) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
@@ -65,14 +65,14 @@ fun BTDevicesRoute(
 
 	val pagerState = rememberPagerState(
 		initialPage = initialTab.tabIdx,
-		pageCount = { BTDeviceTabs.entries.size }
+		pageCount = { BluetoothTypes.entries.size }
 	)
 
 	val currentTab by remember(pagerState.currentPage) {
 		derivedStateOf {
-			if (BTDeviceTabs.LOW_ENERGY.tabIdx == pagerState.currentPage)
-				BTDeviceTabs.LOW_ENERGY
-			else BTDeviceTabs.CLASSIC
+			if (BluetoothTypes.LOW_ENERGY.tabIdx == pagerState.currentPage)
+				BluetoothTypes.LOW_ENERGY
+			else BluetoothTypes.CLASSIC
 		}
 	}
 
@@ -122,14 +122,14 @@ fun BTDevicesRoute(
 				navigation = navigation,
 				startScan = {
 					when (currentTab) {
-						BTDeviceTabs.CLASSIC -> onEvent(BTDevicesScreenEvents.StartScan)
-						BTDeviceTabs.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StartLEDeviceScan)
+						BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StartScan)
+						BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StartLEDeviceScan)
 					}
 				},
 				stopScan = {
 					when (currentTab) {
-						BTDeviceTabs.CLASSIC -> onEvent(BTDevicesScreenEvents.StopScan)
-						BTDeviceTabs.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StopLEDevicesScan)
+						BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StopScan)
+						BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StopLEDevicesScan)
 					}
 				},
 				scrollBehavior = scrollBehaviour
@@ -160,10 +160,11 @@ fun BTDevicesRoute(
 						availableDevices = state.availableDevices,
 						showLocationPlaceholder = showLocationBlock,
 						onSelectDevice = onSelectDevice,
-						contentPadding = PaddingValues(dimensionResource(R.dimen.sc_padding)),
+						contentPadding = PaddingValues(all = dimensionResource(R.dimen.sc_padding)),
 						onLocationPermsAccept = { isAccepted ->
 							hasLocationPermission = isAccepted
 						},
+						modifier = Modifier.fillMaxSize(),
 					)
 				},
 				leTabContent = {
@@ -171,10 +172,11 @@ fun BTDevicesRoute(
 						hasLocationPermission = hasLocationPermission,
 						leDevices = state.leDevices,
 						onDeviceSelect = onSelectLeDevice,
-						contentPadding = PaddingValues(horizontal = dimensionResource(R.dimen.sc_padding)),
+						contentPadding = PaddingValues(all = dimensionResource(R.dimen.sc_padding)),
 						onLocationPermissionChanged = { isAccepted ->
 							hasLocationPermission = isAccepted
 						},
+						modifier = Modifier.fillMaxSize(),
 					)
 				},
 			)
@@ -225,7 +227,7 @@ private fun BTDeviceRouteWithLEDevicesPreview(
 		isScanning = false,
 		state = state,
 		onEvent = {},
-		initialTab = BTDeviceTabs.LOW_ENERGY,
+		initialTab = BluetoothTypes.LOW_ENERGY,
 		onSelectDevice = { }
 	)
 }

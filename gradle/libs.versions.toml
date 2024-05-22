@@ -19,7 +19,7 @@ composeBom = "2024.05.00"
 koinBom = "3.5.3"
 materialIconsExtended = "1.6.7"
 ksp_version = "1.9.20-1.0.14"
-protobufJavalite = "3.25.1"
+protobufJavalite = "4.26.1"
 protobuf_version = "0.9.4"
 
 [libraries]
@@ -62,6 +62,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 # protobuf and datastore
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufJavalite" }
+protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobufJavalite" }
 # kotlinx serialization
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 

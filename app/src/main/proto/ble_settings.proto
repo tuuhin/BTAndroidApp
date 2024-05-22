@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option java_package = "com.eva.bluetoothterminalapp.data.datastore";
+option java_multiple_files = true;
+option java_outer_classname = "BLESettings";
+option java_generate_equals_and_hash = true;
+
+message BLEAppSettings {
+  // scan period for the sca
+  ScanTimmings scan_period = 1 ;
+  // which scan layers are supported
+  SupportedLayers supported_layer = 2;
+  // which scan modes are supported
+  ScanModes scan_mode = 3;
+  // legacy only
+  bool is_advertising_extension = 4;
+
+}
+
+enum ScanTimmings{
+  TWELVE_SECONDS = 0;
+  FOURTY_FIVE_SECONDS = 1;
+  ONE_MINUTE = 2;
+  THREE_MINUTE = 3;
+  FIVE_MINUTES = 4;
+}
+
+enum SupportedLayers{
+  ALL = 0;
+  LEGACY = 1;
+  LONG_RANGE = 2;
+}
+
+enum ScanModes{
+  BALANCED = 0;
+  LOW_POWER = 1;
+  LOW_LATENCY = 2;
+}

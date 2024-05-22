@@ -127,4 +127,18 @@
   <string name="settings_route_title">Settings</string>
   <string name="cannot_find_email_clients">Cannot find any email clients</string>
   <string name="send_email_via">Send Email Via</string>
+  <string name="ble_settings_scan_mode_low_power">Low power</string>
+  <string name="ble_settings_scan_mode_balanced">Balanced</string>
+  <string name="ble_settings_scan_mode_low_latency">Low Latency</string>
+  <string name="ble_settings_scan_mode_title">Scan Mode</string>
+  <string name="ble_settings_layer_all">All Supported</string>
+  <string name="ble_settings_layer_le_1m">LE 1M (Legacy)</string>
+  <string name="ble_settings_layer_le_coded">LE Coded (Long Range)</string>
+  <string name="ble_settings_layer_title">Physical Layer (PHY)</string>
+  <string name="ble_settings_compatibilty_mode_title">Compatibility Mode</string>
+  <string name="ble_settings_compatibilty_mode_legacy_only">Legacy Advertising only</string>
+  <string name="ble_settings_compatibilty_mode_all">Legacy and Advertising Extension</string>
+  <string name="ble_settings_scan_period_title">Scan Period</string>
+  <string name="ble_settings_scan_period_time_minute">%d minutes</string>
+  <string name="ble_settings_scan_period_time_seconds">%d seconds</string>
 </resources>

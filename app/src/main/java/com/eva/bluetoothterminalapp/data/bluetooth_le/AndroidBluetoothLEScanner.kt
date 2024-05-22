@@ -3,6 +3,7 @@ package com.eva.bluetoothterminalapp.data.bluetooth_le
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
@@ -24,6 +25,9 @@ import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothLEDeviceNotSuppor
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothNotEnabled
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
 import com.eva.bluetoothterminalapp.domain.exceptions.LocationPermissionNotProvided
+import com.eva.bluetoothterminalapp.domain.settings.enums.BLESettingsScanMode
+import com.eva.bluetoothterminalapp.domain.settings.enums.BLESettingsSupportedLayer
+import com.eva.bluetoothterminalapp.domain.settings.repository.BLESettingsDataStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -45,7 +49,8 @@ private typealias BluetoothDevices = List<BluetoothLEDeviceModel>
 
 @SuppressLint("MissingPermission")
 class AndroidBluetoothLEScanner(
-	private val context: Context
+	private val context: Context,
+	private val bleSettings: BLESettingsDataStore,
 ) : BluetoothLEScanner {
 
 	private val _bluetoothManager by lazy { context.getSystemService<BluetoothManager>() }
@@ -146,10 +151,12 @@ class AndroidBluetoothLEScanner(
 		// if normal scan is running then stop it
 		if (_btAdapter?.isDiscovering == true) _btAdapter?.cancelDiscovery()
 
+		val breakTime = bleSettings.settings.scanPeriod.duration
+
 		withContext(Dispatchers.Default) {
 			try {
 				val postJob = launch(coroutineContext) {
-					delay(duration)
+					delay(breakTime)
 					stopScanCallback()
 				}
 				startScanCallBack()
@@ -187,8 +194,28 @@ class AndroidBluetoothLEScanner(
 
 		val filters = emptyList<ScanFilter>()
 
+		// its a blocking call
+		val settings = bleSettings.settings
+
+		val scanMode = when (settings.scanMode) {
+			BLESettingsScanMode.LOW_POWER -> ScanSettings.SCAN_MODE_LOW_POWER
+			BLESettingsScanMode.BALANCED -> ScanSettings.SCAN_MODE_BALANCED
+			BLESettingsScanMode.LOW_LATENCY -> ScanSettings.SCAN_MODE_LOW_LATENCY
+		}
+
+		// check it later
+		val layer = when (settings.supportedLayer) {
+			BLESettingsSupportedLayer.ALL -> ScanSettings.PHY_LE_ALL_SUPPORTED
+			BLESettingsSupportedLayer.LEGACY -> BluetoothDevice.PHY_LE_1M
+			BLESettingsSupportedLayer.LONG_RANGE -> BluetoothDevice.PHY_LE_CODED
+		}
+
+		val isLegacyOnly = settings.isLegacyOnly
+
 		val scanSettings = ScanSettings.Builder()
-			.setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+			.setScanMode(scanMode)
+			.setLegacy(isLegacyOnly)
+			.setPhy(layer)
 			.build()
 
 		_bleScanner?.startScan(filters, scanSettings, _bLeScanCallback)

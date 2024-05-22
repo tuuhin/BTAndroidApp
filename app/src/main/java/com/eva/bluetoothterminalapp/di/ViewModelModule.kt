@@ -5,6 +5,7 @@ import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.Blue
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.BTServerViewModel
 import com.eva.bluetoothterminalapp.presentation.feature_devices.BTDeviceViewmodel
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.BLEDeviceViewModel
+import com.eva.bluetoothterminalapp.presentation.feature_settings.AppSettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -24,5 +25,7 @@ val viewModelModule = module {
 
 	// profile viewmodel
 	viewModelOf(::BluetoothProfileViewModel)
+
+	viewModelOf(::AppSettingsViewModel)
 
 }
