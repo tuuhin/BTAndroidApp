@@ -14,19 +14,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.settings.models.BLESettingsModel
+import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
 import com.eva.bluetoothterminalapp.presentation.feature_settings.composables.BLESettingsContent
+import com.eva.bluetoothterminalapp.presentation.feature_settings.composables.BTSettingsContent
 import com.eva.bluetoothterminalapp.presentation.feature_settings.composables.BTSettingsTabs
 import com.eva.bluetoothterminalapp.presentation.feature_settings.util.BLESettingsEvent
+import com.eva.bluetoothterminalapp.presentation.feature_settings.util.BTSettingsEvent
+import com.eva.bluetoothterminalapp.presentation.util.BluetoothTypes
+import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppSettingsRoute(
 	bleSettings: BLESettingsModel,
+	btSettings: BTSettingsModel,
 	onBLEEvent: (BLESettingsEvent) -> Unit,
+	onBTEvent: (BTSettingsEvent) -> Unit,
 	modifier: Modifier = Modifier,
+	initialTab: BluetoothTypes = BluetoothTypes.LOW_ENERGY,
 	navigation: @Composable () -> Unit = {},
 ) {
 	val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -42,7 +52,15 @@ fun AppSettingsRoute(
 		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
 	) { scPadding ->
 		BTSettingsTabs(
-			classicTabContent = {},
+			initialTab = initialTab,
+			contentPadding = scPadding,
+			classicTabContent = {
+				BTSettingsContent(
+					settings = btSettings,
+					onEvent = onBTEvent,
+					modifier = Modifier.fillMaxSize()
+				)
+			},
 			leTabContent = {
 				BLESettingsContent(
 					settings = bleSettings,
@@ -50,17 +68,29 @@ fun AppSettingsRoute(
 					modifier = Modifier.fillMaxSize()
 				)
 			},
-			contentPadding = scPadding
 		)
 
 	}
 }
 
+private class BluetoothTypesPreviewParams : CollectionPreviewParameterProvider<BluetoothTypes>(
+	listOf(
+		BluetoothTypes.LOW_ENERGY,
+		BluetoothTypes.CLASSIC
+	)
+)
+
 @PreviewLightDark
 @Composable
-private fun AppSettingsRoutePreview() = BlueToothTerminalAppTheme {
+private fun AppSettingsRoutePreview(
+	@PreviewParameter(BluetoothTypesPreviewParams::class)
+	initialTab: BluetoothTypes,
+) = BlueToothTerminalAppTheme {
 	AppSettingsRoute(
-		bleSettings = BLESettingsModel(),
+		initialTab = initialTab,
+		bleSettings = PreviewFakes.FAKE_BLE_SETTINGS,
+		btSettings = PreviewFakes.FAKE_BT_SETTINGS,
+		onBTEvent = {},
 		onBLEEvent = {},
 		navigation = {
 			Icon(

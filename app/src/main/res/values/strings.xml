@@ -141,4 +141,22 @@
   <string name="ble_settings_scan_period_title">Scan Period</string>
   <string name="ble_settings_scan_period_time_minute">%d minutes</string>
   <string name="ble_settings_scan_period_time_seconds">%d seconds</string>
+  <string name="bt_classic_settings_char_set_utf_8">UTF-8</string>
+  <string name="bt_classic_settings_char_set_utf_16">UTF-16</string>
+  <string name="bt_classic_settings_char_set_utf_32">UTF-2</string>
+  <string name="bt_classic_settings_char_set_us_ascii">US-ASCII</string>
+  <string name="bt_classic_settings_char_set_iso_8859">ISO_8859_1</string>
+  <string name="bt_classic_settings_char_sets_title">Charsets</string>
+  <string name="bt_classic_settings_show_time_desc">Time Format (MM:SS)</string>
+  <string name="bt_classic_settings_show_time_title">Show TimeStamp</string>
+  <string name="bt_classic_settings_display_mode_text">Text</string>
+  <string name="bt_classic_settings_display_mode_hex">Hex</string>
+  <string name="bt_classic_settings_display_mode_title">Display Mode</string>
+  <string name="bt_classic_settings_new_line_char_cr_lf">CR+LF</string>
+  <string name="bt_classic_settings_new_line_char_lf">LF</string>
+  <string name="bt_classic_settings_new_line_char_cr">CR</string>
+  <string name="bt_classic_settings_new_line_none">None</string>
+  <string name="bt_classic_settings_new_line_char_null">NULL</string>
+  <string name="bt_classic_settings_new_line_char_etx">STX/ETX</string>
+  <string name="bt_classic_settings_new_line_title">End Of Line Character</string>
 </resources>

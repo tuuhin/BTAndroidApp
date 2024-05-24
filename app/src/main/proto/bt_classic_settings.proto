@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option java_package = "com.eva.bluetoothterminalapp.data.datastore";
+option java_multiple_files = true;
+option java_generate_equals_and_hash = true;
+
+message BluetoothClassicSettings{
+  BT_CharSet charset = 1;
+  BT_Display_Mode displayMode = 2;
+  BT_NewLine_Char newLine = 3;
+  bool showTimeStamp = 4;
+}
+
+enum BT_CharSet {
+  CHAR_SET_UTF_8 = 0;
+  CHAR_SET_UTF_16 = 1;
+  CHAR_SET_UTF_32 = 2;
+  CHAR_SET_US_ASCII = 3;
+  CHAR_SET_ISO_8859_1 = 4;
+}
+
+enum BT_Display_Mode{
+  DISPLAY_MODE_TEXT = 0;
+  DISPLAY_MODE_HEX = 1;
+}
+
+enum BT_NewLine_Char{
+  NEW_LINE_CR_LF = 0;
+  NEW_LINE_CR = 1;
+  NEW_LINE_LF = 2;
+  NEW_LINE_END_OF_TEXT = 3;
+  NEW_LINE_NULL_CHR = 4;
+  NEW_LINE_NONE = 5;
+}

@@ -2,7 +2,6 @@ syntax = "proto3";
 
 option java_package = "com.eva.bluetoothterminalapp.data.datastore";
 option java_multiple_files = true;
-option java_outer_classname = "BLESettings";
 option java_generate_equals_and_hash = true;
 
 message BLEAppSettings {

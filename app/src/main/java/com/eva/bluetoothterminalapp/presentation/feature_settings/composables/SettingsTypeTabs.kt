@@ -84,6 +84,7 @@ fun BTSettingsTabs(
 					stiffness = Spring.StiffnessLow
 				)
 			),
+			pageSpacing = dimensionResource(id = R.dimen.page_spacing),
 			modifier = Modifier.fillMaxSize(),
 		) { idx ->
 			when (idx) {

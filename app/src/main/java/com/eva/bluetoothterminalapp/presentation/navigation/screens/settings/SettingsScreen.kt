@@ -29,10 +29,10 @@ import org.koin.androidx.compose.koinViewModel
 fun SettingsScreen(
 	navigator: DestinationsNavigator,
 ) {
-
 	val viewModel = koinViewModel<AppSettingsViewModel>()
 
 	val bleSettings by viewModel.bleSettings.collectAsStateWithLifecycle()
+	val classicSettings by viewModel.btSettings.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(
 		viewModel = viewModel,
@@ -41,7 +41,9 @@ fun SettingsScreen(
 
 	AppSettingsRoute(
 		bleSettings = bleSettings,
+		btSettings = classicSettings,
 		onBLEEvent = viewModel::onBLEEvents,
+		onBTEvent = viewModel::onBTClassicEvents,
 		navigation = {
 			val onBackPress = dropUnlessResumed(block = navigator::popBackStack)
 			IconButton(onClick = onBackPress) {

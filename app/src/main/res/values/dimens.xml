@@ -8,4 +8,5 @@
   <dimen name="messages_list_horizontal_padding">8dp</dimen>
   <dimen name="messages_list_vertical_padding">6dp</dimen>
   <dimen name="messages_text_field_spacing">12dp</dimen>
+  <dimen name="page_spacing">12dp</dimen>
 </resources>

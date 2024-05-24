@@ -8,9 +8,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.domain.settings.models.BLESettingsModel
 import com.eva.bluetoothterminalapp.presentation.feature_settings.util.BLESettingsEvent
+import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
@@ -57,13 +60,23 @@ fun BLESettingsContent(
 	}
 }
 
+class BLESettingsPreviewParams : CollectionPreviewParameterProvider<BLESettingsModel>(
+	listOf(
+		PreviewFakes.FAKE_BLE_SETTINGS,
+		PreviewFakes.FAKE_BLE_SETTINGS_2
+	)
+)
+
 
 @PreviewLightDark
 @Composable
-private fun BLESettingsContentPreview() = BlueToothTerminalAppTheme {
+private fun BLESettingsContentPreview(
+	@PreviewParameter(BLESettingsPreviewParams::class)
+	settings: BLESettingsModel,
+) = BlueToothTerminalAppTheme {
 	Surface {
 		BLESettingsContent(
-			settings = BLESettingsModel(),
+			settings = settings,
 			onEvent = {},
 			contentPadding = PaddingValues(12.dp),
 			modifier = Modifier.fillMaxSize()

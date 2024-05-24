@@ -14,20 +14,19 @@ import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 
 @Composable
-fun BLECompatibilityModeSelector(
-	isLegacyOnly: Boolean,
+fun BTShowTimestampSelector(
+	showTimeStamp: Boolean,
 	onChange: (Boolean) -> Unit,
 	modifier: Modifier = Modifier
 ) {
 	ListItem(
-		headlineContent = { Text(text = stringResource(id = R.string.ble_settings_compatibilty_mode_title)) },
+		headlineContent = { Text(text = stringResource(id = R.string.bt_classic_settings_show_time_title)) },
 		supportingContent = {
-			if (isLegacyOnly) Text(text = stringResource(id = R.string.ble_settings_compatibilty_mode_legacy_only))
-			else Text(text = stringResource(id = R.string.ble_settings_compatibilty_mode_all))
+			Text(text = stringResource(id = R.string.bt_classic_settings_show_time_desc))
 		},
 		trailingContent = {
 			Switch(
-				checked = isLegacyOnly,
+				checked = showTimeStamp,
 				onCheckedChange = onChange,
 				colors = SwitchDefaults.colors(
 					checkedTrackColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -39,6 +38,6 @@ fun BLECompatibilityModeSelector(
 		tonalElevation = 2.dp,
 		modifier = modifier
 			.clip(MaterialTheme.shapes.medium)
-			.clickable { onChange(!isLegacyOnly) }
+			.clickable { onChange(!showTimeStamp) }
 	)
 }

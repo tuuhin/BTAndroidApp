@@ -12,6 +12,11 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDevice
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceType
 import com.eva.bluetoothterminalapp.domain.models.BluetoothMode
+import com.eva.bluetoothterminalapp.domain.settings.enums.BLEScanPeriodTimmings
+import com.eva.bluetoothterminalapp.domain.settings.enums.BLESettingsScanMode
+import com.eva.bluetoothterminalapp.domain.settings.enums.BLESettingsSupportedLayer
+import com.eva.bluetoothterminalapp.domain.settings.models.BLESettingsModel
+import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileScreenState
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenState
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceProfileState
@@ -144,7 +149,7 @@ object PreviewFakes {
 			BLEPropertyTypes.PROPERTY_READ,
 			BLEPropertyTypes.PROPERTY_INDICATE,
 
-		),
+			),
 		descriptors = listOf(
 			FAKE_BLE_DESCRIPTOR_MODEL,
 			FAKE_BLE_DESCRIPTOR_MODEL_WITH_VALUE
@@ -163,4 +168,19 @@ object PreviewFakes {
 		isDiscovering = false,
 		deviceUUIDS = FAKE_UUID_LIST.toImmutableList()
 	)
+
+	val FAKE_BLE_SETTINGS = BLESettingsModel(
+		scanPeriod = BLEScanPeriodTimmings.FIVE_MINUTES,
+		supportedLayer = BLESettingsSupportedLayer.LONG_RANGE,
+		isLegacyOnly = true
+	)
+
+	val FAKE_BLE_SETTINGS_2 = BLESettingsModel(
+		scanPeriod = BLEScanPeriodTimmings.TWELVE_SECONDS,
+		supportedLayer = BLESettingsSupportedLayer.ALL,
+		scanMode = BLESettingsScanMode.LOW_POWER,
+		isLegacyOnly = false
+	)
+
+	val FAKE_BT_SETTINGS = BTSettingsModel()
 }
