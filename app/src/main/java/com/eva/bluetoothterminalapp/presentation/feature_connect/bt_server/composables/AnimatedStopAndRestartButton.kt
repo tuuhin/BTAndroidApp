@@ -15,7 +15,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.eva.bluetoothterminalapp.domain.models.ServerConnectionState
+import androidx.compose.ui.res.stringResource
+import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 
 @Composable
 fun AnimatedStopAndRestartButton(
@@ -44,7 +46,8 @@ fun AnimatedStopAndRestartButton(
 		modifier = modifier
 	) {
 		AnimatedContent(
-			targetState = isConnectionAccepted, label = "Device is accepted or disconnected",
+			targetState = isConnectionAccepted,
+			label = "Device is accepted or disconnected",
 			transitionSpec = {
 				if (targetState > initialState) {
 					slideInVertically { height -> -height } + fadeIn(initialAlpha = .25f) togetherWith
@@ -57,13 +60,13 @@ fun AnimatedStopAndRestartButton(
 		) { isConnected ->
 			if (isConnected) TextButton(onClick = onStop) {
 				Text(
-					text = "Stop",
+					text = stringResource(id = R.string.topbar_action_stop),
 					style = MaterialTheme.typography.titleMedium
 				)
 			}
 			else TextButton(onClick = onRestart) {
 				Text(
-					text = "Restart",
+					text = stringResource(id = R.string.topbar_action_restart),
 					style = MaterialTheme.typography.titleMedium
 				)
 			}

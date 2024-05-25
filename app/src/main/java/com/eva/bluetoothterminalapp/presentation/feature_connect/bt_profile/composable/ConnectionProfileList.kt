@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.data.bluetooth.BTConstants
+import com.eva.bluetoothterminalapp.presentation.util.BTConstants
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 import kotlinx.collections.immutable.ImmutableList
@@ -31,22 +31,26 @@ import java.util.UUID
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ConnectionProfileList(
-	selectedUUID: UUID?,
-	foundUUIDs: ImmutableList<UUID>,
+	selected: UUID?,
+	available: ImmutableList<UUID>,
 	modifier: Modifier = Modifier,
 	isDiscovering: Boolean = false,
 	onUUIDSelect: (UUID) -> Unit = {},
 	contentPadding: PaddingValues = PaddingValues(0.dp),
 	verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(0.dp)
 ) {
-	val isNoUUIDFound by remember(foundUUIDs) {
-		derivedStateOf(foundUUIDs::isEmpty)
+	val isNoUuidFound by remember(available) {
+		derivedStateOf(available::isEmpty)
 	}
 
 	val isLocalInspectionMode = LocalInspectionMode.current
 
 	val uuidsKey: ((Int, UUID) -> Any)? = remember {
 		if (isLocalInspectionMode) null else { _, uuid -> uuid }
+	}
+
+	val uuidContentType: ((Int, UUID) -> Any?) = remember {
+		{ _, _ -> UUID::class.simpleName }
 	}
 
 	LazyColumn(
@@ -60,14 +64,11 @@ fun ConnectionProfileList(
 				supportingContent = { Text(text = stringResource(id = R.string.bl_connect_profile_server_uuid_desc)) },
 			)
 		}
-		item(
-			key = BTConstants.SERVICE_UUID,
-			contentType = UUID::class.simpleName
-		) {
+		item(contentType = UUID::class.simpleName) {
 			SelectableUUIDCard(
 				uuid = BTConstants.SERVICE_UUID,
-				namedUUID = stringResource(id = R.string.bl_connect_profile_server_uuid),
-				isSelected = selectedUUID == BTConstants.SERVICE_UUID,
+				specialName = stringResource(id = R.string.bl_connect_profile_server_uuid),
+				isSelected = selected == BTConstants.SERVICE_UUID,
 				onSelect = { onUUIDSelect(BTConstants.SERVICE_UUID) },
 				modifier = Modifier.fillMaxWidth()
 			)
@@ -91,7 +92,7 @@ fun ConnectionProfileList(
 						.animateItemPlacement(),
 				)
 			}
-		} else if (isNoUUIDFound) {
+		} else if (isNoUuidFound) {
 			item {
 				Text(
 					text = stringResource(id = R.string.bl_connect_profile_device_uuids_not_found),
@@ -104,15 +105,15 @@ fun ConnectionProfileList(
 				)
 			}
 		} else itemsIndexed(
-			items = foundUUIDs,
+			items = available,
 			key = uuidsKey,
-			contentType = { _, _ -> UUID::class.simpleName },
+			contentType = uuidContentType
 		) { _, uuid ->
 			SelectableUUIDCard(
 				uuid = uuid,
-				isSelected = selectedUUID == uuid,
+				isSelected = selected == uuid,
 				onSelect = { onUUIDSelect(uuid) },
-				modifier = Modifier.fillMaxWidth()
+				modifier = Modifier.fillMaxWidth(),
 			)
 		}
 	}
@@ -123,8 +124,8 @@ fun ConnectionProfileList(
 private fun ConnectionProfileListPreview() = BlueToothTerminalAppTheme {
 	Surface {
 		ConnectionProfileList(
-			selectedUUID = null,
-			foundUUIDs = PreviewFakes.FAKE_UUID_LIST.toImmutableList()
+			selected = BTConstants.SERVICE_UUID,
+			available = PreviewFakes.FAKE_UUID_LIST.toImmutableList()
 		)
 	}
 }

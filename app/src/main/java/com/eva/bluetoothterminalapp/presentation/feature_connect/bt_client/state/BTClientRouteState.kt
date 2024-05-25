@@ -1,7 +1,7 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state
 
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
-import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 

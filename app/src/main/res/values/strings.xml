@@ -38,10 +38,10 @@
   <string name="connection_device_bonding">Bonding…</string>
   <string name="connection_bonded">Connection Bonded</string>
   <string name="connection_init">Connecting to device…</string>
-  <string name="connection_init_server">Starting Server…</string>
+  <string name="connection_init_server">Initilizing Server…</string>
   <string name="connection_accepted">Device Connected</string>
   <string name="devices_image_type">Device Image type %s</string>
-  <string name="connection_server_listening">Listening for connection…</string>
+  <string name="connection_server_listening">Listening…</string>
   <string name="bt_server_route">Bluetooth Server</string>
   <!--  Settings receive-->
   <string name="connect_to_client">Connect</string>
@@ -185,4 +185,12 @@
   <!--  Settings auto scroll-->
   <string name="bt_classic_settings_auto_scroll_title">Auto Scroll To End</string>
   <string name="bt_classic_settings_auto_scroll_desc">Auto Scroll to the End of terminal</string>
+  <string name="dialog_action_start">Start</string>
+  <string name="bt_server_close_connection_dialog_title">Stop Server</string>
+  <string name="bt_server_close_connection_dialog_text">A running server must be stopped before leaving</string>
+  <string name="bt_server_start_connection_dialog_title">Start Server</string>
+  <string name="bt_server_start_connection_dialog_text">On starting the server, other devices can connect with this device via bluetooth. Make sure the device is dicoverable before starting the server</string>
+  <string name="topbar_action_stop">Stop</string>
+  <string name="topbar_action_restart">Restart</string>
+  <string name="topbar_action_refresh">Refresh</string>
 </resources>

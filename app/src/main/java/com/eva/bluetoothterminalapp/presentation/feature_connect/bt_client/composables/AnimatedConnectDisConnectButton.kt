@@ -11,6 +11,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -18,9 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 
 @Composable
 fun AnimatedConnectDisconnectButton(
@@ -31,47 +31,35 @@ fun AnimatedConnectDisconnectButton(
 	colors: ButtonColors = ButtonDefaults.textButtonColors(),
 	style: TextStyle = MaterialTheme.typography.titleMedium
 ) {
-	AnimatedContent(
-		targetState = clientState,
-		label = "Connect and disconnect states",
-		transitionSpec = { slideInOutAnimation() },
-		modifier = modifier,
-		contentAlignment = Alignment.Center
-	) { state ->
-		when (state) {
-			ClientConnectionState.CONNECTION_ACCEPTED -> {
-				TextButton(
-					onClick = onDisConnect,
-					colors = colors
-				) {
-					Text(
-						text = stringResource(id = R.string.disconnect_from_client),
-						style = style,
-						textAlign = TextAlign.Center
-					)
+	ProvideTextStyle(value = style) {
+		AnimatedContent(
+			targetState = clientState,
+			label = "Connect and disconnect states",
+			transitionSpec = { slideInOutAnimation() },
+			modifier = modifier,
+			contentAlignment = Alignment.Center
+		) { state ->
+			when (state) {
+				ClientConnectionState.CONNECTION_ACCEPTED, ClientConnectionState.CONNECTION_DEVICE_CONNECTED -> {
+					TextButton(onClick = onDisConnect, colors = colors) {
+						Text(text = stringResource(id = R.string.disconnect_from_client))
+					}
 				}
-			}
 
-			ClientConnectionState.CONNECTION_DENIED, ClientConnectionState.CONNECTION_DISCONNECTED -> {
-				TextButton(
-					onClick = onConnect,
-					colors = colors
-				) {
-					Text(
-						text = stringResource(id = R.string.connect_to_client),
-						style = style,
-						textAlign = TextAlign.Center
-					)
+				ClientConnectionState.CONNECTION_DENIED, ClientConnectionState.CONNECTION_DISCONNECTED -> {
+					TextButton(onClick = onConnect, colors = colors) {
+						Text(text = stringResource(id = R.string.connect_to_client))
+					}
 				}
-			}
 
-			else -> {}
+				else -> {}
+			}
 		}
 	}
 }
 
 private fun AnimatedContentTransitionScope<ClientConnectionState>.slideInOutAnimation(): ContentTransform =
-	if (targetState == ClientConnectionState.CONNECTION_ACCEPTED) {
+	if (targetState == ClientConnectionState.CONNECTION_ACCEPTED || targetState == ClientConnectionState.CONNECTION_DEVICE_CONNECTED) {
 		slideInVertically { height -> -height } + fadeIn(initialAlpha = .25f) togetherWith
 				slideOutVertically { height -> height } + fadeOut(targetAlpha = .25f)
 	} else {

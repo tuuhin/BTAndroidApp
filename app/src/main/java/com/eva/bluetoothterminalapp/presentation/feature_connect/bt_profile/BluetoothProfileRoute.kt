@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -87,8 +88,8 @@ fun BluetoothProfileRoute(
 			) {
 				ExtendedFloatingActionButton(
 					onClick = { selectedUUID?.let(onConnect) },
-					containerColor = MaterialTheme.colorScheme.primaryContainer,
-					contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+					shape = MaterialTheme.shapes.medium,
+					elevation = FloatingActionButtonDefaults.loweredElevation()
 				) {
 					Text(text = stringResource(id = R.string.dialog_action_connect))
 				}
@@ -98,9 +99,9 @@ fun BluetoothProfileRoute(
 		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
 	) { scPadding ->
 		ConnectionProfileList(
-			selectedUUID = selectedUUID,
+			selected = selectedUUID,
 			isDiscovering = state.isDiscovering,
-			foundUUIDs = state.deviceUUIDS,
+			available = state.deviceUUIDS,
 			onUUIDSelect = { uuid -> selectedUUID = uuid },
 			contentPadding = scPadding
 		)

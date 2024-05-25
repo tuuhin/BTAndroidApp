@@ -1,5 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.composables
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -13,13 +14,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import kotlinx.collections.immutable.ImmutableList
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BTMessagesList(
 	messages: ImmutableList<BluetoothMessage>,
 	modifier: Modifier = Modifier,
+	showTimeInMessage: Boolean = true,
 	lazyListState: LazyListState = rememberLazyListState(),
 	isReversed: Boolean = false,
 	scrollToEnd: Boolean = true,
@@ -29,9 +32,9 @@ fun BTMessagesList(
 
 	val isInspectionMode = LocalInspectionMode.current
 
-	val listKeys: ((Int, BluetoothMessage) -> Unit)? = remember {
-		if (!isInspectionMode) { _, message -> message.logTime.toEpochMilliseconds() }
-		else null
+	val listKeys: ((Int, BluetoothMessage) -> Any)? = remember {
+		if (isInspectionMode) null
+		else { _, message -> message.logTime.toEpochMilliseconds() }
 	}
 
 	LaunchedEffect(key1 = messages) {
@@ -57,7 +60,8 @@ fun BTMessagesList(
 		) { _, message ->
 			BTMessageText(
 				message = message,
-				modifier = Modifier.padding(vertical = 1.dp)
+				showTime = showTimeInMessage,
+				modifier = Modifier.padding(vertical = 2.dp)
 			)
 		}
 	}

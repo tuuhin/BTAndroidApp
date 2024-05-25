@@ -16,7 +16,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

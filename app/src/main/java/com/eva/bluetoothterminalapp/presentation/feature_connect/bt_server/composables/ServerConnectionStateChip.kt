@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.models.ServerConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
@@ -48,7 +48,7 @@ fun ServerConnectionStateChip(
 			containerColor = animatedCardColors,
 			labelColor = contentColorFor(connectionState.color)
 		),
-		border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface),
+		border = BorderStroke(1.dp, contentColorFor(connectionState.color)),
 		elevation = elevation,
 		modifier = modifier,
 	)

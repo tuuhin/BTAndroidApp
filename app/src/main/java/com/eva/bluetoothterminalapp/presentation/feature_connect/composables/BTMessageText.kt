@@ -14,33 +14,35 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMessageType
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.presentation.feature_connect.util.toReadableTimeText
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
 fun BTMessageText(
 	message: BluetoothMessage,
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
+	showTime: Boolean = true,
 ) {
 	Row(
 		modifier = modifier.padding(4.dp),
 		horizontalArrangement = Arrangement.spacedBy(12.dp),
-		verticalAlignment = Alignment.CenterVertically
+		verticalAlignment = Alignment.Top
 	) {
-		Text(
-			text = message.logTime.toReadableTimeText(),
-			style = MaterialTheme.typography.titleSmall,
-			color = MaterialTheme.colorScheme.onSurface,
-			fontWeight = FontWeight.Medium
-		)
+		if (showTime)
+			Text(
+				text = message.logTime.toReadableTimeText(),
+				style = MaterialTheme.typography.titleSmall,
+				color = MaterialTheme.colorScheme.onSurface,
+				fontWeight = FontWeight.Medium
+			)
 		Text(
 			text = message.message,
 			style = MaterialTheme.typography.bodyMedium,
 			color = when (message.type) {
-				BluetoothMessageType.MESSAGE_FROM_SERVER -> MaterialTheme.colorScheme.primary
-				BluetoothMessageType.MESSAGE_FROM_CLIENT -> MaterialTheme.colorScheme.secondary
+				BluetoothMessageType.MESSAGE_FROM_OTHER -> MaterialTheme.colorScheme.primary
+				BluetoothMessageType.MESSAGE_FROM_SELF -> MaterialTheme.colorScheme.secondary
 			},
 		)
 	}
@@ -60,6 +62,23 @@ private fun BTMessageTextPreview(
 		BTMessageText(
 			message = BluetoothMessage(
 				message = "Some message",
+				type = type,
+			),
+			modifier = Modifier.padding(12.dp)
+		)
+	}
+}
+
+@PreviewLightDark
+@Composable
+private fun BTMessageTextPreview2(
+	@PreviewParameter(BTMessageTextPreviewParams::class)
+	type: BluetoothMessageType
+) = BlueToothTerminalAppTheme {
+	Surface {
+		BTMessageText(
+			message = BluetoothMessage(
+				message = "This is a very very long message that should be taken into account",
 				type = type,
 			),
 			modifier = Modifier.padding(12.dp)

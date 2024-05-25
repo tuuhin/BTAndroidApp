@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
@@ -77,7 +77,7 @@ fun ClientConnectionStateChip(
 private val ClientConnectionState.textResource: String
 	@Composable
 	get() = when (this) {
-		ClientConnectionState.CONNECTION_DEVICE_FOUND -> stringResource(id = R.string.connection_device_found)
+		ClientConnectionState.CONNECTION_DEVICE_CONNECTED -> stringResource(id = R.string.connection_device_found)
 		ClientConnectionState.CONNECTION_DENIED -> stringResource(id = R.string.connection_denied)
 		ClientConnectionState.CONNECTION_DISCONNECTED -> stringResource(id = R.string.connection_disconnected)
 		ClientConnectionState.CONNECTION_BONDING -> stringResource(id = R.string.connection_device_bonding)
@@ -90,7 +90,7 @@ private val ClientConnectionState.color: Color
 	@Composable
 	get() = when (this) {
 		ClientConnectionState.CONNECTION_INITIALIZING -> MaterialTheme.colorScheme.surfaceContainer
-		ClientConnectionState.CONNECTION_ACCEPTED, ClientConnectionState.CONNECTION_DEVICE_FOUND ->
+		ClientConnectionState.CONNECTION_ACCEPTED, ClientConnectionState.CONNECTION_DEVICE_CONNECTED ->
 			MaterialTheme.colorScheme.primaryContainer
 
 		ClientConnectionState.CONNECTION_DENIED, ClientConnectionState.CONNECTION_DISCONNECTED ->

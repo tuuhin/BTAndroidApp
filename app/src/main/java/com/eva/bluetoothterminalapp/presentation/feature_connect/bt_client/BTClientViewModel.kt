@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMessageType
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
+import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
+import com.eva.bluetoothterminalapp.domain.settings.repository.BTSettingsDataSore
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.EndConnectionEvents
@@ -13,15 +15,22 @@ import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothClient
 import com.eva.bluetoothterminalapp.presentation.navigation.screens.navArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -29,6 +38,7 @@ private const val LOGGER = "BLUETOOTH_CLIENT_VIEW_MODEL"
 
 class BTClientViewModel(
 	private val connector: BluetoothClientConnector,
+	private val settings: BTSettingsDataSore,
 	private val savedStateHandle: SavedStateHandle,
 ) : AppViewModel() {
 
@@ -42,6 +52,12 @@ class BTClientViewModel(
 	override val uiEvents: SharedFlow<UiEvents>
 		get() = _uiEvents.asSharedFlow()
 
+	val btSettings = settings.settingsFlow.stateIn(
+		scope = viewModelScope,
+		started = SharingStarted.WhileSubscribed(2000),
+		initialValue = BTSettingsModel()
+	)
+
 	private val clientConnect: BluetoothClientConnectArgs
 		get() = savedStateHandle.navArgs()
 
@@ -49,6 +65,8 @@ class BTClientViewModel(
 
 	private val _textFieldValueTrimmed: String
 		get() = _clientState.value.textFieldValue.trim()
+
+	private val _localEcho = MutableSharedFlow<BluetoothMessage>()
 
 
 	init {
@@ -113,9 +131,11 @@ class BTClientViewModel(
 
 	private fun sendText() = viewModelScope.launch {
 
+		val isClearTextField = settings.settings.clearInputOnSend
+
 		val message = _textFieldValueTrimmed.trim()
 		if (message.isEmpty()) {
-			_uiEvents.emit(UiEvents.ShowSnackBar("Cannot send empty message"))
+			_uiEvents.emit(UiEvents.ShowToast("Cannot send empty message"))
 			return@launch
 		}
 		val result = connector.sendData(message)
@@ -124,23 +144,27 @@ class BTClientViewModel(
 			onSuccess = {
 				val addedMessage = BluetoothMessage(
 					message = message,
-					type = BluetoothMessageType.MESSAGE_FROM_CLIENT
+					type = BluetoothMessageType.MESSAGE_FROM_SELF
 				)
-				_clientState.update { state ->
-					val updatedList = state.messages.add(addedMessage)
-					state.copy(messages = updatedList, textFieldValue = "")
-				}
+				_localEcho.emit(addedMessage)
+				if (isClearTextField) _clientState.update { state -> state.copy(textFieldValue = "") }
 			},
 			onFailure = { err ->
 				_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "Failed to send message"))
 			},
 		)
-
-
 	}
 
-
-	private fun readIncomingData() = connector.readIncomingData
+	@OptIn(ExperimentalCoroutinesApi::class)
+	private fun readIncomingData() = settings.settingsFlow
+		.map { settings -> settings.localEchoEnabled }
+		.distinctUntilChanged()
+		.flatMapConcat { enabled ->
+			// if local echo enabled then check both flows
+			if (enabled) merge(connector.readIncomingData, _localEcho)
+			// otherwise only the incomming flow
+			else connector.readIncomingData
+		}
 		.catch { err ->
 			Log.e(LOGGER, "SOME_ERROR_OCCURRED", err)
 			_uiEvents.emit(
@@ -172,8 +196,10 @@ class BTClientViewModel(
 
 
 	override fun onCleared() {
-		// close the connection
-		closeConnection()
+		// close the connection if the connection is active
+		if (_connectAsClientJob?.isActive == true) {
+			closeConnection()
+		}
 		// unregister the receivers
 		connector.releaseResources()
 		// log viewmodel is cleared

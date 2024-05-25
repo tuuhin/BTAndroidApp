@@ -10,7 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.BTClientRoute
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.BTClientViewModel
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.CloseConnectionDialog
@@ -37,6 +37,7 @@ fun BTClassicClientScreen(
 	val viewModel = koinViewModel<BTClientViewModel>()
 	val clientState by viewModel.clientState.collectAsStateWithLifecycle()
 	val showCloseDialog by viewModel.showCloseDialog.collectAsStateWithLifecycle()
+	val btSettings by viewModel.btSettings.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(
 		viewModel = viewModel,
@@ -50,6 +51,7 @@ fun BTClassicClientScreen(
 
 	BTClientRoute(
 		state = clientState,
+		btSettings = btSettings,
 		onConnectionEvent = viewModel::onClientConnectionEvents,
 		onBackPress = { viewModel.onCloseConnectionEvent(EndConnectionEvents.OnOpenDisconnectDialog) },
 		navigation = {

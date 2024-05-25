@@ -1,5 +1,8 @@
 package com.eva.bluetoothterminalapp.presentation.util
 
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.BluetoothDeviceType
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.BluetoothMode
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPermission
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPropertyTypes
@@ -9,9 +12,6 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristic
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceType
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMode
 import com.eva.bluetoothterminalapp.domain.settings.enums.BLEScanPeriodTimmings
 import com.eva.bluetoothterminalapp.domain.settings.enums.BLESettingsScanMode
 import com.eva.bluetoothterminalapp.domain.settings.enums.BLESettingsSupportedLayer
