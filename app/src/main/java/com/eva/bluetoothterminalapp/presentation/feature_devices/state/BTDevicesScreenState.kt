@@ -1,7 +1,7 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.state
 
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 

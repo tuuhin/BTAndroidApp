@@ -48,13 +48,13 @@ fun BLEDeviceRoute(
 ) {
 	val scrollConnection = TopAppBarDefaults.pinnedScrollBehavior()
 
-
 	Scaffold(
 		topBar = {
 			BLEDeviceRouteTopBar(
-				scrollConnection = scrollConnection,
+				connectionState = profile.connectionState,
+				onConfigEvent = onConfigEvent,
 				navigation = navigation,
-				onConfigEvent = onConfigEvent
+				scrollConnection = scrollConnection,
 			)
 		},
 		modifier = modifier.nestedScroll(scrollConnection.nestedScrollConnection)

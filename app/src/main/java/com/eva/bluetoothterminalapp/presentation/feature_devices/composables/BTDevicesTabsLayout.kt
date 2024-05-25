@@ -1,8 +1,10 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -28,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.eva.bluetoothterminalapp.presentation.feature_devices.util.BTDeviceTabs
+import com.eva.bluetoothterminalapp.presentation.util.BluetoothTypes
 
 @OptIn(
 	ExperimentalFoundationApi::class,
@@ -38,7 +40,7 @@ import com.eva.bluetoothterminalapp.presentation.feature_devices.util.BTDeviceTa
 fun BTDevicesTabsLayout(
 	pagerState: PagerState,
 	isScanning: Boolean,
-	onTabChange: (BTDeviceTabs) -> Unit,
+	onTabChange: (BluetoothTypes) -> Unit,
 	modifier: Modifier = Modifier,
 	contentPadding: PaddingValues = PaddingValues(0.dp),
 	classicTabContent: @Composable () -> Unit,
@@ -49,15 +51,15 @@ fun BTDevicesTabsLayout(
 	) {
 		AnimatedVisibility(
 			visible = isScanning,
-			enter = slideInVertically() + fadeIn(),
-			exit = slideOutVertically() + fadeOut(),
+			enter = slideInVertically() + fadeIn(tween(easing = FastOutSlowInEasing)),
+			exit = slideOutVertically() + fadeOut(tween(easing = FastOutSlowInEasing)),
 			label = "Is scan running"
 		) {
 			LinearProgressIndicator(
 				modifier = Modifier.fillMaxWidth(),
 				color = MaterialTheme.colorScheme.primary,
 				trackColor = MaterialTheme.colorScheme.surfaceVariant,
-				strokeCap = StrokeCap.Square
+				strokeCap = StrokeCap.Butt
 			)
 		}
 		SecondaryTabRow(
@@ -69,11 +71,13 @@ fun BTDevicesTabsLayout(
 				)
 			}
 		) {
-			BTDeviceTabs.entries.forEach { tab ->
+			BluetoothTypes.entries.forEach { tab ->
 				Tab(
 					selected = tab.tabIdx == pagerState.currentPage,
 					onClick = { onTabChange(tab) },
 					text = { Text(text = stringResource(id = tab.text)) },
+					selectedContentColor = MaterialTheme.colorScheme.onSurface,
+					unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
 				)
 			}
 		}
@@ -91,8 +95,8 @@ fun BTDevicesTabsLayout(
 			)
 		) { idx ->
 			when (idx) {
-				BTDeviceTabs.CLASSIC.tabIdx -> classicTabContent()
-				BTDeviceTabs.LOW_ENERGY.tabIdx -> leTabContent()
+				BluetoothTypes.CLASSIC.tabIdx -> classicTabContent()
+				BluetoothTypes.LOW_ENERGY.tabIdx -> leTabContent()
 				else -> {}
 			}
 		}

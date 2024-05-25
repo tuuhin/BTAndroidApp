@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,6 +45,7 @@ import com.eva.bluetoothterminalapp.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BTDevicesTopBarDropDownMenu(
+	hasDiscoverPermission: Boolean,
 	onStartDiscovery: () -> Unit,
 	modifier: Modifier = Modifier
 ) {
@@ -94,8 +95,8 @@ fun BTDevicesTopBarDropDownMenu(
 			state = rememberTooltipState()
 		) {
 			Icon(
-				imageVector = Icons.Default.Settings,
-				contentDescription = null,
+				imageVector = Icons.Default.MoreVert,
+				contentDescription = stringResource(id = R.string.menu_option_more),
 			)
 		}
 		DropdownMenu(
@@ -161,6 +162,7 @@ fun BTDevicesTopBarDropDownMenu(
 			DropdownMenuItem(
 				text = { Text(text = stringResource(id = R.string.allow_discover)) },
 				onClick = onStartDiscovery,
+				enabled = hasDiscoverPermission,
 				leadingIcon = {
 					Icon(
 						painter = painterResource(id = R.drawable.ic_radar),

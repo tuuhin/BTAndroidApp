@@ -29,8 +29,8 @@ import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameter
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTDeviceRouteTopBar
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTDevicesTabsLayout
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BluetoothDevicesList

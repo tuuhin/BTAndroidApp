@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,7 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.presentation.composables.LocationPermissionCard
 import kotlinx.collections.immutable.ImmutableList
 
@@ -49,15 +50,19 @@ fun BluetoothDevicesList(
 		else { _, device -> device.address }
 	}
 
+	val devicesContentKey: ((Int, BluetoothDeviceModel) -> Any?) = remember {
+		{ _, _ -> BluetoothDeviceModel::class.simpleName }
+	}
+
 
 	LazyColumn(
 		modifier = modifier.fillMaxSize(),
 		verticalArrangement = Arrangement.spacedBy(8.dp),
 		contentPadding = contentPadding
 	) {
-		stickyHeader {
-			PairedDevicesHeader()
-		}
+
+		PairedDevicesHeader()
+
 		if (isPairedListEmpty) {
 			item {
 				Text(
@@ -68,10 +73,11 @@ fun BluetoothDevicesList(
 				)
 			}
 		}
+
 		itemsIndexed(
 			items = pairedDevices,
 			key = devicesKey,
-			contentType = { _, device -> device.javaClass.simpleName }
+			contentType = devicesContentKey,
 		) { _, device ->
 			BluetoothDeviceCard(
 				device = device,
@@ -81,9 +87,9 @@ fun BluetoothDevicesList(
 					.animateItemPlacement()
 			)
 		}
-		stickyHeader {
-			AvailableDevicesHeader()
-		}
+
+		AvailableDevicesHeader()
+
 		if (showLocationPlaceholder) {
 			item {
 				LocationPermissionCard(
@@ -94,10 +100,11 @@ fun BluetoothDevicesList(
 				)
 			}
 		}
+
 		itemsIndexed(
 			items = availableDevices,
 			key = devicesKey,
-			contentType = { _, device -> device.javaClass.simpleName }
+			contentType = devicesContentKey
 		) { _, device ->
 			BluetoothDeviceCard(
 				device = device,
@@ -110,10 +117,11 @@ fun BluetoothDevicesList(
 	}
 }
 
-@Composable
-private fun PairedDevicesHeader(modifier: Modifier = Modifier) {
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.PairedDevicesHeader() = stickyHeader {
 	Column(
-		modifier = modifier
+		modifier = Modifier
 			.background(MaterialTheme.colorScheme.surface)
 			.padding(bottom = 8.dp)
 			.fillMaxWidth(),
@@ -131,10 +139,11 @@ private fun PairedDevicesHeader(modifier: Modifier = Modifier) {
 	}
 }
 
-@Composable
-fun AvailableDevicesHeader(modifier: Modifier = Modifier) {
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.AvailableDevicesHeader() = stickyHeader {
 	Column(
-		modifier = modifier
+		modifier = Modifier
 			.background(MaterialTheme.colorScheme.surface)
 			.padding(bottom = 8.dp)
 			.fillMaxWidth(),
