@@ -7,8 +7,13 @@ option java_generate_equals_and_hash = true;
 message BluetoothClassicSettings{
   BT_CharSet charset = 1;
   BT_Display_Mode displayMode = 2;
-  BT_NewLine_Char newLine = 3;
-  bool showTimeStamp = 4;
+  BT_NewLine_Char newLineForReceive = 3;
+  BT_NewLine_Char newLineForSend = 4;
+  bool showTimeStamp = 5;
+  bool auto_scroll_terminal = 6;
+  bool localEcho = 7;
+  bool clearInputOnSend = 8;
+  bool keepScreenOnWhenConnected = 9;
 }
 
 enum BT_CharSet {

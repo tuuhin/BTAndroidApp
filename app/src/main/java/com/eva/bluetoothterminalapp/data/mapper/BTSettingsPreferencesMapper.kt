@@ -12,7 +12,11 @@ import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
 @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
 fun BluetoothClassicSettings.toModel(): BTSettingsModel = BTSettingsModel(
 	showTimeStamp = showTimeStamp,
-	newLineChar = when (newLine) {
+	autoScrollEnabled = autoScrollTerminal,
+	localEchoEnabled = localEcho,
+	clearInputOnSend = clearInputOnSend,
+	keepScreenOnWhenConnected = keepScreenOnWhenConnected,
+	newLineCharReceive = when (newLineForReceive) {
 		BT_NewLine_Char.NEW_LINE_CR_LF -> BTTerminalNewLineChar.NEW_LINE_CR_LF
 		BT_NewLine_Char.NEW_LINE_CR -> BTTerminalNewLineChar.NEW_LINE_CR
 		BT_NewLine_Char.NEW_LINE_LF -> BTTerminalNewLineChar.NEW_LINE_LF
@@ -21,7 +25,16 @@ fun BluetoothClassicSettings.toModel(): BTSettingsModel = BTSettingsModel(
 		BT_NewLine_Char.NEW_LINE_NONE -> BTTerminalNewLineChar.NEW_LINE_NONE
 		BT_NewLine_Char.UNRECOGNIZED -> BTTerminalNewLineChar.NEW_LINE_CR_LF
 	},
-	charset = when (charset) {
+	newLineCharSend = when (newLineForSend) {
+		BT_NewLine_Char.NEW_LINE_CR_LF -> BTTerminalNewLineChar.NEW_LINE_CR_LF
+		BT_NewLine_Char.NEW_LINE_CR -> BTTerminalNewLineChar.NEW_LINE_CR
+		BT_NewLine_Char.NEW_LINE_LF -> BTTerminalNewLineChar.NEW_LINE_LF
+		BT_NewLine_Char.NEW_LINE_END_OF_TEXT -> BTTerminalNewLineChar.NEW_LINE_END_OF_TEXT
+		BT_NewLine_Char.NEW_LINE_NULL_CHR -> BTTerminalNewLineChar.NEW_LINE_NULL_CHR
+		BT_NewLine_Char.NEW_LINE_NONE -> BTTerminalNewLineChar.NEW_LINE_NONE
+		BT_NewLine_Char.UNRECOGNIZED -> BTTerminalNewLineChar.NEW_LINE_CR_LF
+	},
+	btTerminalCharSet = when (charset) {
 		BT_CharSet.CHAR_SET_UTF_8 -> BTTerminalCharSet.CHAR_SET_UTF_8
 		BT_CharSet.CHAR_SET_UTF_16 -> BTTerminalCharSet.CHAR_SET_UTF_16
 		BT_CharSet.CHAR_SET_UTF_32 -> BTTerminalCharSet.CHAR_SET_UTF_32

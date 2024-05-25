@@ -5,8 +5,13 @@ import com.eva.bluetoothterminalapp.domain.settings.enums.BTTerminalDisplayMode
 import com.eva.bluetoothterminalapp.domain.settings.enums.BTTerminalNewLineChar
 
 data class BTSettingsModel(
-	val charset: BTTerminalCharSet = BTTerminalCharSet.CHAR_SET_UTF_8,
+	val btTerminalCharSet: BTTerminalCharSet = BTTerminalCharSet.CHAR_SET_UTF_8,
 	val showTimeStamp: Boolean = false,
 	val displayMode: BTTerminalDisplayMode = BTTerminalDisplayMode.DISPLAY_MODE_TEXT,
-	val newLineChar: BTTerminalNewLineChar = BTTerminalNewLineChar.NEW_LINE_CR_LF,
+	val newLineCharReceive: BTTerminalNewLineChar = BTTerminalNewLineChar.NEW_LINE_LF,
+	val newLineCharSend: BTTerminalNewLineChar = BTTerminalNewLineChar.NEW_LINE_LF,
+	val autoScrollEnabled: Boolean = false,
+	val localEchoEnabled: Boolean = false,
+	val clearInputOnSend: Boolean = false,
+	val keepScreenOnWhenConnected: Boolean = false,
 )

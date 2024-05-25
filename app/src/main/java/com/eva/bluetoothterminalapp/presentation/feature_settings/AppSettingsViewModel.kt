@@ -69,12 +69,32 @@ class AppSettingsViewModel(
 				btDatastore.onDisplayModeChange(event.mode)
 			}
 
-			is BTSettingsEvent.OnNewLineCharChange -> viewModelScope.launch {
-				btDatastore.onNewLineCharChange(event.newLineChar)
+			is BTSettingsEvent.OnReceiveNewLineCharChanged -> viewModelScope.launch {
+				btDatastore.onNewLineCharChangeForReceive(event.newlineChar)
 			}
 
-			is BTSettingsEvent.OnShowTimestampChange -> viewModelScope.launch {
+			is BTSettingsEvent.OnShowTimeStampValueChanged -> viewModelScope.launch {
 				btDatastore.onShowTimestampChange(event.isChange)
+			}
+
+			is BTSettingsEvent.OnClearInputValueChange -> viewModelScope.launch {
+				btDatastore.onClearInputOnSendValueChange(event.canClear)
+			}
+
+			is BTSettingsEvent.OnLocalEchoValueChange -> viewModelScope.launch {
+				btDatastore.onLocalEchoValueChange(event.isAllowed)
+			}
+
+			is BTSettingsEvent.OnSendNewLineCharacChanged -> viewModelScope.launch {
+				btDatastore.onNewLineCharChangeForSend(event.newlineChar)
+			}
+
+			is BTSettingsEvent.OnKeepScreenOnValueChange -> viewModelScope.launch {
+				btDatastore.onKeepScreenOnConnectedValueChange(event.isKeepScreenOn)
+			}
+
+			is BTSettingsEvent.OnAutoScrollValueChanged -> viewModelScope.launch {
+				btDatastore.onAutoScrollValueChange(event.isEnabled)
 			}
 		}
 	}

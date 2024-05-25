@@ -5,12 +5,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.settings.models.BLESettingsModel
 import com.eva.bluetoothterminalapp.presentation.feature_settings.util.BLESettingsEvent
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
@@ -28,7 +31,9 @@ fun BLESettingsContent(
 		contentPadding = contentPadding,
 		verticalArrangement = Arrangement.spacedBy(8.dp),
 	) {
-
+		bTListItemTitle {
+			Text(text = stringResource(id = R.string.ble_settings_category_scanner))
+		}
 		item {
 			BLEScanPeriodSelector(
 				scanPeriodTime = settings.scanPeriod,
@@ -38,17 +43,13 @@ fun BLESettingsContent(
 		item {
 			BLEScanModeSelector(
 				scanMode = settings.scanMode,
-				onScanModeChange = { mode ->
-					onEvent(BLESettingsEvent.OnScanModeChange(mode))
-				},
+				onScanModeChange = { mode -> onEvent(BLESettingsEvent.OnScanModeChange(mode)) },
 			)
 		}
 		item {
 			BLEPhysicalLayerSelector(
 				selectedLayer = settings.supportedLayer,
-				onLayerChange = { layer ->
-					onEvent(BLESettingsEvent.OnPhyLayerChange(layer))
-				}
+				onLayerChange = { layer -> onEvent(BLESettingsEvent.OnPhyLayerChange(layer)) }
 			)
 		}
 		item {

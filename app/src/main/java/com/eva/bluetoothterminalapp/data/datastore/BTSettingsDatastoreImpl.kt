@@ -12,6 +12,7 @@ import com.eva.bluetoothterminalapp.domain.settings.enums.BTTerminalNewLineChar
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
 import com.eva.bluetoothterminalapp.domain.settings.repository.BTSettingsDataSore
 import com.google.protobuf.InvalidProtocolBufferException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -19,13 +20,15 @@ import kotlinx.coroutines.runBlocking
 import java.io.InputStream
 import java.io.OutputStream
 
-class BTSettingsDatastoreImpl(private val context: Context) : BTSettingsDataSore {
+class BTSettingsDatastoreImpl(
+	private val context: Context
+) : BTSettingsDataSore {
 
 	override val settingsFlow: Flow<BTSettingsModel>
 		get() = context.btClassicSettings.data.map(BluetoothClassicSettings::toModel)
 
 	override val settings: BTSettingsModel
-		get() = runBlocking { settingsFlow.first() }
+		get() = runBlocking(Dispatchers.Default) { settingsFlow.first() }
 
 	override suspend fun onCharsetChange(charSet: BTTerminalCharSet) {
 		context.btClassicSettings.updateData { prefs ->
@@ -51,10 +54,50 @@ class BTSettingsDatastoreImpl(private val context: Context) : BTSettingsDataSore
 		}
 	}
 
-	override suspend fun onNewLineCharChange(newLineChar: BTTerminalNewLineChar) {
+	override suspend fun onNewLineCharChangeForReceive(newLineChar: BTTerminalNewLineChar) {
 		context.btClassicSettings.updateData { prefs ->
 			prefs.copy {
-				newLine = newLineChar.toProto
+				newLineForReceive = newLineChar.toProto
+			}
+		}
+	}
+
+	override suspend fun onNewLineCharChangeForSend(newLineChar: BTTerminalNewLineChar) {
+		context.btClassicSettings.updateData { prefs ->
+			prefs.copy {
+				newLineForSend = newLineChar.toProto
+			}
+		}
+	}
+
+	override suspend fun onLocalEchoValueChange(isLocalEcho: Boolean) {
+		context.btClassicSettings.updateData { prefs ->
+			prefs.copy {
+				localEcho = isLocalEcho
+			}
+		}
+	}
+
+	override suspend fun onClearInputOnSendValueChange(canClear: Boolean) {
+		context.btClassicSettings.updateData { prefs ->
+			prefs.copy {
+				clearInputOnSend = canClear
+			}
+		}
+	}
+
+	override suspend fun onKeepScreenOnConnectedValueChange(isKeepScreenOn: Boolean) {
+		context.btClassicSettings.updateData { prefs ->
+			prefs.copy {
+				keepScreenOnWhenConnected = isKeepScreenOn
+			}
+		}
+	}
+
+	override suspend fun onAutoScrollValueChange(isEnabled: Boolean) {
+		context.btClassicSettings.updateData { prefs ->
+			prefs.copy {
+				autoScrollTerminal = isEnabled
 			}
 		}
 	}

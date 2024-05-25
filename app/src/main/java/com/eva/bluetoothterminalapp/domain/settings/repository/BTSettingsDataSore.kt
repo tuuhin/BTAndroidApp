@@ -18,7 +18,16 @@ interface BTSettingsDataSore {
 
 	suspend fun onDisplayModeChange(mode: BTTerminalDisplayMode)
 
-	suspend fun onNewLineCharChange(newLineChar: BTTerminalNewLineChar)
+	suspend fun onNewLineCharChangeForReceive(newLineChar: BTTerminalNewLineChar)
 
+	suspend fun onNewLineCharChangeForSend(newLineChar: BTTerminalNewLineChar)
+
+	suspend fun onLocalEchoValueChange(isLocalEcho: Boolean)
+
+	suspend fun onClearInputOnSendValueChange(canClear: Boolean)
+
+	suspend fun onKeepScreenOnConnectedValueChange(isKeepScreenOn: Boolean)
+
+	suspend fun onAutoScrollValueChange(isEnabled: Boolean)
 
 }

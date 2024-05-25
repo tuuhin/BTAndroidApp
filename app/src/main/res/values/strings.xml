@@ -127,31 +127,39 @@
   <string name="settings_route_title">Settings</string>
   <string name="cannot_find_email_clients">Cannot find any email clients</string>
   <string name="send_email_via">Send Email Via</string>
+  <!--  Ble settings scan mode-->
   <string name="ble_settings_scan_mode_low_power">Low power</string>
   <string name="ble_settings_scan_mode_balanced">Balanced</string>
   <string name="ble_settings_scan_mode_low_latency">Low Latency</string>
   <string name="ble_settings_scan_mode_title">Scan Mode</string>
+  <!--  Ble settings ble layer-->
   <string name="ble_settings_layer_all">All Supported</string>
   <string name="ble_settings_layer_le_1m">LE 1M (Legacy)</string>
   <string name="ble_settings_layer_le_coded">LE Coded (Long Range)</string>
   <string name="ble_settings_layer_title">Physical Layer (PHY)</string>
+  <!--  Ble settings compatibility mode-->
   <string name="ble_settings_compatibilty_mode_title">Compatibility Mode</string>
   <string name="ble_settings_compatibilty_mode_legacy_only">Legacy Advertising only</string>
   <string name="ble_settings_compatibilty_mode_all">Legacy and Advertising Extension</string>
+  <!--  BLE settings scan period-->
   <string name="ble_settings_scan_period_title">Scan Period</string>
   <string name="ble_settings_scan_period_time_minute">%d minutes</string>
   <string name="ble_settings_scan_period_time_seconds">%d seconds</string>
+  <!--  Settings char set-->
   <string name="bt_classic_settings_char_set_utf_8">UTF-8</string>
   <string name="bt_classic_settings_char_set_utf_16">UTF-16</string>
   <string name="bt_classic_settings_char_set_utf_32">UTF-2</string>
   <string name="bt_classic_settings_char_set_us_ascii">US-ASCII</string>
   <string name="bt_classic_settings_char_set_iso_8859">ISO_8859_1</string>
   <string name="bt_classic_settings_char_sets_title">Charsets</string>
-  <string name="bt_classic_settings_show_time_desc">Time Format (MM:SS)</string>
+  <!--  Settings timestamp-->
   <string name="bt_classic_settings_show_time_title">Show TimeStamp</string>
+  <string name="bt_classic_settings_show_time_desc">Time Format (hh:mm:ss:aa)</string>
+  <!--  Settings display mode-->
   <string name="bt_classic_settings_display_mode_text">Text</string>
   <string name="bt_classic_settings_display_mode_hex">Hex</string>
   <string name="bt_classic_settings_display_mode_title">Display Mode</string>
+  <!--  Settings new line character-->
   <string name="bt_classic_settings_new_line_char_cr_lf">CR+LF</string>
   <string name="bt_classic_settings_new_line_char_lf">LF</string>
   <string name="bt_classic_settings_new_line_char_cr">CR</string>
@@ -159,4 +167,22 @@
   <string name="bt_classic_settings_new_line_char_null">NULL</string>
   <string name="bt_classic_settings_new_line_char_etx">STX/ETX</string>
   <string name="bt_classic_settings_new_line_title">End Of Line Character</string>
+  <!--  Settings Local echo-->
+  <string name="bt_classic_settings_local_echo_title">Local Echo</string>
+  <string name="bt_classic_settings_local_echo_desc">Show send data in termial</string>
+  <!--  Settings keep screen on-->
+  <string name="bt_classic_settings_keep_screen_on_title">Keep screen On</string>
+  <string name="bt_classic_settings_keep_screen_on_desc">Keep screen on when connected</string>
+  <string name="toast_screen_will_be_on">Screen will be on,while the device is connected</string>
+  <!--  Settings Category-->
+  <string name="ble_settings_category_scanner">Scanner</string>
+  <string name="bt_classic_settings_category_terminal">Terminal</string>
+  <string name="bt_classic_settings_category_recv">Receive</string>
+  <string name="bt_classic_settings_category_send">Send</string>
+  <string name="bt_classic_settings_category_misc">Misc.</string>
+  <!--  Settings clean input-->
+  <string name="bt_classic_settings_clear_input_title">Clear Input On Send</string>
+  <!--  Settings auto scroll-->
+  <string name="bt_classic_settings_auto_scroll_title">Auto Scroll To End</string>
+  <string name="bt_classic_settings_auto_scroll_desc">Auto Scroll to the End of terminal</string>
 </resources>
