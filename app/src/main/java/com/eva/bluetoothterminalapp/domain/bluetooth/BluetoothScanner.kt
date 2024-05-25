@@ -1,6 +1,6 @@
 package com.eva.bluetoothterminalapp.domain.bluetooth
 
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 

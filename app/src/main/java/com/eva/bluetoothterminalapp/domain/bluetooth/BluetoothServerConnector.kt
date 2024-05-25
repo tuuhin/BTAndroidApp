@@ -1,7 +1,7 @@
 package com.eva.bluetoothterminalapp.domain.bluetooth
 
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
-import com.eva.bluetoothterminalapp.domain.models.ServerConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 

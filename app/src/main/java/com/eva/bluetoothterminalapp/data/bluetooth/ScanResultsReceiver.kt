@@ -10,7 +10,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 
 @Suppress("DEPRECATION")
 class ScanResultsReceiver(

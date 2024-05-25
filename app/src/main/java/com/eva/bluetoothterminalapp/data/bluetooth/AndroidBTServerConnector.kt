@@ -13,8 +13,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothServerConnector
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
-import com.eva.bluetoothterminalapp.domain.models.ServerConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
+import com.eva.bluetoothterminalapp.domain.settings.repository.BTSettingsDataSore
+import com.eva.bluetoothterminalapp.presentation.util.BTConstants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +35,8 @@ private const val SERVER_LOGGER = "SERVER_LOGGER"
 
 @SuppressLint("MissingPermission")
 class AndroidBTServerConnector(
-	private val context: Context
+	private val context: Context,
+	private val settings: BTSettingsDataSore,
 ) : BluetoothServerConnector {
 
 	private val _btManager by lazy { context.getSystemService<BluetoothManager>() }
@@ -61,18 +64,15 @@ class AndroidBTServerConnector(
 		// if no permission provided return
 		if (!_hasBtPermission) return@withContext
 
-
 		//creating socket based on the choice
-		_serverSocket = if (secure)
-			_btAdapter?.listenUsingRfcommWithServiceRecord(
-				BTConstants.SERVICE_NAME,
-				BTConstants.SERVICE_UUID
-			)
-		else
-			_btAdapter?.listenUsingInsecureRfcommWithServiceRecord(
-				BTConstants.SERVICE_NAME,
-				BTConstants.SERVICE_UUID
-			)
+		_serverSocket = if (secure) _btAdapter?.listenUsingRfcommWithServiceRecord(
+			BTConstants.SERVICE_NAME,
+			BTConstants.SERVICE_UUID
+		)
+		else _btAdapter?.listenUsingInsecureRfcommWithServiceRecord(
+			BTConstants.SERVICE_NAME,
+			BTConstants.SERVICE_UUID
+		)
 
 		Log.d(SERVER_LOGGER, "SOCKET CREATED LISTENING FOR CONNECTION")
 		_connectMode.update { ServerConnectionState.CONNECTION_LISTENING }
@@ -89,7 +89,7 @@ class AndroidBTServerConnector(
 				null
 			}
 			_clientSocket?.let { socket ->
-				_transferService = BluetoothTransferService(socket)
+				_transferService = BluetoothTransferService(socket, settings)
 				_connectMode.update { ServerConnectionState.CONNECTION_ACCEPTED }
 				Log.d(SERVER_LOGGER, "CONNECTED")
 				// as only one client can be connected once thus closing the
@@ -111,8 +111,8 @@ class AndroidBTServerConnector(
 
 
 	override suspend fun sendData(data: String): Result<Boolean> {
-		val infoAsByteArray = data.trim().encodeToByteArray()
-		return _transferService?.writeToStream(infoAsByteArray)
+		val valueString = data.trim()
+		return _transferService?.writeToStream(valueString)
 			?: Result.success(false)
 	}
 

@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.domain.models
+package com.eva.bluetoothterminalapp.domain.bluetooth.models
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant

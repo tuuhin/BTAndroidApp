@@ -1,6 +1,6 @@
 package com.eva.bluetoothterminalapp.domain.bluetooth_le.models
 
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 
 /**
  * Bluetooth Low energy Device Model represents the base device model, that will be mainly

@@ -12,8 +12,8 @@ import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Toys
 import androidx.compose.material.icons.outlined.Watch
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceType
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.BluetoothDeviceType
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 
 val BluetoothDeviceModel.imageVector: ImageVector
 	get() = when (type) {

@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.domain.models
+package com.eva.bluetoothterminalapp.domain.bluetooth.enums
 
 enum class ServerConnectionState {
 

@@ -15,10 +15,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
 import com.eva.bluetoothterminalapp.domain.exceptions.InvalidBluetoothAddressException
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMessage
-import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.settings.repository.BTSettingsDataSore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,7 +44,8 @@ private const val CLIENT_LOGGER = "CLIENT_LOGGER"
 
 @SuppressLint("MissingPermission")
 class AndroidBTClientConnector(
-	private val context: Context
+	private val context: Context,
+	private val btSettings: BTSettingsDataSore,
 ) : BluetoothClientConnector {
 
 	private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -77,7 +79,9 @@ class AndroidBTClientConnector(
 	 * disconnect etc
 	 */
 	private val remoteConnectInfoReceiver = RemoteConnectionReceiver(
-		onResults = { connected, _ -> _connectState.update { connected } },
+		onResults = { newState, _ ->
+			_connectState.update { newState }
+		},
 	)
 
 	override suspend fun connectClient(
@@ -110,7 +114,7 @@ class AndroidBTClientConnector(
 				socket.connect()
 				Log.d(CLIENT_LOGGER, "CLIENT CONNECTED")
 				// set socket
-				_transferService = BluetoothTransferService(socket)
+				_transferService = BluetoothTransferService(socket, btSettings)
 				// set connection mode to accepted
 				_connectState.update { ClientConnectionState.CONNECTION_ACCEPTED }
 			}
@@ -132,7 +136,8 @@ class AndroidBTClientConnector(
 
 		val remoteDeviceUUIDReceiver = RemoteDeviceUUIDReceiver(
 			onReceivedUUIDs = { uuids ->
-				val uuidSet = uuids.toSet().toList()
+				// remove the client-server uuid
+				val uuidSet = uuids.distinct()
 				Log.d(CLIENT_LOGGER, "FOUND UUIDS: $uuids")
 				scope.launch { send(uuidSet) }
 			},
@@ -166,8 +171,10 @@ class AndroidBTClientConnector(
 
 
 	override suspend fun sendData(data: String): Result<Boolean> {
-		val infoAsByteArray = data.trim().encodeToByteArray()
-		return _transferService?.writeToStream(infoAsByteArray)
+		val valueToSend = data.trim()
+		if (valueToSend.isEmpty()) return Result.success(false)
+
+		return _transferService?.writeToStream(value = valueToSend)
 			?: Result.success(false)
 	}
 

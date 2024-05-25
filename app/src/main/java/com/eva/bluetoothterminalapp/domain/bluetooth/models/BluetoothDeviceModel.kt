@@ -1,4 +1,7 @@
-package com.eva.bluetoothterminalapp.domain.models
+package com.eva.bluetoothterminalapp.domain.bluetooth.models
+
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.BluetoothDeviceType
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.BluetoothMode
 
 data class BluetoothDeviceModel(
 	val name: String,

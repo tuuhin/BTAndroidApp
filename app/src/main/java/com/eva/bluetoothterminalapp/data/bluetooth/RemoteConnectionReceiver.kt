@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import com.eva.bluetoothterminalapp.domain.models.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 
 typealias RemoteConnectionChangedCallback = (connected: ClientConnectionState, device: BluetoothDevice?) -> Unit
 
@@ -27,7 +27,7 @@ class RemoteConnectionReceiver(
 
 		val connectionState = when (intent.action) {
 			BluetoothDevice.ACTION_BOND_STATE_CHANGED -> bondStateToConnectionMode(bondState)
-			BluetoothDevice.ACTION_ACL_CONNECTED -> ClientConnectionState.CONNECTION_DEVICE_FOUND
+			BluetoothDevice.ACTION_ACL_CONNECTED -> ClientConnectionState.CONNECTION_DEVICE_CONNECTED
 			BluetoothDevice.ACTION_ACL_DISCONNECTED -> ClientConnectionState.CONNECTION_DISCONNECTED
 			else -> null
 		}

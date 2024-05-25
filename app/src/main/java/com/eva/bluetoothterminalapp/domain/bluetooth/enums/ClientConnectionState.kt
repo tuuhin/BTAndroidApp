@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.domain.models
+package com.eva.bluetoothterminalapp.domain.bluetooth.enums
 
 enum class ClientConnectionState {
 	/**
@@ -9,7 +9,7 @@ enum class ClientConnectionState {
 	/**
 	 * Remote device is recognized by the device
 	 */
-	CONNECTION_DEVICE_FOUND,
+	CONNECTION_DEVICE_CONNECTED,
 
 	/**
 	 * Remote Device connection is accepted

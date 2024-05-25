@@ -3,9 +3,9 @@ package com.eva.bluetoothterminalapp.data.mapper
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceType
-import com.eva.bluetoothterminalapp.domain.models.BluetoothMode
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.BluetoothDeviceType
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.BluetoothMode
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 
 @SuppressLint("MissingPermission")
 fun BluetoothDevice.toDomainModel(): BluetoothDeviceModel = BluetoothDeviceModel(

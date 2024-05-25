@@ -11,11 +11,11 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
-import com.eva.bluetoothterminalapp.data.bluetooth.BTConstants
 import com.eva.bluetoothterminalapp.data.mapper.canIndicate
 import com.eva.bluetoothterminalapp.data.mapper.canNotify
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
 import com.eva.bluetoothterminalapp.data.samples.SampleUUIDReader
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
@@ -24,7 +24,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import com.eva.bluetoothterminalapp.domain.exceptions.BLECharacteristicDontHaveIndicateOrNotifyProperties
 import com.eva.bluetoothterminalapp.domain.exceptions.BLEIndicationORNotificationAlraedyRunningException
 import com.eva.bluetoothterminalapp.domain.exceptions.BLEServiceAndCharacteristicMatchNotFoundException
-import com.eva.bluetoothterminalapp.domain.models.BluetoothDeviceModel
+import com.eva.bluetoothterminalapp.presentation.util.BTConstants
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
