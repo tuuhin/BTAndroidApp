@@ -14,6 +14,8 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.getSystemService
+import com.eva.bluetoothterminalapp.data.bluetooth.receivers.RemoteConnectionReceiver
+import com.eva.bluetoothterminalapp.data.bluetooth.receivers.RemoteDeviceUUIDReceiver
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage

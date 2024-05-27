@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.data.bluetooth
+package com.eva.bluetoothterminalapp.data.bluetooth.receivers
 
 import android.Manifest
 import android.bluetooth.BluetoothDevice

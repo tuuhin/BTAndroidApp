@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.data.bluetooth
+package com.eva.bluetoothterminalapp.data.bluetooth.receivers
 
 import android.bluetooth.BluetoothAdapter
 import android.content.BroadcastReceiver

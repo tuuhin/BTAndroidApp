@@ -13,6 +13,11 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.getSystemService
+import com.eva.bluetoothterminalapp.data.bluetooth.receivers.BluetoothStateReceiver
+import com.eva.bluetoothterminalapp.data.bluetooth.receivers.BondStateChangedReceiver
+import com.eva.bluetoothterminalapp.data.bluetooth.receivers.ScanDiscoveryReceiver
+import com.eva.bluetoothterminalapp.data.bluetooth.receivers.ScanResultsReceiver
+import com.eva.bluetoothterminalapp.data.bluetooth.util.BTScanDiscoveryStatus
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothScanner
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel

@@ -1,9 +1,10 @@
-package com.eva.bluetoothterminalapp.data.bluetooth
+package com.eva.bluetoothterminalapp.data.bluetooth.receivers
 
 import android.bluetooth.BluetoothAdapter
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.eva.bluetoothterminalapp.data.bluetooth.util.BTScanDiscoveryStatus
 
 class ScanDiscoveryReceiver(
 	private val onchange: (BTScanDiscoveryStatus) -> Unit,
