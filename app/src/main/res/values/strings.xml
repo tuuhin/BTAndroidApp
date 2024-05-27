@@ -21,8 +21,6 @@
   <string name="available_scan_devices">Available Devices</string>
   <string name="available_scan_devices_desc">Devices found in the range after a scan</string>
   <string name="devices_route">Bluetooth Devices</string>
-  <string name="bt_connection_type_server">Start Server</string>
-  <string name="bt_connection_type_server_desc">Starts a Bluetooth server to let other devices to connect</string>
   <string name="bt_client_route">Bluetooth Client</string>
   <string name="allow_discover">Allow Discoverability</string>
   <string name="device_discoverable_success">Device is now discoverable %d seconds</string>
@@ -46,18 +44,13 @@
   <!--  Settings receive-->
   <string name="connect_to_client">Connect</string>
   <string name="disconnect_from_client">Disconnect</string>
-  <string name="client_connect_to_device">Connect to a device</string>
-  <string name="client_connect_to_server">Connect to Server</string>
   <string name="dialog_action_connect">Connect</string>
-  <string name="connect_mode_desc">With this app you can connect to a device or connect as a chart client pick your choice</string>
-  <string name="connect_mode_title">Connect Mode</string>
   <!--  Devices-->
   <string name="bluetooth_classic">Bluetooth Classic</string>
   <string name="bluetooth_le">Bluetooth LE</string>
   <string name="bt_le_device">Bluetooth LE Devices</string>
   <string name="bt_le_device_desc">Bluetooth low energy devices in your range</string>
   <string name="location_settings">Location Settings</string>
-  <string name="le_device_info">Device Information</string>
   <string name="le_available_devices">Available Services</string>
   <string name="bl_connect_profile_server_uuid_text">Special UUID</string>
   <string name="bl_connect_profile_server_uuid_desc">This UUID can be used to connect to a server started by this app, on other phone</string>
@@ -75,7 +68,6 @@
   <string name="ble_connection_disconnecting">Disconnecting</string>
   <string name="ble_connection_disconnnected">Disconnected</string>
   <string name="ble_connection_failed">Failed</string>
-  <string name="ble_device_rssi">Ble Device Rssi %dBm</string>
   <string name="ble_property_broadcast">BroadCast</string>
   <string name="ble_property_read">Read</string>
   <string name="ble_property_write_no_resp">Write (No Response)</string>
@@ -89,7 +81,6 @@
   <string name="le_charactertics_not_present">No characteristics found with this service</string>
   <string name="ble_device_profile">LE Device Profile</string>
   <string name="back_arrow">Arrow back</string>
-  <string name="refresh_tooltip_text">Refresh</string>
   <string name="menu_option_more">Menu Option More</string>
   <string name="ble_descriptor_unknown">Unknown Descriptor</string>
   <string name="dialog_action_send">Send</string>
@@ -109,6 +100,7 @@
   <string name="ble_descriptor_readble_value">Value (Readable) : %s</string>
   <string name="ble_property_indicate_stop">Stop Indicate</string>
   <string name="ble_characteristic_properties">Properties : %s</string>
+  <string name="close_ble_connection_dialog">Close connection</string>
   <!--  Inforamtion Route-->
   <string name="information_ble_assign_url">https://www.bluetooth.com/specifications/assigned-numbers/</string>
   <string name="cannot_launch_activity">Cannot launch Activity</string>
@@ -193,4 +185,5 @@
   <string name="topbar_action_stop">Stop</string>
   <string name="topbar_action_restart">Restart</string>
   <string name="topbar_action_refresh">Refresh</string>
+  <string name="close_ble_connection_desc">Are you sure you cant to close this bluetooth low energy gatt connection</string>
 </resources>

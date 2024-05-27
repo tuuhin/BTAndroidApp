@@ -13,6 +13,11 @@ sealed interface BTDevicesScreenEvents {
 	data object StopScan : BTDevicesScreenEvents
 
 	/**
+	 * Check if bluetooth permission has changed or not
+	 */
+	data class OnBTPermissionChanged(val isGranted: Boolean) : BTDevicesScreenEvents
+
+	/**
 	 * Start Bluetooth low energy scan
 	 */
 	data object StartLEDeviceScan : BTDevicesScreenEvents

@@ -18,6 +18,7 @@ import com.eva.bluetoothterminalapp.data.bluetooth.receivers.RemoteConnectionRec
 import com.eva.bluetoothterminalapp.data.bluetooth.receivers.RemoteDeviceUUIDReceiver
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.checkIfStateChangeAllowed
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
 import com.eva.bluetoothterminalapp.domain.exceptions.InvalidBluetoothAddressException
@@ -82,9 +83,17 @@ class AndroidBTClientConnector(
 	 */
 	private val remoteConnectInfoReceiver = RemoteConnectionReceiver(
 		onResults = { newState, _ ->
-			_connectState.update { newState }
+			_connectState.update { previous ->
+				val isOk = checkIfStateChangeAllowed(previous, newState)
+				if (isOk) newState else previous
+			}
 		},
 	)
+
+	init {
+		// remote connection receiver
+		setRemoteConnectionReceiver()
+	}
 
 	override suspend fun connectClient(
 		address: String,
@@ -98,8 +107,10 @@ class AndroidBTClientConnector(
 		val device = _btAdapter?.getRemoteDevice(address)
 			?: return@withContext Result.failure(InvalidBluetoothAddressException())
 
-		// remote connection receiver
-		setRemoteConnectionReceiver()
+		if (secure && device.bondState == BluetoothDevice.BOND_NONE) {
+			// if the device is not bonded bond with the deivce
+			device.createBond()
+		}
 
 		_btClientSocket = if (secure) device.createRfcommSocketToServiceRecord(connectUUID)
 		else device.createInsecureRfcommSocketToServiceRecord(connectUUID)
@@ -133,8 +144,8 @@ class AndroidBTClientConnector(
 	override fun fetchUUIDs(address: String): Flow<List<UUID>> = callbackFlow {
 		val device = _btAdapter?.getRemoteDevice(address)
 
-		if (device?.bondState == BluetoothDevice.BOND_NONE)
-			device.createBond()
+//		if (device?.bondState == BluetoothDevice.BOND_NONE)
+//			device.createBond()
 
 		val remoteDeviceUUIDReceiver = RemoteDeviceUUIDReceiver(
 			onReceivedUUIDs = { uuids ->

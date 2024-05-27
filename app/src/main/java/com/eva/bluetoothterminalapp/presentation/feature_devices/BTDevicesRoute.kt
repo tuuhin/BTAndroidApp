@@ -78,11 +78,6 @@ fun BTDevicesRoute(
 
 	val scope = rememberCoroutineScope()
 
-	LaunchedEffect(pagerState.currentPage) {
-		// when the current page changes stop any running scan
-		onEvent(BTDevicesScreenEvents.OnStopAnyRunningScan)
-	}
-
 	var hasBtPermission by remember(context) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 			mutableStateOf(
@@ -113,6 +108,16 @@ fun BTDevicesRoute(
 	}
 
 	val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior()
+
+	LaunchedEffect(hasBtPermission) {
+		// responds when bt permission has changed
+		onEvent(BTDevicesScreenEvents.OnBTPermissionChanged(hasBtPermission))
+	}
+
+	LaunchedEffect(pagerState.currentPage) {
+		// when the current page changes stop any running scan
+		onEvent(BTDevicesScreenEvents.OnStopAnyRunningScan)
+	}
 
 	Scaffold(
 		topBar = {

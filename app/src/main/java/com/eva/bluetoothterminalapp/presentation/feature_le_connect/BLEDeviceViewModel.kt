@@ -9,6 +9,7 @@ import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEChar
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceConfigEvent
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceProfileState
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.CharacteristicWriteDialogState
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.CloseConnectionEvents
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.SelectedCharacteristicState
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.WriteCharacteristicEvent
 import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothDeviceArgs
@@ -66,6 +67,10 @@ class BLEDeviceViewModel(
 		initialValue = BLEDeviceProfileState()
 	)
 
+	private val _showCloseConnectionDialog = MutableStateFlow<Boolean>(false)
+	val showConnectionDialog = _showCloseConnectionDialog.asStateFlow()
+
+
 	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	override val uiEvents: SharedFlow<UiEvents>
 		get() = _uiEvents.asSharedFlow()
@@ -82,10 +87,9 @@ class BLEDeviceViewModel(
 
 	fun onCharacteristicEvent(event: BLECharacteristicEvent) {
 		when (event) {
-			is BLECharacteristicEvent.OnSelectCharacteristic -> _selectedCharacteristic
-				.update { char ->
-					char.copy(service = event.service, characteristic = event.characteristics)
-				}
+			is BLECharacteristicEvent.OnSelectCharacteristic -> _selectedCharacteristic.update { selected ->
+				selected.copy(service = event.service, characteristic = event.characteristics)
+			}
 
 			BLECharacteristicEvent.OnUnSelectCharactetistic -> onUnselectCharacterisitc()
 
@@ -116,7 +120,6 @@ class BLEDeviceViewModel(
 		}
 	}
 
-	fun stopIndications() = onIndicateOrNotifyBLECharacteristic(false)
 
 	fun onConfigEvents(event: BLEDeviceConfigEvent) {
 		when (event) {
@@ -126,6 +129,19 @@ class BLEDeviceViewModel(
 			BLEDeviceConfigEvent.OnReconnectEvent -> bleConnector.reconnect()
 		}
 	}
+
+	fun onCloseConnectionEvent(event: CloseConnectionEvents) {
+		when (event) {
+			CloseConnectionEvents.CancelCloseConnection -> _showCloseConnectionDialog.update { false }
+			CloseConnectionEvents.ShowCloseConnectionDialog -> _showCloseConnectionDialog.update { true }
+			CloseConnectionEvents.ConfirmCloseDialog -> viewModelScope.launch {
+				bleConnector.close()
+				_uiEvents.emit(UiEvents.NavigateBack)
+			}
+		}
+	}
+
+	private fun stopIndications() = onIndicateOrNotifyBLECharacteristic(false)
 
 	private fun onUnselectCharacterisitc() {
 		if (isNotifyOrIndicationRunning)

@@ -16,6 +16,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
+import com.eva.bluetoothterminalapp.presentation.util.BTConstants
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -254,16 +255,22 @@ class BLEClientGattCallback(
 	) {
 		scope.launch {
 			try {
-				// decode the received value and decide it
+				// for the first time readchar will be null
 				if (_readCharacteristic.value == null) {
-					// read the value for the first time
-					val isSuccess = gatt.readCharacteristic(characteristic)
-					if (isSuccess) return@launch
+
 					val domainModel = characteristic.toDomainModelWithNames(scope, reader)
 						.copy(byteArray = value)
+					// update the model
 					_readCharacteristic.update { domainModel }
+					// read tehe gett desciptor then
+					val configDescriptor = characteristic
+						.getDescriptor(BTConstants.CLIENT_CONFIG_DESCRIPTOR_UUID)
+
+					gatt.readDescriptor(configDescriptor)
+					// set the read value once
 				}
 
+				// then only update the values
 				_readCharacteristic.update { prev ->
 					if (prev == null) return@update prev
 					prev.copy(byteArray = value)

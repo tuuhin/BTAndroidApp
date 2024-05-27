@@ -10,6 +10,7 @@ import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class BTDeviceViewmodel(
@@ -59,6 +61,8 @@ class BTDeviceViewmodel(
 		initialValue = BTDevicesScreenState()
 	)
 
+	private val _hasBtPermission = MutableStateFlow(false)
+
 	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	override val uiEvents: SharedFlow<UiEvents>
 		get() = _uiEvents.asSharedFlow()
@@ -74,9 +78,10 @@ class BTDeviceViewmodel(
 		when (event) {
 			BTDevicesScreenEvents.StartScan -> startNormalScan()
 			BTDevicesScreenEvents.StopScan -> stopNormalScan()
-			is BTDevicesScreenEvents.OnStopAnyRunningScan -> onStopAnyRunningScan()
+			BTDevicesScreenEvents.OnStopAnyRunningScan -> onStopAnyRunningScan()
 			BTDevicesScreenEvents.StartLEDeviceScan -> startLEScan()
 			BTDevicesScreenEvents.StopLEDevicesScan -> stopLEScan()
+			is BTDevicesScreenEvents.OnBTPermissionChanged -> _hasBtPermission.update { event.isGranted }
 		}
 	}
 
@@ -104,8 +109,8 @@ class BTDeviceViewmodel(
 	}
 
 	private fun setPairedDevices() {
-		bluetoothScanner.isBluetoothActive.onEach { isActive ->
-			if (!isActive) return@onEach
+		merge(bluetoothScanner.isBluetoothActive, _hasBtPermission).onEach { canCheck ->
+			if (!canCheck) return@onEach
 			val status = bluetoothScanner.findPairedDevices()
 			status.onFailure { exp ->
 				viewModelScope.launch {

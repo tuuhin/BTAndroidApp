@@ -36,7 +36,7 @@ fun AppSettingsRoute(
 	onBLEEvent: (BLESettingsEvent) -> Unit,
 	onBTEvent: (BTSettingsEvent) -> Unit,
 	modifier: Modifier = Modifier,
-	initialTab: BluetoothTypes = BluetoothTypes.LOW_ENERGY,
+	initialTab: BluetoothTypes = BluetoothTypes.CLASSIC,
 	navigation: @Composable () -> Unit = {},
 ) {
 	val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
