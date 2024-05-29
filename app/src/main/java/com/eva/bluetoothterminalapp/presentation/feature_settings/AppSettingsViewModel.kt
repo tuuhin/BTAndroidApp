@@ -85,7 +85,7 @@ class AppSettingsViewModel(
 				btDatastore.onLocalEchoValueChange(event.isAllowed)
 			}
 
-			is BTSettingsEvent.OnSendNewLineCharacChanged -> viewModelScope.launch {
+			is BTSettingsEvent.OnSendNewLineCharChanged -> viewModelScope.launch {
 				btDatastore.onNewLineCharChangeForSend(event.newlineChar)
 			}
 

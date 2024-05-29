@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -44,6 +46,18 @@ fun InformationRoute(
 	val context = LocalContext.current
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
+	val openAssignedNumbersLambda: () -> Unit = remember {
+		context::openAssignedNumbersList
+	}
+
+	val openGitubLambda: () -> Unit = remember {
+		context::openGithub
+	}
+
+	val openEmailLambda: () -> Unit = remember {
+		context::sendEmailToMe
+	}
+
 	Scaffold(
 		topBar = {
 			MediumTopAppBar(
@@ -56,9 +70,10 @@ fun InformationRoute(
 	) { scPadding ->
 		LazyColumn(
 			contentPadding = scPadding,
-			modifier = Modifier.padding(
-				horizontal = dimensionResource(id = R.dimen.sc_padding)
-			), verticalArrangement = Arrangement.spacedBy(8.dp)
+			verticalArrangement = Arrangement.spacedBy(8.dp),
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(horizontal = dimensionResource(id = R.dimen.sc_padding)),
 		) {
 
 			item {
@@ -105,7 +120,7 @@ fun InformationRoute(
 						)
 					},
 					trailingContent = {
-						TextButton(onClick = context::openAssignedNumbersList) {
+						TextButton(onClick = openAssignedNumbersLambda) {
 							Text(text = stringResource(id = R.string.info_visit_link))
 						}
 					},
@@ -137,7 +152,7 @@ fun InformationRoute(
 						)
 					},
 					trailingContent = {
-						TextButton(onClick = context::openGithub) {
+						TextButton(onClick = openGitubLambda) {
 							Text(text = stringResource(id = R.string.info_visit_github))
 						}
 					},
@@ -147,21 +162,17 @@ fun InformationRoute(
 			}
 			item {
 				ListItem(
-					headlineContent = { Text(text = "Contact") },
-					supportingContent = {
-						Text(
-							text = "Contact developer with email"
-						)
-					},
+					headlineContent = { Text(text = stringResource(id = R.string.contacts)) },
+					supportingContent = { Text(text = stringResource(id = R.string.contracts_with_email)) },
 					leadingContent = {
 						Icon(
 							imageVector = Icons.Outlined.Mail,
-							contentDescription = null
+							contentDescription = stringResource(id = R.string.contacts)
 						)
 					},
 					trailingContent = {
-						TextButton(onClick = context::sendEmailToMe) {
-							Text(text = "Mail")
+						TextButton(onClick = openEmailLambda) {
+							Text(text = stringResource(id = R.string.mail_title))
 						}
 					},
 					tonalElevation = 2.dp,

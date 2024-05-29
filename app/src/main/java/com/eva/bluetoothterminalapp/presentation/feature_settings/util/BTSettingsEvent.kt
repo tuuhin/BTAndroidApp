@@ -15,7 +15,7 @@ sealed interface BTSettingsEvent {
 	data class OnReceiveNewLineCharChanged(val newlineChar: BTTerminalNewLineChar) :
 		BTSettingsEvent
 
-	data class OnSendNewLineCharacChanged(val newlineChar: BTTerminalNewLineChar) : BTSettingsEvent
+	data class OnSendNewLineCharChanged(val newlineChar: BTTerminalNewLineChar) : BTSettingsEvent
 
 	data class OnLocalEchoValueChange(val isAllowed: Boolean) : BTSettingsEvent
 

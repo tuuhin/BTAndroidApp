@@ -186,4 +186,7 @@
   <string name="topbar_action_restart">Restart</string>
   <string name="topbar_action_refresh">Refresh</string>
   <string name="close_ble_connection_desc">Are you sure you cant to close this bluetooth low energy gatt connection</string>
+  <string name="contacts">Contacts</string>
+  <string name="contracts_with_email">Contact developer with email</string>
+  <string name="mail_title">Email</string>
 </resources>

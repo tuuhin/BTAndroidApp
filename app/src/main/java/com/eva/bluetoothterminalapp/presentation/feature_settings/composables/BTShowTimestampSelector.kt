@@ -21,9 +21,7 @@ fun BTShowTimestampSelector(
 ) {
 	ListItem(
 		headlineContent = { Text(text = stringResource(id = R.string.bt_classic_settings_show_time_title)) },
-		supportingContent = {
-			Text(text = stringResource(id = R.string.bt_classic_settings_show_time_desc))
-		},
+		supportingContent = { Text(text = stringResource(id = R.string.bt_classic_settings_show_time_desc)) },
 		trailingContent = {
 			Switch(
 				checked = showTimeStamp,

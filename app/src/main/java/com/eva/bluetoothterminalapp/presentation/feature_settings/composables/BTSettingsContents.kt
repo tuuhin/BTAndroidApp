@@ -8,12 +8,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.domain.settings.enums.BTTerminalCharSet
+import com.eva.bluetoothterminalapp.domain.settings.enums.BTTerminalDisplayMode
+import com.eva.bluetoothterminalapp.domain.settings.enums.BTTerminalNewLineChar
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
 import com.eva.bluetoothterminalapp.presentation.feature_settings.util.BTSettingsEvent
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
@@ -26,6 +30,43 @@ fun BTSettingsContent(
 	modifier: Modifier = Modifier,
 	contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
+
+	val onCharsetChange: (BTTerminalCharSet) -> Unit = remember {
+		{ charset -> onEvent(BTSettingsEvent.OnCharsetChange(charset)) }
+	}
+
+	val onDisplayModeChange: (BTTerminalDisplayMode) -> Unit = remember {
+		{ mode -> onEvent(BTSettingsEvent.OnDisplayModeChange(mode)) }
+	}
+
+	val onShowTimeStampChange: (Boolean) -> Unit = remember {
+		{ show -> onEvent(BTSettingsEvent.OnShowTimeStampValueChanged(show)) }
+	}
+
+	val onScrollEnabled: (Boolean) -> Unit = remember {
+		{ isEnabled -> onEvent(BTSettingsEvent.OnAutoScrollValueChanged(isEnabled)) }
+	}
+
+	val onNewLineRecvCharChange: (BTTerminalNewLineChar) -> Unit = remember {
+		{ newLineChar -> onEvent(BTSettingsEvent.OnReceiveNewLineCharChanged(newLineChar)) }
+	}
+
+	val onNewLineSendCharChange: (BTTerminalNewLineChar) -> Unit = remember {
+		{ newLineChar -> onEvent(BTSettingsEvent.OnSendNewLineCharChanged(newLineChar)) }
+	}
+
+	val onLocalEchoChange: (Boolean) -> Unit = remember {
+		{ isAllowed -> onEvent(BTSettingsEvent.OnLocalEchoValueChange(isAllowed)) }
+	}
+
+	val onKeepScreenOnValueChange: (Boolean) -> Unit = remember {
+		{ keepOn -> onEvent(BTSettingsEvent.OnKeepScreenOnValueChange(keepOn)) }
+	}
+
+	val onClearInputOnSend: (Boolean) -> Unit = remember {
+		{ isAllowed -> onEvent(BTSettingsEvent.OnClearInputValueChange(isAllowed)) }
+	}
+
 	LazyColumn(
 		modifier = modifier,
 		contentPadding = contentPadding,
@@ -37,24 +78,26 @@ fun BTSettingsContent(
 		item {
 			BTCharsetSelector(
 				selectedCharset = settings.btTerminalCharSet,
-				onCharsetChange = { onEvent(BTSettingsEvent.OnCharsetChange(it)) },
+				onCharsetChange = onCharsetChange,
 			)
 		}
 		item {
 			BTDisplayModeSelector(
 				mode = settings.displayMode,
-				onModeChange = { onEvent(BTSettingsEvent.OnDisplayModeChange(it)) },
+				onModeChange = onDisplayModeChange,
 			)
 		}
 		item {
 			BTShowTimestampSelector(
 				showTimeStamp = settings.showTimeStamp,
-				onChange = { onEvent(BTSettingsEvent.OnShowTimeStampValueChanged(it)) },
+				onChange = onShowTimeStampChange,
 			)
 		}
 		item {
-			BTAutoScrollEnabled(isAutoScrollEnabled = settings.autoScrollEnabled,
-				onAutoScrollChange = { onEvent(BTSettingsEvent.OnAutoScrollValueChanged(it)) })
+			BTAutoScrollEnabled(
+				isAutoScrollEnabled = settings.autoScrollEnabled,
+				onAutoScrollChange = onScrollEnabled,
+			)
 		}
 		bTListItemTitle {
 			Text(text = stringResource(id = R.string.bt_classic_settings_category_recv))
@@ -62,7 +105,7 @@ fun BTSettingsContent(
 		item {
 			BTNewLineSelector(
 				newLineChar = settings.newLineCharReceive,
-				onNewLineCharChange = { onEvent(BTSettingsEvent.OnReceiveNewLineCharChanged(it)) },
+				onNewLineCharChange = onNewLineRecvCharChange,
 			)
 		}
 		bTListItemTitle {
@@ -71,19 +114,19 @@ fun BTSettingsContent(
 		item {
 			BTNewLineSelector(
 				newLineChar = settings.newLineCharSend,
-				onNewLineCharChange = { onEvent(BTSettingsEvent.OnSendNewLineCharacChanged(it)) },
+				onNewLineCharChange = onNewLineSendCharChange,
 			)
 		}
 		item {
 			BTLocalEchoSelector(
 				isLocalEcho = settings.localEchoEnabled,
-				onLocalEchoChange = { onEvent(BTSettingsEvent.OnLocalEchoValueChange(it)) },
+				onLocalEchoChange = onLocalEchoChange,
 			)
 		}
 		item {
 			BTClearInputSelector(
 				isClear = settings.clearInputOnSend,
-				onClearSettingsChange = { onEvent(BTSettingsEvent.OnClearInputValueChange(it)) },
+				onClearSettingsChange = onClearInputOnSend,
 			)
 		}
 		bTListItemTitle {
@@ -92,9 +135,7 @@ fun BTSettingsContent(
 		item {
 			BTKeppScreenOnSelector(
 				isKeepScreenTrue = settings.keepScreenOnWhenConnected,
-				onKeepScreenOnSettingsChange = {
-					onEvent(BTSettingsEvent.OnKeepScreenOnValueChange(it))
-				},
+				onKeepScreenOnSettingsChange = onKeepScreenOnValueChange,
 			)
 		}
 	}
