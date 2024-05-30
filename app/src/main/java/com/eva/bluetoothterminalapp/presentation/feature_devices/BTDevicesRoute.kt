@@ -6,7 +6,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -17,7 +16,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -42,7 +40,6 @@ import com.eva.bluetoothterminalapp.presentation.util.BluetoothTypes
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
-import kotlinx.coroutines.launch
 
 @OptIn(
 	ExperimentalFoundationApi::class,
@@ -55,7 +52,6 @@ fun BTDevicesRoute(
 	state: BTDevicesScreenState,
 	onEvent: (BTDevicesScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
-	initialTab: BluetoothTypes = BluetoothTypes.CLASSIC,
 	onSelectDevice: (BluetoothDeviceModel) -> Unit = {},
 	onSelectLeDevice: (BluetoothLEDeviceModel) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
@@ -63,20 +59,9 @@ fun BTDevicesRoute(
 	val context = LocalContext.current
 	val snackBarHostState = LocalSnackBarProvider.current
 
-	val pagerState = rememberPagerState(
-		initialPage = initialTab.tabIdx,
-		pageCount = { BluetoothTypes.entries.size }
-	)
-
-	val currentTab by remember(pagerState.currentPage) {
-		derivedStateOf {
-			if (BluetoothTypes.LOW_ENERGY.tabIdx == pagerState.currentPage)
-				BluetoothTypes.LOW_ENERGY
-			else BluetoothTypes.CLASSIC
-		}
+	var currentTab by remember {
+		mutableStateOf(BluetoothTypes.CLASSIC)
 	}
-
-	val scope = rememberCoroutineScope()
 
 	var hasBtPermission by remember(context) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
@@ -114,9 +99,29 @@ fun BTDevicesRoute(
 		onEvent(BTDevicesScreenEvents.OnBTPermissionChanged(hasBtPermission))
 	}
 
-	LaunchedEffect(pagerState.currentPage) {
-		// when the current page changes stop any running scan
-		onEvent(BTDevicesScreenEvents.OnStopAnyRunningScan)
+	val onCurrentTabChanged: (BluetoothTypes) -> Unit = remember {
+		{ tab ->
+			currentTab = tab
+			onEvent(BTDevicesScreenEvents.OnStopAnyRunningScan)
+		}
+	}
+
+	val onStartScan: () -> Unit = remember {
+		{
+			when (currentTab) {
+				BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StartScan)
+				BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StartLEDeviceScan)
+			}
+		}
+	}
+
+	val onStopScan: () -> Unit = remember {
+		{
+			when (currentTab) {
+				BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StopScan)
+				BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StopLEDevicesScan)
+			}
+		}
 	}
 
 	Scaffold(
@@ -125,18 +130,8 @@ fun BTDevicesRoute(
 				isScanning = isScanning,
 				canShowScanOption = showScanButton,
 				navigation = navigation,
-				startScan = {
-					when (currentTab) {
-						BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StartScan)
-						BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StartLEDeviceScan)
-					}
-				},
-				stopScan = {
-					when (currentTab) {
-						BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StopScan)
-						BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StopLEDevicesScan)
-					}
-				},
+				startScan = onStartScan,
+				stopScan = onStopScan,
 				scrollBehavior = scrollBehaviour
 			)
 		},
@@ -152,13 +147,9 @@ fun BTDevicesRoute(
 				.padding(scPadding)
 		) {
 			BTDevicesTabsLayout(
-				pagerState = pagerState,
 				isScanning = isScanning,
-				onTabChange = { tab ->
-					scope.launch {
-						pagerState.animateScrollToPage(tab.tabIdx)
-					}
-				},
+				onCurrentTabChanged = onCurrentTabChanged,
+				initialTab = BluetoothTypes.CLASSIC,
 				classicTabContent = {
 					BluetoothDevicesList(
 						pairedDevices = state.pairedDevices,
@@ -232,7 +223,6 @@ private fun BTDeviceRouteWithLEDevicesPreview(
 		isScanning = false,
 		state = state,
 		onEvent = {},
-		initialTab = BluetoothTypes.LOW_ENERGY,
 		onSelectDevice = { }
 	)
 }

@@ -10,6 +10,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -56,6 +57,14 @@ fun BTDevicesScreen(
 	val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 	val scope = rememberCoroutineScope()
 
+	val onShowDrawer: () -> Unit = remember {
+		{
+			scope.launch {
+				drawerState.open()
+			}
+		}
+	}
+
 	ModalNavigationDrawer(
 		drawerState = drawerState,
 		gesturesEnabled = true,
@@ -82,9 +91,7 @@ fun BTDevicesScreen(
 				navigator.navigate(BTLEClientScreenDestination(args), onlyIfResumed = true)
 			},
 			navigation = {
-				IconButton(
-					onClick = { scope.launch { drawerState.open() } }
-				) {
+				IconButton(onClick = onShowDrawer) {
 					Icon(
 						imageVector = Icons.Default.Menu,
 						contentDescription = stringResource(id = R.string.menu_option_more)

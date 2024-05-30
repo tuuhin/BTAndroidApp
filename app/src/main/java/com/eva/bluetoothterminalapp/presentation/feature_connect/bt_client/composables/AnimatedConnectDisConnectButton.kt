@@ -40,7 +40,7 @@ fun AnimatedConnectDisconnectButton(
 			contentAlignment = Alignment.Center
 		) { state ->
 			when (state) {
-				ClientConnectionState.CONNECTION_ACCEPTED, ClientConnectionState.CONNECTION_DEVICE_CONNECTED -> {
+				ClientConnectionState.CONNECTION_ACCEPTED -> {
 					TextButton(onClick = onDisConnect, colors = colors) {
 						Text(text = stringResource(id = R.string.disconnect_from_client))
 					}

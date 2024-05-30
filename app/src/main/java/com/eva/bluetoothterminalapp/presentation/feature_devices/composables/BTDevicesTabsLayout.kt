@@ -7,8 +7,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,20 +17,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
-import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.presentation.util.BluetoothTypes
+import com.eva.bluetoothterminalapp.presentation.util.textResource
+import kotlinx.coroutines.launch
 
 @OptIn(
 	ExperimentalFoundationApi::class,
@@ -38,22 +45,50 @@ import com.eva.bluetoothterminalapp.presentation.util.BluetoothTypes
 )
 @Composable
 fun BTDevicesTabsLayout(
-	pagerState: PagerState,
 	isScanning: Boolean,
-	onTabChange: (BluetoothTypes) -> Unit,
+	onCurrentTabChanged: (BluetoothTypes) -> Unit,
 	modifier: Modifier = Modifier,
+	initialTab: BluetoothTypes = BluetoothTypes.CLASSIC,
 	contentPadding: PaddingValues = PaddingValues(0.dp),
 	classicTabContent: @Composable () -> Unit,
 	leTabContent: @Composable () -> Unit,
 ) {
+
+	val scope = rememberCoroutineScope()
+	val onPageChange by rememberUpdatedState(newValue = onCurrentTabChanged)
+
+	val pagerState = rememberPagerState(
+		initialPage = initialTab.tabIdx,
+		pageCount = { BluetoothTypes.entries.size }
+	)
+
+	val selectedTab by remember(pagerState.currentPage) {
+		derivedStateOf { pagerState.currentPage }
+	}
+
+	val onTabChange: (Int) -> Unit = remember {
+		{ index ->
+			if (selectedTab != index) scope.launch {
+				pagerState.animateScrollToPage(index)
+			}
+		}
+	}
+
+	LaunchedEffect(selectedTab) {
+		val tab = if (BluetoothTypes.LOW_ENERGY.tabIdx == selectedTab)
+			BluetoothTypes.LOW_ENERGY
+		else BluetoothTypes.CLASSIC
+		onPageChange(tab)
+	}
+
 	Column(
 		verticalArrangement = Arrangement.spacedBy(2.dp)
 	) {
 		AnimatedVisibility(
 			visible = isScanning,
-			enter = slideInVertically() + fadeIn(tween(easing = FastOutSlowInEasing)),
-			exit = slideOutVertically() + fadeOut(tween(easing = FastOutSlowInEasing)),
-			label = "Is scan running"
+			enter = slideInHorizontally() + fadeIn(tween(easing = FastOutSlowInEasing)),
+			exit = slideOutHorizontally() + fadeOut(tween(easing = FastOutSlowInEasing)),
+			label = "Indication that scan is running"
 		) {
 			LinearProgressIndicator(
 				modifier = Modifier.fillMaxWidth(),
@@ -62,8 +97,8 @@ fun BTDevicesTabsLayout(
 				strokeCap = StrokeCap.Butt
 			)
 		}
-		SecondaryTabRow(
-			selectedTabIndex = pagerState.currentPage,
+		PrimaryTabRow(
+			selectedTabIndex = selectedTab,
 			divider = {
 				HorizontalDivider(
 					color = MaterialTheme.colorScheme.outlineVariant,
@@ -73,9 +108,9 @@ fun BTDevicesTabsLayout(
 		) {
 			BluetoothTypes.entries.forEach { tab ->
 				Tab(
-					selected = tab.tabIdx == pagerState.currentPage,
-					onClick = { onTabChange(tab) },
-					text = { Text(text = stringResource(id = tab.text)) },
+					selected = tab.tabIdx == selectedTab,
+					onClick = { onTabChange(tab.tabIdx) },
+					text = { Text(text = tab.textResource) },
 					selectedContentColor = MaterialTheme.colorScheme.onSurface,
 					unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
 				)

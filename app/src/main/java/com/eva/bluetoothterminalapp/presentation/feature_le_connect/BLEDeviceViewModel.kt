@@ -82,7 +82,8 @@ class BLEDeviceViewModel(
 		get() = bleConnector.isNotifyOrIndicationRunning.value
 
 	init {
-		navArgs?.address?.let(bleConnector::connect)
+		// starts the connection
+		initiateConnection()
 	}
 
 	fun onCharacteristicEvent(event: BLECharacteristicEvent) {
@@ -164,6 +165,14 @@ class BLEDeviceViewModel(
 		// any of the reader is started match the uuids to check for data
 		val outResult = if (isSameCharacteristic) readCharactertistic else selected.characteristic
 		return outResult.copy(isSetNotificationActive = isSetNoticationActive)
+	}
+
+	private fun initiateConnection() {
+		navArgs?.address?.let { deviceAddress ->
+			bleConnector.connect(deviceAddress)
+		} ?: viewModelScope.launch {
+			_uiEvents.emit(UiEvents.ShowSnackBar("Didn't find any address to connect "))
+		}
 	}
 
 	private fun onWriteBLECharacteristic() {

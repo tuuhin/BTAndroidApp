@@ -1,18 +1,14 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
@@ -25,9 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -35,17 +29,15 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.BTMessagesWithServerState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.BTServerTopAppBar
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.ServerConnectionStateChip
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerRouteState
-import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTMessagesList
 import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.SendCommandTextField
 import com.eva.bluetoothterminalapp.presentation.feature_connect.util.KeepScreenOnEffect
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
@@ -99,31 +91,15 @@ fun BTServerRoute(
 				.imePadding(),
 			verticalArrangement = Arrangement.spacedBy(4.dp)
 		) {
-			Box(
+			BTMessagesWithServerState(
+				connectionState = state.connectionMode,
+				messages = state.messages,
+				scrollToEnd = btSettings.autoScrollEnabled,
+				showTimestamps = btSettings.showTimeStamp,
 				modifier = Modifier
 					.fillMaxWidth()
 					.weight(1f)
-					.clip(MaterialTheme.shapes.medium)
-					.background(MaterialTheme.colorScheme.surfaceContainer),
-			) {
-				ServerConnectionStateChip(
-					connectionState = state.connectionMode,
-					modifier = Modifier
-						.offset(y = dimensionResource(id = R.dimen.connection_chip_offset))
-						.align(Alignment.TopCenter)
-						.zIndex(1f)
-				)
-				BTMessagesList(
-					messages = state.messages,
-					scrollToEnd = btSettings.autoScrollEnabled,
-					showTimeInMessage = btSettings.showTimeStamp,
-					contentPadding = PaddingValues(
-						horizontal = dimensionResource(id = R.dimen.messages_list_horizontal_padding),
-						vertical = dimensionResource(id = R.dimen.messages_list_vertical_padding)
-					),
-					modifier = Modifier.fillMaxSize()
-				)
-			}
+			)
 			HorizontalDivider(
 				color = MaterialTheme.colorScheme.outlineVariant,
 				modifier = Modifier.padding(

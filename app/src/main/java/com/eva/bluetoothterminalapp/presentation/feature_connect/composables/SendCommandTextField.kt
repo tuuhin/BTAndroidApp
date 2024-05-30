@@ -101,7 +101,7 @@ fun SendCommandTextField(
 				) {
 					Icon(
 						painter = painterResource(id = R.drawable.ic_send),
-						contentDescription = "Send",
+						contentDescription = stringResource(id = R.string.dialog_action_send),
 					)
 				}
 			}

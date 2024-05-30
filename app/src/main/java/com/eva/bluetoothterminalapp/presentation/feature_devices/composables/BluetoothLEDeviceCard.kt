@@ -121,10 +121,7 @@ fun BluetoothLEDeviceCard(
 			) {
 				Icon(
 					imageVector = Icons.Default.SignalCellularAlt,
-					contentDescription = stringResource(
-						R.string.device_rssi_value,
-						leDeviceModel.rssi
-					),
+					contentDescription = stringResource(R.string.device_rssi_value),
 					modifier = Modifier.size(24.dp),
 					tint = MaterialTheme.colorScheme.onPrimaryContainer
 				)

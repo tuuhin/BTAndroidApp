@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.composables
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -17,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import kotlinx.collections.immutable.ImmutableList
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BTMessagesList(
 	messages: ImmutableList<BluetoothMessage>,

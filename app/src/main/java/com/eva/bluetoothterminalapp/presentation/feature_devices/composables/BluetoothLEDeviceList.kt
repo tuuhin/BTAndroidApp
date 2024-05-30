@@ -1,13 +1,13 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -48,23 +48,14 @@ fun BluetoothLeDeviceList(
 		{ _, _ -> BluetoothLEDeviceModel::class.simpleName }
 	}
 
-
 	Crossfade(
 		targetState = hasLocationPermission,
 		label = "Location Permission",
-		animationSpec = tween(400),
+		modifier = modifier,
 	) { isGranted ->
-
-		if (!isGranted) Box(
-			modifier = modifier,
-			contentAlignment = Alignment.Center
-		) {
-			LocationPermissionBox(onLocationPermsGranted = onLocationPermissionChanged)
-		}
-		else LazyColumn(
+		if (isGranted) LazyColumn(
 			verticalArrangement = Arrangement.spacedBy(8.dp),
 			contentPadding = contentPadding,
-			modifier = modifier
 		) {
 			BLEDevicesHeader()
 			itemsIndexed(
@@ -80,6 +71,13 @@ fun BluetoothLeDeviceList(
 						.animateItemPlacement()
 				)
 			}
+		} else Box(
+			modifier = Modifier.fillMaxSize(),
+			contentAlignment = Alignment.Center
+		) {
+			LocationPermissionBox(
+				onLocationPermsGranted = onLocationPermissionChanged
+			)
 		}
 	}
 }

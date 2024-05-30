@@ -90,7 +90,7 @@
   <string name="ble_characteristic_not_selected_desc">Select an characteristic in order to continue</string>
   <string name="write_characteristic_dialog_title">Write Characteristic</string>
   <string name="write_characteristic_dialog_desc">Enter text value in utf-8 to write to.</string>
-  <string name="device_rssi_value">Current Device RSSI value %d</string>
+  <string name="device_rssi_value">Current Device RSSI value</string>
   <string name="bluetooth_device_mac_address">MAC : %s</string>
   <string name="ble_value_hex">Value Hex (0x) : %s</string>
   <string name="ble_disable_notification">Notfication are dissabled</string>
@@ -185,7 +185,7 @@
   <string name="topbar_action_stop">Stop</string>
   <string name="topbar_action_restart">Restart</string>
   <string name="topbar_action_refresh">Refresh</string>
-  <string name="close_ble_connection_desc">Are you sure you cant to close this bluetooth low energy gatt connection</string>
+  <string name="close_ble_connection_desc">Are you sure you cannot to close this bluetooth low energy gatt connection</string>
   <string name="contacts">Contacts</string>
   <string name="contracts_with_email">Contact developer with email</string>
   <string name="mail_title">Email</string>
