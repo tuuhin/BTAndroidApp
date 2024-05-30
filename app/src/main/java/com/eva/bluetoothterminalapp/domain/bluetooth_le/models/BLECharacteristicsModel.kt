@@ -12,7 +12,7 @@ data class BLECharacteristicsModel(
 	val instanceId: Int,
 	val uuid: UUID,
 	val permission: BLEPermission,
-	val properties: List<BLEPropertyTypes>,
+	val properties: ImmutableList<BLEPropertyTypes>,
 	val writeType: BLEWriteTypes,
 	val descriptors: ImmutableList<BLEDescriptorModel> = persistentListOf(),
 	val byteArray: ByteArray = byteArrayOf(),

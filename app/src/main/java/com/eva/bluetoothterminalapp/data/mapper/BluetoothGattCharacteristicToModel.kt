@@ -7,6 +7,8 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPropertyTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEWriteTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 
 fun BluetoothGattCharacteristic.toDomainModel(probableName: String? = null): BLECharacteristicsModel =
@@ -82,24 +84,27 @@ private val BluetoothGattCharacteristic.permission: BLEPermission
 		else -> BLEPermission.PERMISSION_UNKNOWN
 	}
 
-private val BluetoothGattCharacteristic.bleProperties: List<BLEPropertyTypes>
-	get() = buildList<BLEPropertyTypes> {
-		if (properties and BluetoothGattCharacteristic.PROPERTY_BROADCAST != 0)
-			add(BLEPropertyTypes.PROPERTY_BROADCAST)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0)
-			add(BLEPropertyTypes.PROPERTY_INDICATE)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0)
-			add(BLEPropertyTypes.PROPERTY_NOTIFY)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_READ != 0)
-			add(BLEPropertyTypes.PROPERTY_READ)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0)
-			add(BLEPropertyTypes.PROPERTY_WRITE)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_EXTENDED_PROPS != 0)
-			add(BLEPropertyTypes.PROPERTY_EXTENDED_PROPS)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE != 0)
-			add(BLEPropertyTypes.PROPERTY_SIGNED_WRITE)
-		if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0)
-			add(BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE)
+private val BluetoothGattCharacteristic.bleProperties: ImmutableList<BLEPropertyTypes>
+	get() {
+		val properties = buildList {
+			if (properties and BluetoothGattCharacteristic.PROPERTY_BROADCAST != 0)
+				add(BLEPropertyTypes.PROPERTY_BROADCAST)
+			if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0)
+				add(BLEPropertyTypes.PROPERTY_INDICATE)
+			if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0)
+				add(BLEPropertyTypes.PROPERTY_NOTIFY)
+			if (properties and BluetoothGattCharacteristic.PROPERTY_READ != 0)
+				add(BLEPropertyTypes.PROPERTY_READ)
+			if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0)
+				add(BLEPropertyTypes.PROPERTY_WRITE)
+			if (properties and BluetoothGattCharacteristic.PROPERTY_EXTENDED_PROPS != 0)
+				add(BLEPropertyTypes.PROPERTY_EXTENDED_PROPS)
+			if (properties and BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE != 0)
+				add(BLEPropertyTypes.PROPERTY_SIGNED_WRITE)
+			if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0)
+				add(BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE)
+		}
+		return persistentListOf<BLEPropertyTypes>().addAll(properties)
 	}
 
 

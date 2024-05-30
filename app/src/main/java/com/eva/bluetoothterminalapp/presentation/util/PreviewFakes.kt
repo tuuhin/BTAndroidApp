@@ -106,18 +106,18 @@ object PreviewFakes {
 
 	val FAKE_BLE_DESCRIPTOR_MODEL = BLEDescriptorModel(
 		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
-		permissions = listOf(BLEPermission.PERMISSION_WRITE),
+		permissions = persistentListOf(BLEPermission.PERMISSION_WRITE),
 	)
 
 	val FAKE_BLE_DESCRIPTOR_MODEL_WITH_VALUE = BLEDescriptorModel(
 		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
-		permissions = listOf(BLEPermission.PERMISSION_READ),
+		permissions = persistentListOf(BLEPermission.PERMISSION_READ),
 		byteArray = byteArrayOf(0x4B, 0x6F, 0x6C, 0x74, 0x69, 0x6E)
 	)
 
 	val FAKE_BLE_DESCRIPTOR_WITH_ENABLE_NOTIFICATION_VALUE = BLEDescriptorModel(
 		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
-		permissions = listOf(BLEPermission.PERMISSION_READ),
+		permissions = persistentListOf(BLEPermission.PERMISSION_READ),
 		byteArray = byteArrayOf(0x00, 0x00)
 	)
 
@@ -126,7 +126,7 @@ object PreviewFakes {
 		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
 		permission = BLEPermission.PERMISSION_WRITE,
 		writeType = BLEWriteTypes.TYPE_UNKNOWN,
-		properties = listOf(
+		properties = persistentListOf(
 			BLEPropertyTypes.PROPERTY_WRITE,
 			BLEPropertyTypes.PROPERTY_READ,
 			BLEPropertyTypes.PROPERTY_INDICATE,
@@ -144,7 +144,7 @@ object PreviewFakes {
 		uuid = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
 		permission = BLEPermission.PERMISSION_WRITE,
 		writeType = BLEWriteTypes.TYPE_UNKNOWN,
-		properties = listOf(
+		properties = persistentListOf(
 			BLEPropertyTypes.PROPERTY_WRITE,
 			BLEPropertyTypes.PROPERTY_READ,
 			BLEPropertyTypes.PROPERTY_INDICATE,
