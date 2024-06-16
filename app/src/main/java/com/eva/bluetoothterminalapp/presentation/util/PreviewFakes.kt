@@ -80,17 +80,6 @@ object PreviewFakes {
 		serviceType = BLEServicesTypes.PRIMARY
 	)
 
-	val FAKE_SERVICE_WITH_CHARACTERISTICS = BLEServiceModel(
-		serviceId = 1,
-		serviceUUID = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
-		serviceType = BLEServicesTypes.SECONDARY
-	).apply {
-		characteristic = persistentListOf<BLECharacteristicsModel>(
-			FAKE_BLE_CHARACTERISTIC_MODEL,
-			FAKE_BLE_CHARACTERISTIC_MODEL_WITH_DATA
-		)
-	}
-
 	val FAKE_BLE_PROFILE_STATE = BLEDeviceProfileState(
 		device = FAKE_DEVICE_MODEL,
 		connectionState = BLEConnectionState.CONNECTED,
@@ -158,6 +147,17 @@ object PreviewFakes {
 	).apply {
 		probableName = "Compose"
 
+	}
+
+	val FAKE_SERVICE_WITH_CHARACTERISTICS = BLEServiceModel(
+		serviceId = 1,
+		serviceUUID = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
+		serviceType = BLEServicesTypes.SECONDARY
+	).apply {
+		characteristic = persistentListOf<BLECharacteristicsModel>(
+			FAKE_BLE_CHARACTERISTIC_MODEL,
+			FAKE_BLE_CHARACTERISTIC_MODEL_WITH_DATA
+		)
 	}
 
 	val FAKE_UUID_LIST = List(10) {

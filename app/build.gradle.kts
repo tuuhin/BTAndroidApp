@@ -4,6 +4,7 @@ plugins {
 	alias(libs.plugins.google.devtools.ksp)
 	alias(libs.plugins.kotlinx.serialization)
 	alias(libs.plugins.google.protobuf)
+	alias(libs.plugins.compose.compiler)
 	id("kotlin-parcelize")
 }
 
@@ -52,14 +53,18 @@ android {
 	buildFeatures {
 		compose = true
 	}
-	composeOptions {
-		kotlinCompilerExtensionVersion = "1.5.5"
-	}
 	packaging {
 		resources {
 			excludes += "/META-INF/{AL2.0,LGPL2.1}"
 		}
 	}
+}
+
+composeCompiler {
+	enableStrongSkippingMode = true
+	metricsDestination = layout.buildDirectory.dir("compose_compiler")
+	reportsDestination = layout.buildDirectory.dir("compose_compiler")
+	stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
 }
 
 dependencies {

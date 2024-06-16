@@ -4,22 +4,22 @@ compose_destination_animation_version = "1.10.2"
 compose_destination_core_version = "1.10.2"
 coreSplashscreen = "1.0.1"
 datastore = "1.1.1"
-kotlin = "1.9.20"
+kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 kotlinxCollectionsImmutable = "0.3.7"
 kotlinxDatetime = "0.6.0"
-kotlinxSerializationJson = "1.6.3"
+kotlinxSerializationJson = "1.7.0"
 ksp = "1.10.2"
-lifecycleRuntimeKtx = "2.8.1"
+lifecycleRuntimeKtx = "2.8.2"
 activityCompose = "1.9.0"
-composeBom = "2024.05.00"
+composeBom = "2024.06.00"
 koinBom = "3.5.6"
-materialIconsExtended = "1.6.7"
-ksp_version = "1.9.20-1.0.14"
-protobufJavalite = "4.27.0"
+materialIconsExtended = "1.6.8"
+ksp_version = "2.0.0-1.0.21"
+protobufJavalite = "4.27.1"
 protobuf_version = "0.9.4"
 
 [libraries]
@@ -70,6 +70,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google_devtools_ksp = { id = "com.google.devtools.ksp", version.ref = "ksp_version" }
 google_protobuf = { id = "com.google.protobuf", version.ref = "protobuf_version" }
 kotlinx_serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
