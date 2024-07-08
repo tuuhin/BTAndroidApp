@@ -12,7 +12,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.eva.bluetoothterminalapp.presentation.navigation.AppNavigation
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
@@ -38,13 +37,8 @@ class MainActivity : ComponentActivity() {
 					// A surface container using the 'background' color from the theme
 					CompositionLocalProvider(
 						LocalSnackBarProvider provides snackBarHostState,
-						LocalLifecycleOwner provides this
 					) {
-						Surface(
-							color = MaterialTheme.colorScheme.background,
-						) {
-							AppNavigation()
-						}
+						AppNavigation()
 					}
 				}
 			}
