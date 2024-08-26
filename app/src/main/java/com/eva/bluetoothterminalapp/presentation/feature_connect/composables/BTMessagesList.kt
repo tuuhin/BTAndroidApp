@@ -32,7 +32,7 @@ fun BTMessagesList(
 
 	val listKeys: ((Int, BluetoothMessage) -> Any)? = remember {
 		if (isInspectionMode) null
-		else { _, message -> message.logTime.toEpochMilliseconds() }
+		else { _, message -> message.uuid.toString() }
 	}
 
 	LaunchedEffect(key1 = messages) {
