@@ -26,16 +26,15 @@ import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothDevice
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RootNavGraph
-@Destination(
+@Destination<RootGraph>(
 	route = Routes.BLE_CLIENT_ROUTE,
 	style = RouteAnimation::class,
-	navArgsDelegate = BluetoothDeviceArgs::class
+	navArgs = BluetoothDeviceArgs::class
 )
 @Composable
 fun BTLEClientScreen(

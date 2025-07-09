@@ -11,32 +11,38 @@ import androidx.compose.animation.fadeOut
 import androidx.navigation.NavBackStackEntry
 import com.ramcosta.composedestinations.spec.DestinationStyle
 
-object RouteAnimation : DestinationStyle.Animated {
-	override fun AnimatedContentTransitionScope<NavBackStackEntry>.enterTransition(): EnterTransition {
-		return slideIntoContainer(
-			AnimatedContentTransitionScope.SlideDirection.Up,
-			animationSpec = tween(easing = EaseInOut)
-		) + fadeIn(animationSpec = tween(easing = EaseInOut))
-	}
+object RouteAnimation : DestinationStyle.Animated() {
 
-	override fun AnimatedContentTransitionScope<NavBackStackEntry>.exitTransition(): ExitTransition {
-		return slideOutOfContainer(
-			AnimatedContentTransitionScope.SlideDirection.Down,
-			animationSpec = tween(easing = EaseOutBounce)
-		) + fadeOut(animationSpec = tween(easing = EaseOutBounce))
-	}
+	override val enterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)?
+		get() = {
+			slideIntoContainer(
+				AnimatedContentTransitionScope.SlideDirection.Up,
+				animationSpec = tween(easing = EaseInOut)
+			) + fadeIn(animationSpec = tween(easing = EaseInOut))
+		}
 
-	override fun AnimatedContentTransitionScope<NavBackStackEntry>.popEnterTransition(): EnterTransition {
-		return slideIntoContainer(
-			AnimatedContentTransitionScope.SlideDirection.Up,
-			animationSpec = tween(easing = EaseInOut)
-		) + fadeIn(animationSpec = tween(easing = EaseInOut))
-	}
 
-	override fun AnimatedContentTransitionScope<NavBackStackEntry>.popExitTransition(): ExitTransition {
-		return slideOutOfContainer(
-			AnimatedContentTransitionScope.SlideDirection.Down,
-			animationSpec = tween(easing = EaseOutBounce)
-		) + fadeOut(animationSpec = tween(easing = EaseOutBounce))
-	}
+	override val exitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)?
+		get() = {
+			slideOutOfContainer(
+				AnimatedContentTransitionScope.SlideDirection.Down,
+				animationSpec = tween(easing = EaseOutBounce)
+			) + fadeOut(animationSpec = tween(easing = EaseOutBounce))
+		}
+
+	override val popEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)?
+		get() = {
+			slideIntoContainer(
+				AnimatedContentTransitionScope.SlideDirection.Up,
+				animationSpec = tween(easing = EaseInOut)
+			) + fadeIn(animationSpec = tween(easing = EaseInOut))
+		}
+
+	override val popExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)?
+		get() = {
+			slideOutOfContainer(
+				AnimatedContentTransitionScope.SlideDirection.Down,
+				animationSpec = tween(easing = EaseOutBounce)
+			) + fadeOut(animationSpec = tween(easing = EaseOutBounce))
+		}
 }

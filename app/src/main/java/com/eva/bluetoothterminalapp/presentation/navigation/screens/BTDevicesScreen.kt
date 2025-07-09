@@ -23,19 +23,14 @@ import com.eva.bluetoothterminalapp.presentation.navigation.UIEventsSideEffect
 import com.eva.bluetoothterminalapp.presentation.navigation.args.toArgs
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.destinations.BTDeviceProfileScreenDestination
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.destinations.BTLEClientScreenDestination
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.destinations.BTServerScreenDestination
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.destinations.InformationScreenDestination
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.destinations.SettingsScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-@RootNavGraph(start = true)
-@Destination(
+@Destination<RootGraph>(
+	start = true,
 	route = Routes.DEVICES_ROUTE,
 	style = RouteAnimation::class
 )
@@ -71,9 +66,15 @@ fun BTDevicesScreen(
 		drawerContent = {
 			BTAppNavigationDrawer(
 				modifier = Modifier.fillMaxWidth(.7f),
-				onNavigateToFeedBackRoute = { navigator.navigate(InformationScreenDestination) },
-				onNavigateToSettingsRoute = { navigator.navigate(SettingsScreenDestination) },
-				onNavigateToClassicServer = { navigator.navigate(BTServerScreenDestination) }
+				onNavigateToFeedBackRoute = {
+//					navigator.navigate(InformationScreenDestination)
+				},
+				onNavigateToSettingsRoute = {
+//					navigator.navigate(SettingsScreenDestination)
+				},
+				onNavigateToClassicServer = {
+//					navigator.navigate(BTServerScreenDestination)
+				}
 			)
 		},
 	) {
@@ -84,11 +85,11 @@ fun BTDevicesScreen(
 			onEvent = viewModel::onEvents,
 			onSelectDevice = { device ->
 				val args = device.toArgs()
-				navigator.navigate(BTDeviceProfileScreenDestination(args), onlyIfResumed = true)
+//				navigator.navigate(BTDeviceProfileScreenDestination(args), onlyIfResumed = true)
 			},
 			onSelectLeDevice = { device ->
 				val args = device.toArgs()
-				navigator.navigate(BTLEClientScreenDestination(args), onlyIfResumed = true)
+//				navigator.navigate(BTLEClientScreenDestination(args), onlyIfResumed = true)
 			},
 			navigation = {
 				IconButton(onClick = onShowDrawer) {

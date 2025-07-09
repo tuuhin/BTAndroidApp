@@ -89,7 +89,7 @@ fun ConnectionProfileList(
 					textAlign = TextAlign.Center,
 					modifier = Modifier
 						.fillMaxWidth()
-						.animateItemPlacement(),
+						.animateItem(),
 				)
 			}
 		} else if (isNoUuidFound) {
@@ -101,7 +101,7 @@ fun ConnectionProfileList(
 					textAlign = TextAlign.Center,
 					modifier = Modifier
 						.fillMaxWidth()
-						.animateItemPlacement(),
+						.animateItem(),
 				)
 			}
 		} else itemsIndexed(

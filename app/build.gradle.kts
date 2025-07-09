@@ -1,5 +1,7 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-	alias(libs.plugins.androidApplication)
+	alias(libs.plugins.android.application)
 	alias(libs.plugins.jetbrainsKotlinAndroid)
 	alias(libs.plugins.google.devtools.ksp)
 	alias(libs.plugins.kotlinx.serialization)
@@ -10,12 +12,12 @@ plugins {
 
 android {
 	namespace = "com.eva.bluetoothterminalapp"
-	compileSdk = 34
+	compileSdk = 36
 
 	defaultConfig {
 		applicationId = "com.eva.bluetoothterminalapp"
 		minSdk = 29
-		targetSdk = 34
+		targetSdk = 36
 		versionCode = 1
 		versionName = "1.0"
 
@@ -39,16 +41,14 @@ android {
 			isShrinkResources = true
 			multiDexEnabled = true
 			proguardFiles(
-				getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+				getDefaultProguardFile("proguard-android-optimize.txt"),
+				"proguard-rules.pro"
 			)
 		}
 	}
 	compileOptions {
-		sourceCompatibility = JavaVersion.VERSION_1_8
-		targetCompatibility = JavaVersion.VERSION_1_8
-	}
-	kotlinOptions {
-		jvmTarget = "1.8"
+		sourceCompatibility = JavaVersion.VERSION_17
+		targetCompatibility = JavaVersion.VERSION_17
 	}
 	buildFeatures {
 		compose = true
@@ -60,11 +60,19 @@ android {
 	}
 }
 
+kotlin {
+	compilerOptions {
+		jvmTarget = JvmTarget.JVM_17
+		optIn.add("kotlin.time.ExperimentalTime")
+		optIn.add("kotlin.uuid.ExperimentalUuidApi")
+	}
+}
+
 composeCompiler {
-	enableStrongSkippingMode = true
+//	featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
 	metricsDestination = layout.buildDirectory.dir("compose_compiler")
 	reportsDestination = layout.buildDirectory.dir("compose_compiler")
-	stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
+	stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("stability_config.conf"))
 }
 
 dependencies {
@@ -95,6 +103,8 @@ dependencies {
 	implementation(libs.koin.core)
 	implementation(libs.koin.android)
 	implementation(libs.koin.compose)
+	implementation(libs.koin.android.startup)
+
 	// kotlinx-serialization
 	implementation(libs.kotlinx.serialization.json)
 	//icons

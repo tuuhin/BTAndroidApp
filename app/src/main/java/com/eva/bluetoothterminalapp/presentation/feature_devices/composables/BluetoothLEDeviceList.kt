@@ -68,7 +68,7 @@ fun BluetoothLeDeviceList(
 					onItemSelect = { onDeviceSelect(item) },
 					modifier = Modifier
 						.fillMaxWidth()
-						.animateItemPlacement()
+						.animateItem()
 				)
 			}
 		} else Box(

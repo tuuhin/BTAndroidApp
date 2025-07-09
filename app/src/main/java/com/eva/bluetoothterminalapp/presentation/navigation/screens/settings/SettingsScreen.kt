@@ -16,12 +16,11 @@ import com.eva.bluetoothterminalapp.presentation.navigation.UIEventsSideEffect
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
-@RootNavGraph
-@Destination(
+@Destination<RootGraph>(
 	route = Routes.SETTINGS_ROUTE,
 	style = RouteAnimation::class
 )

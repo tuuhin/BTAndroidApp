@@ -12,9 +12,9 @@ import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.EndConnectionEvents
 import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothClientConnectArgs
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.navArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
+import com.ramcosta.composedestinations.generated.navArgs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow

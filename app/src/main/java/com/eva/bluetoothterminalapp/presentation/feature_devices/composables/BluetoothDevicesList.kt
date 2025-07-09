@@ -84,7 +84,7 @@ fun BluetoothDevicesList(
 				onConnect = { onSelectDevice(device) },
 				modifier = Modifier
 					.fillMaxWidth()
-					.animateItemPlacement()
+					.animateItem()
 			)
 		}
 
@@ -96,7 +96,7 @@ fun BluetoothDevicesList(
 					onLocationAccess = onLocationPermsAccept,
 					modifier = Modifier
 						.fillMaxWidth()
-						.animateItemPlacement()
+						.animateItem()
 				)
 			}
 		}
@@ -111,7 +111,7 @@ fun BluetoothDevicesList(
 				onConnect = { onSelectDevice(device) },
 				modifier = Modifier
 					.fillMaxWidth()
-					.animateItemPlacement()
+					.animateItem()
 			)
 		}
 	}

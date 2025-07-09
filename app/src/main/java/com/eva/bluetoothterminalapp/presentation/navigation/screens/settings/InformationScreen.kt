@@ -13,11 +13,10 @@ import com.eva.bluetoothterminalapp.presentation.feature_settings.InformationRou
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@RootNavGraph
-@Destination(
+@Destination<RootGraph>(
 	route = Routes.INFORMATION_ROUTE,
 	style = RouteAnimation::class,
 )

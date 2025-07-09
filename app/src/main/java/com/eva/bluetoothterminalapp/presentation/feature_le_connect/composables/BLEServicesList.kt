@@ -68,7 +68,7 @@ fun BLEServicesList(
 				onCharacteristicSelect = { onCharacteristicSelect(service, it) },
 				modifier = Modifier
 					.fillMaxWidth()
-					.animateItemPlacement()
+					.animateItem()
 			)
 		}
 	}

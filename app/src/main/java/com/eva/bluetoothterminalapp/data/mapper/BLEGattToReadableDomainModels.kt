@@ -12,15 +12,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-import org.koin.core.time.measureDuration
-import org.koin.core.time.measureDurationForResult
+import kotlin.time.measureTime
+import kotlin.time.measureTimedValue
+
 
 suspend fun List<BluetoothGattService>.toDomainModelWithNames(
 	scope: CoroutineScope,
 	reader: SampleUUIDReader
 ): List<BLEServiceModel> = withContext(scope.coroutineContext) {
 	// load the files for the first time it will load all the files in memeory
-	val time = measureDuration { reader.loadFromFiles() }
+	val time = measureTime { reader.loadFromFiles() }
 	Log.d("READ DURATION", "LOADING TIME $time millis")
 
 	return@withContext map { gattService ->
@@ -85,7 +86,7 @@ suspend fun BluetoothGattDescriptor.toDomainModelWithName(
 	scope: CoroutineScope,
 	reader: SampleUUIDReader
 ): BLEDescriptorModel = withContext(scope.coroutineContext) {
-	val (matchingSample, time) = measureDurationForResult {
+	val (matchingSample, time) = measureTimedValue {
 		reader.findDescriptorNameForUUID(uuid)
 	}
 	Log.d("READ_DURATION", "CHARACTERISTICS READ $time")

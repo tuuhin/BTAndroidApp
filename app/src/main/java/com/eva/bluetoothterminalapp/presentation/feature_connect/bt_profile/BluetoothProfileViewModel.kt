@@ -6,9 +6,9 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileScreenState
 import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothDeviceArgs
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.navArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
+import com.ramcosta.composedestinations.generated.navArgs
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

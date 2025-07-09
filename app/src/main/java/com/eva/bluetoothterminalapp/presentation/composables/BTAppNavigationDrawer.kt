@@ -36,7 +36,7 @@ import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 fun BTAppNavigationDrawer(
 	modifier: Modifier = Modifier,
 	drawerShape: Shape = DrawerDefaults.shape,
-	drawerContainerColor: Color = DrawerDefaults.containerColor,
+	drawerContainerColor: Color = DrawerDefaults.standardContainerColor,
 	drawerTonalElevation: Dp = 4.dp,
 	onNavigateToClassicServer: () -> Unit = {},
 	onNavigateToFeedBackRoute: () -> Unit = {},
