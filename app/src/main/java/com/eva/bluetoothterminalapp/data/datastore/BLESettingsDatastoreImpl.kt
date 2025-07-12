@@ -16,7 +16,6 @@ import com.google.protobuf.InvalidProtocolBufferException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -27,9 +26,9 @@ class BLESettingsDatastoreImpl(
 	override val settingsFlow: Flow<BLESettingsModel>
 		get() = context.bleSettingsDataStore.data.map(BLEAppSettings::toModel)
 
-	// blocking call
-	override val settings: BLESettingsModel
-		get() = runBlocking { settingsFlow.first() }
+	override suspend fun getSettings(): BLESettingsModel {
+		return settingsFlow.first()
+	}
 
 	override suspend fun onUpdateScanPeriod(timming: BLEScanPeriodTimmings) {
 		context.bleSettingsDataStore.updateData { pref ->
@@ -68,7 +67,7 @@ private val Context.bleSettingsDataStore: DataStore<BLEAppSettings> by dataStore
 	fileName = DatastoreConstants.BLE_SETTINGS_FILE_NAME,
 	serializer = object : Serializer<BLEAppSettings> {
 
-		override val defaultValue: BLEAppSettings = BLEAppSettings.getDefaultInstance()
+		override val defaultValue: BLEAppSettings = bLEAppSettings {}
 
 		override suspend fun readFrom(input: InputStream): BLEAppSettings {
 			try {

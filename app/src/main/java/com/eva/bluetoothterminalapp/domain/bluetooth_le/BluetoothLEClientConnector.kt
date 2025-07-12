@@ -6,7 +6,6 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPropertyTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
-import com.eva.bluetoothterminalapp.domain.exceptions.BLECharacteristicDontHaveIndicateOrNotifyProperties
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -19,7 +18,7 @@ interface BluetoothLEClientConnector {
 	val connectionState: StateFlow<BLEConnectionState>
 
 	/**
-	 * Receive signal strenght of the device
+	 * Receive signal strength of the device
 	 */
 	val deviceRssi: StateFlow<Int>
 
@@ -47,25 +46,19 @@ interface BluetoothLEClientConnector {
 
 	/**
 	 * Initiate a connection with a device
-	 * @param address Unique address of the deivce
-	 * @param autoConnect Whether the deivce should autoconnect if it comes inside the range
+	 * @param address Unique address of the device
+	 * @param autoConnect Whether the device should auto-connect if it disconnected because of range
 	 */
-	fun connect(
-		address: String,
-		autoConnect: Boolean = false
-	): Result<Boolean>
+	fun connect(address: String, autoConnect: Boolean = false): Result<Boolean>
 
 
 	/**
-	 * Reads the charactetistic value for the [BLECharacteristicsModel]
+	 * Reads the characteristic value for the [BLECharacteristicsModel]
 	 * @param service Service in which the characteristic is present
 	 * @param characteristic The characteristic to be read for
 	 * @return [Result] if the operation is successfully started
 	 */
-	fun read(
-		service: BLEServiceModel,
-		characteristic: BLECharacteristicsModel
-	): Result<Boolean>
+	fun read(service: BLEServiceModel, characteristic: BLECharacteristicsModel): Result<Boolean>
 
 
 	/**
@@ -75,11 +68,8 @@ interface BluetoothLEClientConnector {
 	 * @param value The [String] value to be written
 	 * @return [Result] indicating operation has successfully started
 	 */
-	fun write(
-		service: BLEServiceModel,
-		characteristic: BLECharacteristicsModel,
-		value: String
-	): Result<Boolean>
+	fun write(service: BLEServiceModel, characteristic: BLECharacteristicsModel, value: String)
+			: Result<Boolean>
 
 
 	/**
@@ -95,15 +85,29 @@ interface BluetoothLEClientConnector {
 		descriptor: BLEDescriptorModel,
 	): Result<Boolean>
 
+	/**
+	 * Write some content to a descriptor
+	 * @param service Service containing the characteristic
+	 * @param characteristic Characteristic containing the descriptor
+	 * @param descriptor [BLEDescriptorModel] descriptor to read from
+	 * @param value The value as [String] to be written
+	 * @return [Result] Is the operation has started successfully
+	 */
+	fun writeToDescriptor(
+		service: BLEServiceModel,
+		characteristic: BLECharacteristicsModel,
+		descriptor: BLEDescriptorModel,
+		value: String
+	): Result<Boolean>
+
 
 	/**
 	 * Indication or Notification for a characteristics
 	 * @param service Service containing the characteristic
 	 * @param characteristic Characteristic containing property of
 	 * either [BLEPropertyTypes.PROPERTY_INDICATE] or [BLEPropertyTypes.PROPERTY_NOTIFY] otherwise
-	 * reults will Result failure of  [BLECharacteristicDontHaveIndicateOrNotifyProperties]
-	 * @param enable Set [true] to start listening to characteristic changes and [false] to stop
-	 * listening.
+	 * results will Result failure of  BLECharacteristic Don't HaveIndicateOrNotifyProperties
+	 * @param enable to start and end the notification or indication running
 	 * @return [Result] indicating operation has started successfully
 	 */
 	fun startIndicationOrNotification(
@@ -121,21 +125,21 @@ interface BluetoothLEClientConnector {
 
 
 	/**
-	 * Re-evalutae the value of rssi
+	 * Re-evaluate the value of rssi
 	 * @return [Result] If the operation done correctly
 	 */
 	fun checkRssi(): Result<Boolean>
 
 
 	/**
-	 * Reconnects with the deivce if its disconnected
+	 * Reconnects with the device if its disconnected
 	 * @return [Result] If the operation done correctly
 	 */
 	fun reconnect(): Result<Boolean>
 
 
 	/**
-	 * Disconnects with the deivce
+	 * Disconnects with the device
 	 * @return [Result] If the operation done correctly
 	 */
 	fun disconnect(): Result<Unit>

@@ -124,9 +124,9 @@ fun BLEDescriptorCard(
 private val BLEDescriptorModel.textValue: String
 	@Composable
 	get() = when (descriptorValue) {
-		BLEDescriptorValue.DisableNotifcationOrIndication -> stringResource(id = R.string.ble_disable_notification)
+		BLEDescriptorValue.DisableNotifyOrIndication -> stringResource(id = R.string.ble_disable_notification)
 		BLEDescriptorValue.EnableIndication -> stringResource(id = R.string.ble_enable_indication)
-		BLEDescriptorValue.EnableNotifcation -> stringResource(id = R.string.ble_enable_notification)
+		BLEDescriptorValue.EnableNotification -> stringResource(id = R.string.ble_enable_notification)
 		is BLEDescriptorValue.ReadableValue -> valueAsString ?: ""
 
 	}

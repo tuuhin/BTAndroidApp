@@ -7,7 +7,6 @@ val appModule = module {
 	includes(
 		bluetoothLEModule,
 		bluetoothClassicModule,
-		readerModule,
 		viewModelModule,
 		settingsModule
 	)

@@ -8,7 +8,6 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEWriteTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 
 fun BluetoothGattCharacteristic.toDomainModel(probableName: String? = null): BLECharacteristicsModel =
@@ -63,11 +62,18 @@ val BLECharacteristicsModel.canRead: Boolean
  * @see BLEPropertyTypes
  */
 val BLECharacteristicsModel.canWrite: Boolean
-	get() = properties.any { property ->
-		property in arrayOf(
+	get() {
+		val writeable = arrayOf(
 			BLEPropertyTypes.PROPERTY_WRITE,
-			BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE,
-		) && writeType in arrayOf(BLEWriteTypes.TYPE_NO_RESPONSE, BLEWriteTypes.TYPE_DEFAULT)
+			BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE
+		)
+
+		val writeType = arrayOf(
+			BLEWriteTypes.TYPE_NO_RESPONSE,
+			BLEWriteTypes.TYPE_DEFAULT
+		)
+
+		return properties.any { property -> property in writeable && this.writeType in writeType }
 	}
 
 
@@ -85,27 +91,24 @@ private val BluetoothGattCharacteristic.permission: BLEPermission
 	}
 
 private val BluetoothGattCharacteristic.bleProperties: ImmutableList<BLEPropertyTypes>
-	get() {
-		val properties = buildList {
-			if (properties and BluetoothGattCharacteristic.PROPERTY_BROADCAST != 0)
-				add(BLEPropertyTypes.PROPERTY_BROADCAST)
-			if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0)
-				add(BLEPropertyTypes.PROPERTY_INDICATE)
-			if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0)
-				add(BLEPropertyTypes.PROPERTY_NOTIFY)
-			if (properties and BluetoothGattCharacteristic.PROPERTY_READ != 0)
-				add(BLEPropertyTypes.PROPERTY_READ)
-			if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0)
-				add(BLEPropertyTypes.PROPERTY_WRITE)
-			if (properties and BluetoothGattCharacteristic.PROPERTY_EXTENDED_PROPS != 0)
-				add(BLEPropertyTypes.PROPERTY_EXTENDED_PROPS)
-			if (properties and BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE != 0)
-				add(BLEPropertyTypes.PROPERTY_SIGNED_WRITE)
-			if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0)
-				add(BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE)
-		}
-		return persistentListOf<BLEPropertyTypes>().addAll(properties)
-	}
+	get() = buildList {
+		if (properties and BluetoothGattCharacteristic.PROPERTY_BROADCAST != 0)
+			add(BLEPropertyTypes.PROPERTY_BROADCAST)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0)
+			add(BLEPropertyTypes.PROPERTY_INDICATE)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0)
+			add(BLEPropertyTypes.PROPERTY_NOTIFY)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_READ != 0)
+			add(BLEPropertyTypes.PROPERTY_READ)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0)
+			add(BLEPropertyTypes.PROPERTY_WRITE)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_EXTENDED_PROPS != 0)
+			add(BLEPropertyTypes.PROPERTY_EXTENDED_PROPS)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE != 0)
+			add(BLEPropertyTypes.PROPERTY_SIGNED_WRITE)
+		if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0)
+			add(BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE)
+	}.toPersistentList()
 
 
 private val BluetoothGattCharacteristic.bleWriteType: BLEWriteTypes
