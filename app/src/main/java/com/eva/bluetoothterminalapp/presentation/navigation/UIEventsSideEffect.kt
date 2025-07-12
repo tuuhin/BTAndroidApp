@@ -5,25 +5,31 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
-import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun <T : AppViewModel> UIEventsSideEffect(viewModel: T, navigator: DestinationsNavigator) {
+fun UIEventsSideEffect(
+	events: () -> Flow<UiEvents>,
+	onPopBack: () -> Unit = {}
+) {
 
 	val context = LocalContext.current
 	val lifecyleOwner = LocalLifecycleOwner.current
 	val snackBarHostState = LocalSnackBarProvider.current
+	val currentOnPopBack by rememberUpdatedState(onPopBack)
 
 	LaunchedEffect(lifecyleOwner, context) {
 		lifecyleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-			viewModel.uiEvents.collect { event ->
+			val eventFlow = events()
+			eventFlow.collect { event ->
 				when (event) {
 					is UiEvents.ShowSnackBar -> snackBarHostState
 						.showSnackbar(message = event.message)
@@ -44,7 +50,7 @@ fun <T : AppViewModel> UIEventsSideEffect(viewModel: T, navigator: DestinationsN
 						.makeText(context, event.message, Toast.LENGTH_SHORT)
 						.show()
 
-					is UiEvents.NavigateBack -> navigator.popBackStack()
+					is UiEvents.NavigateBack -> currentOnPopBack()
 				}
 			}
 		}

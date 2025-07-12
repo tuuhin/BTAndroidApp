@@ -18,6 +18,8 @@ import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimatio
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.BlProfileDestination
+import com.ramcosta.composedestinations.generated.destinations.ClientRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
@@ -36,23 +38,21 @@ fun BTDeviceProfileScreen(
 	val profile by viewmodel.profile.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(
-		viewModel = viewmodel,
-		navigator = navigator
+		events = { viewmodel.uiEvents },
+		onPopBack = dropUnlessResumed { navigator.popBackStack() }
 	)
 
 	BluetoothProfileRoute(
 		state = profile,
 		onEvent = viewmodel::onEvent,
 		onConnect = { uuid ->
-//			navigator.navigate(
-//				direction = BTClassicClientScreenDestination(address = args.address, uuid = uuid),
-//				onlyIfResumed = true
-//			) {
-//				// pop this scrren as its not required any more
-//				popUpTo(BTDeviceProfileScreenDestination) {
-//					inclusive = true
-//				}
-//			}
+			navigator.navigate(
+				direction = ClientRouteDestination(address = args.address, uuid = uuid),
+			) {
+				popUpTo(BlProfileDestination) {
+					inclusive = true
+				}
+			}
 		},
 		navigation = {
 			val onBack = dropUnlessResumed(block = navigator::popBackStack)

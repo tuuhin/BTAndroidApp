@@ -19,7 +19,7 @@ import com.eva.bluetoothterminalapp.domain.settings.models.BLESettingsModel
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileScreenState
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenState
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceProfileState
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLEDeviceProfileState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -28,24 +28,7 @@ import java.util.UUID
 
 object PreviewFakes {
 
-	val ANDROID_NAME_AS_BYTEARRAY = byteArrayOf(
-		0x4A,
-		0x65,
-		0x74,
-		0x70,
-		0x61,
-		0x63,
-		0x6B,
-		0x20,
-		0x43,
-		0x6F,
-		0x6D,
-		0x70,
-		0x6F,
-		0x73,
-		0x65
-	)
-
+	val ANDROID_NAME_AS_BYTEARRAY = "Android".encodeToByteArray()
 
 	val FAKE_DEVICE_MODEL = BluetoothDeviceModel(
 		name = "Android HeadSet",
@@ -154,7 +137,7 @@ object PreviewFakes {
 		serviceUUID = UUID.fromString("10297702-35bd-4fda-a904-1e693390e08a"),
 		serviceType = BLEServicesTypes.SECONDARY
 	).apply {
-		characteristic = persistentListOf<BLECharacteristicsModel>(
+		characteristic = persistentListOf(
 			FAKE_BLE_CHARACTERISTIC_MODEL,
 			FAKE_BLE_CHARACTERISTIC_MODEL_WITH_DATA
 		)

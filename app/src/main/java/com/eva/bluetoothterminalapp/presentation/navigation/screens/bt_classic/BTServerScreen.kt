@@ -39,8 +39,8 @@ fun BTServerScreen(
 	val settings by viewModel.btSettings.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(
-		viewModel = viewModel,
-		navigator = navigator
+		events = { viewModel.uiEvents },
+		onPopBack = dropUnlessResumed { navigator.popBackStack() }
 	)
 
 	StartServerConnectionDailog(

@@ -40,8 +40,8 @@ fun BTClassicClientScreen(
 	val btSettings by viewModel.btSettings.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(
-		viewModel = viewModel,
-		navigator = navigator
+		events = { viewModel.uiEvents },
+		onPopBack = dropUnlessResumed { navigator.popBackStack() }
 	)
 
 	CloseConnectionDialog(

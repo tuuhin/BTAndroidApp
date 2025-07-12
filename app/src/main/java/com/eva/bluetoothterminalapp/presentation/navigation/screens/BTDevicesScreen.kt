@@ -15,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.composables.BTAppNavigationDrawer
 import com.eva.bluetoothterminalapp.presentation.feature_devices.BTDeviceViewmodel
@@ -25,6 +26,8 @@ import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimatio
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.BleClientRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.SettingsDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -45,8 +48,8 @@ fun BTDevicesScreen(
 	val isScanning by viewModel.isScanning.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(
-		viewModel = viewModel,
-		navigator = navigator
+		events = { viewModel.uiEvents },
+		onPopBack = dropUnlessResumed { navigator.popBackStack() }
 	)
 
 	val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -67,13 +70,13 @@ fun BTDevicesScreen(
 			BTAppNavigationDrawer(
 				modifier = Modifier.fillMaxWidth(.7f),
 				onNavigateToFeedBackRoute = {
-//					navigator.navigate(InformationScreenDestination)
+//					navigator.navigate(InformationDestination)
 				},
 				onNavigateToSettingsRoute = {
-//					navigator.navigate(SettingsScreenDestination)
+					navigator.navigate(SettingsDestination)
 				},
 				onNavigateToClassicServer = {
-//					navigator.navigate(BTServerScreenDestination)
+//					navigator.navigate(BTServer)
 				}
 			)
 		},
@@ -89,7 +92,7 @@ fun BTDevicesScreen(
 			},
 			onSelectLeDevice = { device ->
 				val args = device.toArgs()
-//				navigator.navigate(BTLEClientScreenDestination(args), onlyIfResumed = true)
+				navigator.navigate(BleClientRouteDestination(args))
 			},
 			navigation = {
 				IconButton(onClick = onShowDrawer) {
