@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -49,6 +50,7 @@ fun BLEServicesList(
 				modifier = Modifier
 					.background(MaterialTheme.colorScheme.surface)
 					.fillMaxWidth()
+					.heightIn(min = 40.dp)
 			) {
 				Text(
 					text = stringResource(id = R.string.le_available_devices),
@@ -65,7 +67,7 @@ fun BLEServicesList(
 			BLEDeviceServiceCard(
 				bleService = service,
 				selectedCharacteristic = selectedCharacteristic,
-				onCharacteristicSelect = { onCharacteristicSelect(service, it) },
+				onCharacteristicSelect = { char -> onCharacteristicSelect(service, char) },
 				modifier = Modifier
 					.fillMaxWidth()
 					.animateItem()

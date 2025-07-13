@@ -4,7 +4,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -15,7 +17,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.DialogProperties
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.CloseConnectionEvents
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.CloseConnectionEvents
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
@@ -32,12 +34,18 @@ fun CloseConnectionDialog(
 
 	AlertDialog(
 		confirmButton = {
-			TextButton(onClick = onConfirm) {
+			TextButton(
+				onClick = onConfirm,
+				colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+			) {
 				Text(text = stringResource(id = R.string.dialog_action_close))
 			}
 		},
 		dismissButton = {
-			TextButton(onClick = onDismiss) {
+			TextButton(
+				onClick = onDismiss,
+				colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+			) {
 				Text(text = stringResource(id = R.string.dialog_action_cancel))
 			}
 		},

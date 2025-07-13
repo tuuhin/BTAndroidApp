@@ -113,7 +113,7 @@ class SampleUUIDReader(private val context: Context) {
 
 	suspend fun findServiceNameForUUID(uuid: UUID): SampleBLEUUIDModel? {
 		// if the files are not loaded then services will be loaded in the memory
-		if (_serviceUUIDCache.isEmpty()) loadFromFiles()
+		if (_serviceUUIDCache.isEmpty()) loadServiceUUIDFromFile()
 		return if (!_serviceUUIDCache.isEmpty()) null
 		else _serviceUUIDCache[uuid]
 	}
@@ -121,7 +121,7 @@ class SampleUUIDReader(private val context: Context) {
 
 	suspend fun findDescriptorNameForUUID(uuid: UUID): SampleBLEUUIDModel? {
 		// if the files are not loaded then services will be loaded in the memory
-		if (_descriptorUUIDCache.isEmpty()) loadFromFiles()
+		if (_descriptorUUIDCache.isEmpty()) loadDescriptorsFromFile()
 		return if (!_descriptorUUIDCache.contains(uuid)) null
 		else _descriptorUUIDCache[uuid]
 	}
@@ -129,7 +129,7 @@ class SampleUUIDReader(private val context: Context) {
 
 	suspend fun findCharacteristicsNameForUUID(uuid: UUID): SampleBLEUUIDModel? {
 		// if the file is not loaded
-		if (_characteristicsUUIDCache.isEmpty()) loadFromFiles()
+		if (_characteristicsUUIDCache.isEmpty()) loadCharacteristicsFromFile()
 		return if (!_characteristicsUUIDCache.contains(uuid)) null
 		else _characteristicsUUIDCache[uuid]
 	}

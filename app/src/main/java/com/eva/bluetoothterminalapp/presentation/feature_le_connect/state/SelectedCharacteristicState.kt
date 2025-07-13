@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_le_connect.util
+package com.eva.bluetoothterminalapp.presentation.feature_le_connect.state
 
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel

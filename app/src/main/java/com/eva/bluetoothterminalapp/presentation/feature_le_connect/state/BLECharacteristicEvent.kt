@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_le_connect.util
+package com.eva.bluetoothterminalapp.presentation.feature_le_connect.state
 
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
@@ -11,10 +11,9 @@ sealed interface BLECharacteristicEvent {
 		val characteristics: BLECharacteristicsModel
 	) : BLECharacteristicEvent
 
-	data object OnUnSelectCharactetistic : BLECharacteristicEvent
-
-
 	data class OnDescriptorRead(val desc: BLEDescriptorModel) : BLECharacteristicEvent
+
+	data object OnUnSelectCharacteristic : BLECharacteristicEvent
 
 	data object ReadCharacteristic : BLECharacteristicEvent
 

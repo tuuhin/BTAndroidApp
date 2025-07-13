@@ -49,7 +49,7 @@ interface BluetoothLEClientConnector {
 	 * @param address Unique address of the device
 	 * @param autoConnect Whether the device should auto-connect if it disconnected because of range
 	 */
-	fun connect(address: String, autoConnect: Boolean = false): Result<Boolean>
+	suspend fun connect(address: String, autoConnect: Boolean = false): Result<Boolean>
 
 
 	/**

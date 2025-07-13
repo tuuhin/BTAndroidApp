@@ -23,15 +23,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.toReadbleProperties
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.toReadableProperties
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
@@ -47,15 +51,11 @@ fun BLECharacteristicsCard(
 	onStopIndicate: () -> Unit,
 	onIndicate: () -> Unit,
 	modifier: Modifier = Modifier,
+	titleColor: Color = MaterialTheme.colorScheme.primary,
+	valuesColor: Color = MaterialTheme.colorScheme.secondary,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
 	shape: Shape = MaterialTheme.shapes.large,
 ) {
-
-	val context = LocalContext.current
-
-	val probableName = remember(characteristic.probableName) {
-		characteristic.probableName ?: context.getString(R.string.ble_characteristic_name_unknown)
-	}
 
 	val showStringValue = remember(characteristic.byteArray) {
 		characteristic.valueAsString?.isNotBlank() == true
@@ -79,20 +79,35 @@ fun BLECharacteristicsCard(
 			verticalArrangement = Arrangement.spacedBy(2.dp)
 		) {
 			Text(
-				text = probableName,
-				style = MaterialTheme.typography.bodyLarge
+				text = characteristic.probableName
+					?: stringResource(R.string.ble_characteristic_name_unknown),
+				style = MaterialTheme.typography.bodyLarge,
+				fontWeight = FontWeight.Medium,
+				color = titleColor,
 			)
 			Spacer(modifier = Modifier.height(2.dp))
 			Text(
-				text = "UUID : ${characteristic.uuid}",
+				text = buildAnnotatedString {
+					append("ID: ")
+					withStyle(
+						SpanStyle(
+							fontFamily = FontFamily.Monospace,
+							fontWeight = FontWeight.Medium
+						)
+					) {
+						append("${characteristic.uuid}")
+					}
+				},
 				style = MaterialTheme.typography.bodySmall,
+				color = MaterialTheme.colorScheme.onSurface,
 			)
 			Text(
 				text = stringResource(
 					R.string.ble_characteristic_properties,
-					characteristic.toReadbleProperties
+					characteristic.toReadableProperties
 				),
 				style = MaterialTheme.typography.bodySmall,
+				color = MaterialTheme.colorScheme.onSurface,
 			)
 			HorizontalDivider(
 				modifier = Modifier.padding(vertical = 2.dp),
@@ -109,7 +124,7 @@ fun BLECharacteristicsCard(
 						characteristic.valueHexString
 					),
 					style = MaterialTheme.typography.labelLarge,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
+					color = valuesColor,
 				)
 
 			}
@@ -124,11 +139,11 @@ fun BLECharacteristicsCard(
 						characteristic.valueAsString ?: ""
 					),
 					style = MaterialTheme.typography.labelLarge,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
+					color = valuesColor,
 				)
 
 			}
-			BLECharacteristicsPropertiesOptions(
+			BLECharacteristicsActions(
 				characteristic = characteristic,
 				isDeviceConnected = isDeviceConnected,
 				onRead = onRead,

@@ -37,7 +37,7 @@ private const val TAG = "BLE_CLIENT_LOGGER"
 @Suppress("DEPRECATION")
 class AndroidBLEClientConnector(
 	private val context: Context,
-	reader: SampleUUIDReader,
+	private val reader: SampleUUIDReader,
 ) : BluetoothLEClientConnector {
 
 	private val gattCallback = BLEClientGattCallback(reader, echoWrite = true)
@@ -71,7 +71,7 @@ class AndroidBLEClientConnector(
 
 	private var _bLEGatt: BluetoothGatt? = null
 
-	override fun connect(address: String, autoConnect: Boolean): Result<Boolean> {
+	override suspend fun connect(address: String, autoConnect: Boolean): Result<Boolean> {
 		return try {
 
 			val device = _btAdapter?.getRemoteDevice(address)
@@ -86,6 +86,8 @@ class AndroidBLEClientConnector(
 				BluetoothDevice.TRANSPORT_LE
 			)
 			Log.d(TAG, "CONNECT GATT")
+			// load all files
+			reader.loadFromFiles()
 			// return success if there is no error
 			Result.success(true)
 		} catch (e: Exception) {

@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPropertyTypes
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEServicesTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 
 private val BLEPropertyTypes.propertyRes: Int?
 	get() = when (this) {
@@ -20,11 +22,19 @@ private val BLEPropertyTypes.propertyRes: Int?
 	}
 
 
-val BLECharacteristicsModel.toReadbleProperties: String
+val BLECharacteristicsModel.toReadableProperties: String
 	@Composable
 	get() = buildString {
 		properties.forEachIndexed { idx, property ->
 			if (idx != 0) append(",")
 			property.propertyRes?.let { res -> append(stringResource(id = res)) }
 		}
+	}
+
+val BLEServiceModel.serviceTypeText: String
+	@Composable
+	get() = when (this.serviceType) {
+		BLEServicesTypes.PRIMARY -> stringResource(R.string.ble_service_primary)
+		BLEServicesTypes.SECONDARY -> stringResource(R.string.ble_service_secondary)
+		BLEServicesTypes.UNKNOWN -> stringResource(R.string.ble_service_unknown)
 	}

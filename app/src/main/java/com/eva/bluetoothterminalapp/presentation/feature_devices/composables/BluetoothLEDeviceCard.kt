@@ -24,10 +24,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,7 +45,12 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDevice
 import com.eva.bluetoothterminalapp.presentation.feature_devices.util.imageVector
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlin.time.Duration.Companion.milliseconds
 
+@OptIn(FlowPreview::class)
 @Composable
 fun BluetoothLEDeviceCard(
 	leDeviceModel: BluetoothLEDeviceModel,
@@ -51,6 +59,15 @@ fun BluetoothLEDeviceCard(
 	shape: Shape = MaterialTheme.shapes.medium,
 ) {
 	var isMenuExpanded by remember { mutableStateOf(false) }
+	var localRssi by remember { mutableIntStateOf(leDeviceModel.rssi) }
+
+	LaunchedEffect(leDeviceModel.rssi) {
+		// a debounced version
+		snapshotFlow { leDeviceModel.rssi }
+			.debounce(200.milliseconds)
+			.distinctUntilChanged()
+			.collect { rssi -> localRssi = rssi }
+	}
 
 	val cardContainerColor by animateColorAsState(
 		targetValue = if (isMenuExpanded)
@@ -59,11 +76,6 @@ fun BluetoothLEDeviceCard(
 		label = "Card container color",
 		animationSpec = tween(durationMillis = 200)
 	)
-
-	val deviceStrength = remember(leDeviceModel.rssi) {
-		"${leDeviceModel.rssi} ${BluetoothDeviceModel.RSSI_UNIT}"
-	}
-
 
 	Card(
 		onClick = { isMenuExpanded = true },
@@ -126,7 +138,7 @@ fun BluetoothLEDeviceCard(
 					tint = MaterialTheme.colorScheme.onPrimaryContainer
 				)
 				Text(
-					text = deviceStrength,
+					text = "$localRssi ${BluetoothDeviceModel.RSSI_UNIT}",
 					style = MaterialTheme.typography.labelLarge
 				)
 			}

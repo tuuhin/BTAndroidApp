@@ -84,7 +84,7 @@
   <string name="menu_option_more">Menu Option More</string>
   <string name="ble_descriptor_unknown">Unknown Descriptor</string>
   <string name="dialog_action_send">Send</string>
-  <string name="ble_selected_characteristic">Characteristic</string>
+  <string name="ble_selected_characteristic">Characteristics</string>
   <string name="ble_descriptor_title">Descriptors</string>
   <string name="ble_characteristic_not_selected_title">No Selected Characteristic</string>
   <string name="ble_characteristic_not_selected_desc">Select a characteristic in order to continue</string>
@@ -189,4 +189,6 @@
   <string name="contacts">Contacts</string>
   <string name="contracts_with_email">Contact developer with email</string>
   <string name="mail_title">Email</string>
+  <string name="ble_device_profile_action_refresh_rssi">Refresh RSSI</string>
+  <string name="ble_device_profile_action_refresh_services">Refresh Services</string>
 </resources>

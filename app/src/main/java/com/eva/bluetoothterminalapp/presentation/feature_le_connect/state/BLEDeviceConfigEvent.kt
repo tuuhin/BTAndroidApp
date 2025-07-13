@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_le_connect.util
+package com.eva.bluetoothterminalapp.presentation.feature_le_connect.state
 
 sealed interface BLEDeviceConfigEvent {
 
@@ -8,5 +8,5 @@ sealed interface BLEDeviceConfigEvent {
 
 	data object OnReadRssiStrength : BLEDeviceConfigEvent
 
-	data object OnRefreshCharacteristics : BLEDeviceConfigEvent
+	data object OnReDiscoverServices : BLEDeviceConfigEvent
 }

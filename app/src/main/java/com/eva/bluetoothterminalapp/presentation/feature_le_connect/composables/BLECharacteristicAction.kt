@@ -11,7 +11,6 @@ import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -31,7 +30,7 @@ import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun BLECharacteristicsPropertiesOptions(
+fun BLECharacteristicsActions(
 	characteristic: BLECharacteristicsModel,
 	isDeviceConnected: Boolean,
 	onRead: () -> Unit,
@@ -45,29 +44,13 @@ fun BLECharacteristicsPropertiesOptions(
 	chipColors: Color = MaterialTheme.colorScheme.primary,
 ) {
 
-	val canWrite = remember(characteristic.properties) {
-		characteristic.canWrite
-	}
-
-	val canNotify = remember(characteristic.properties) {
-		characteristic.canNotify
-	}
-
-	val canIndicate = remember(characteristic) {
-		characteristic.canIndicate
-	}
-
-	val canRead = remember(characteristic.properties) {
-		characteristic.canRead
-	}
-
-	val suggestionChipColors = SuggestionChipDefaults.suggestionChipColors(
+	val primaryColor = SuggestionChipDefaults.suggestionChipColors(
 		containerColor = chipColors,
 		labelColor = contentColorFor(backgroundColor = chipColors),
 		disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
 	)
 
-	val secondayChipColors = SuggestionChipDefaults.suggestionChipColors(
+	val secondaryColor = SuggestionChipDefaults.suggestionChipColors(
 		containerColor = MaterialTheme.colorScheme.tertiaryContainer,
 		labelColor = MaterialTheme.colorScheme.onTertiaryContainer,
 		disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -77,27 +60,27 @@ fun BLECharacteristicsPropertiesOptions(
 		horizontalArrangement = Arrangement.spacedBy(6.dp),
 		modifier = modifier.fillMaxWidth()
 	) {
-		if (canRead) SuggestionChip(
+		if (characteristic.canRead) SuggestionChip(
 			onClick = onRead,
 			shape = shape,
 			label = { Text(text = stringResource(id = R.string.ble_property_read)) },
 			enabled = isDeviceConnected,
-			colors = suggestionChipColors,
+			colors = primaryColor,
 			border = SuggestionChipDefaults
 				.suggestionChipBorder(enabled = chipBordersEnabled)
 		)
 
-		if (canWrite) SuggestionChip(
+		if (characteristic.canWrite) SuggestionChip(
 			onClick = onWrite,
 			shape = shape,
 			label = { Text(text = stringResource(id = R.string.ble_property_write)) },
 			enabled = isDeviceConnected,
-			colors = suggestionChipColors,
+			colors = primaryColor,
 			border = SuggestionChipDefaults
 				.suggestionChipBorder(enabled = chipBordersEnabled)
 		)
 
-		if (canNotify) Crossfade(
+		if (characteristic.canNotify) Crossfade(
 			targetState = characteristic.isNotificationRunning,
 			label = "Is notify running for the characteristic"
 		) { isRunning ->
@@ -106,7 +89,7 @@ fun BLECharacteristicsPropertiesOptions(
 				onClick = onStopNotify,
 				label = { Text(text = stringResource(R.string.ble_property_notify_stop)) },
 				enabled = isDeviceConnected,
-				colors = secondayChipColors,
+				colors = secondaryColor,
 				border = SuggestionChipDefaults
 					.suggestionChipBorder(enabled = chipBordersEnabled)
 			)
@@ -115,12 +98,12 @@ fun BLECharacteristicsPropertiesOptions(
 				onClick = onNotify,
 				label = { Text(text = stringResource(R.string.ble_property_notify)) },
 				enabled = isDeviceConnected,
-				colors = suggestionChipColors,
+				colors = primaryColor,
 				border = SuggestionChipDefaults
 					.suggestionChipBorder(enabled = chipBordersEnabled)
 			)
 		}
-		if (canIndicate) Crossfade(
+		if (characteristic.canIndicate) Crossfade(
 			targetState = characteristic.isIndicationRunning,
 			label = "Is Indications are running for the characteristic"
 		) { isRunning ->
@@ -129,7 +112,7 @@ fun BLECharacteristicsPropertiesOptions(
 				onClick = onStopIndicate,
 				label = { Text(text = stringResource(R.string.ble_property_indicate_stop)) },
 				enabled = isDeviceConnected,
-				colors = secondayChipColors,
+				colors = secondaryColor,
 				border = SuggestionChipDefaults
 					.suggestionChipBorder(enabled = chipBordersEnabled)
 			)
@@ -138,7 +121,7 @@ fun BLECharacteristicsPropertiesOptions(
 				onClick = onIndicate,
 				label = { Text(text = stringResource(R.string.ble_property_indicate)) },
 				enabled = isDeviceConnected && !characteristic.isNotificationRunning,
-				colors = suggestionChipColors,
+				colors = primaryColor,
 				border = SuggestionChipDefaults
 					.suggestionChipBorder(enabled = chipBordersEnabled)
 			)
@@ -146,7 +129,7 @@ fun BLECharacteristicsPropertiesOptions(
 	}
 }
 
-private class BLECahracteristicsPropertyParams :
+private class BLECharacteristicsPropertyParams :
 	CollectionPreviewParameterProvider<BLECharacteristicsModel>(
 		listOf(
 			PreviewFakes.FAKE_BLE_CHARACTERISTIC_MODEL_WITH_DATA
@@ -157,10 +140,10 @@ private class BLECahracteristicsPropertyParams :
 @PreviewLightDark
 @Composable
 private fun BLECharacteristicsPropertiesOptionsPreview(
-	@PreviewParameter(BLECahracteristicsPropertyParams::class)
+	@PreviewParameter(BLECharacteristicsPropertyParams::class)
 	characteristic: BLECharacteristicsModel
 ) = BlueToothTerminalAppTheme {
-	BLECharacteristicsPropertiesOptions(
+	BLECharacteristicsActions(
 		characteristic = characteristic,
 		isDeviceConnected = true,
 		onRead = { },

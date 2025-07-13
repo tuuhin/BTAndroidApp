@@ -25,18 +25,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEServicesTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.serviceTypeText
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
@@ -49,27 +53,8 @@ fun BLEDeviceServiceCard(
 	shape: Shape = MaterialTheme.shapes.medium,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer
 ) {
-	val context = LocalContext.current
 	val isInspectionMode = LocalInspectionMode.current
-
 	var isSelected by remember { mutableStateOf(isInspectionMode) }
-
-	val characteristicsSize = remember(bleService.characteristic) {
-		"Characteristics: ${bleService.charisticsCount}"
-	}
-
-	val serviceTypeText = remember(bleService.serviceType) {
-		val type = when (bleService.serviceType) {
-			BLEServicesTypes.PRIMARY -> context.getString(R.string.ble_service_primary)
-			BLEServicesTypes.SECONDARY -> context.getString(R.string.ble_service_secondary)
-			else -> return@remember null
-		}
-		return@remember "Service : $type"
-	}
-
-	val serviceNameReadable = remember(bleService.probableName) {
-		bleService.probableName ?: context.getString(R.string.ble_service_unknown)
-	}
 
 	Card(
 		onClick = { isSelected = !isSelected },
@@ -88,30 +73,39 @@ fun BLEDeviceServiceCard(
 			verticalArrangement = Arrangement.spacedBy(2.dp),
 		) {
 			Text(
-				text = serviceNameReadable,
-				color = MaterialTheme.colorScheme.onSurface,
+				text = bleService.probableName ?: stringResource(R.string.ble_service_unknown),
+				color = MaterialTheme.colorScheme.primary,
 				style = MaterialTheme.typography.titleMedium
 			)
 			Text(
-				text = "UUID: ${bleService.serviceUUID}",
+				text = buildAnnotatedString {
+					append("ID: ")
+					withStyle(
+						SpanStyle(
+							fontFamily = FontFamily.Monospace,
+							fontWeight = FontWeight.Medium
+						)
+					) {
+						append("${bleService.serviceUUID}")
+					}
+				},
 				style = MaterialTheme.typography.bodyMedium,
+				color = MaterialTheme.colorScheme.secondary,
 				maxLines = 2,
 				overflow = TextOverflow.Clip
 			)
-			serviceTypeText?.let { serviceType ->
-				Text(
-					text = serviceType,
-					style = MaterialTheme.typography.labelLarge,
-				)
-			}
+			Text(
+				text = "Type : ${bleService.serviceTypeText}",
+				style = MaterialTheme.typography.labelLarge,
+			)
 
 			Spacer(modifier = Modifier.height(4.dp))
 
 			when (bleService.charisticsCount) {
 				0 -> Text(
-					text = stringResource(id = R.string.le_charactertics_not_present),
+					text = stringResource(id = R.string.le_characteristics_not_present),
 					style = MaterialTheme.typography.labelLarge,
-					color = MaterialTheme.colorScheme.onSurfaceVariant
+					color = MaterialTheme.colorScheme.tertiary
 				)
 
 				else -> AnimatedVisibility(
@@ -123,8 +117,10 @@ fun BLEDeviceServiceCard(
 						verticalArrangement = Arrangement.spacedBy(4.dp)
 					) {
 						Text(
-							text = characteristicsSize,
-							style = MaterialTheme.typography.titleSmall
+							text = "Characteristics: ${bleService.charisticsCount}",
+							style = MaterialTheme.typography.labelMedium,
+							fontWeight = FontWeight.SemiBold,
+							color = MaterialTheme.colorScheme.tertiary
 						)
 						bleService.characteristic.forEach { characteristic ->
 							SelectableBLECharacteristics(

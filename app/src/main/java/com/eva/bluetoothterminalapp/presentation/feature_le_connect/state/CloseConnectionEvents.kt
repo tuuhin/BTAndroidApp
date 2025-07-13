@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_le_connect.util
+package com.eva.bluetoothterminalapp.presentation.feature_le_connect.state
 
 interface CloseConnectionEvents {
 

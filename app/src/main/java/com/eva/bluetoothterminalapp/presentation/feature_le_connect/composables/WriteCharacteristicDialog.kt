@@ -30,13 +30,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.CharacteristicWriteDialogState
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.WriteCharacteristicEvent
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.CharacteristicWriteDialogState
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.WriteCharacteristicEvent
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WriteCharactertisticDialog(
+fun WriteCharacteristicsDialog(
 	showDialog: Boolean,
 	textFieldValue: String,
 	errorString: String?,
@@ -82,25 +82,24 @@ fun WriteCharactertisticDialog(
 					color = textContentCOlor,
 					style = MaterialTheme.typography.bodyMedium
 				)
-				Column {
-					OutlinedTextField(
-						value = textFieldValue,
-						onValueChange = onValueChange,
-						textStyle = MaterialTheme.typography.bodyMedium,
-						shape = MaterialTheme.shapes.medium,
-						isError = errorString != null,
-						placeholder = {
-							Text(text = stringResource(R.string.text_field_placeholder))
-						},
-						modifier = Modifier.padding(vertical = 12.dp),
+
+				OutlinedTextField(
+					value = textFieldValue,
+					onValueChange = onValueChange,
+					textStyle = MaterialTheme.typography.bodyMedium,
+					shape = MaterialTheme.shapes.medium,
+					isError = errorString != null,
+					placeholder = {
+						Text(text = stringResource(R.string.text_field_placeholder))
+					},
+					modifier = Modifier.padding(vertical = 12.dp),
+				)
+				errorString?.let { err ->
+					Text(
+						text = err,
+						style = MaterialTheme.typography.labelSmall,
+						color = MaterialTheme.colorScheme.error
 					)
-					errorString?.let { err ->
-						Text(
-							text = err,
-							style = MaterialTheme.typography.labelSmall,
-							color = MaterialTheme.colorScheme.error
-						)
-					}
 				}
 				Spacer(modifier = Modifier.height(8.dp))
 				ProvideTextStyle(value = MaterialTheme.typography.labelLarge) {
@@ -131,7 +130,7 @@ fun WriteCharactertisticDialog(
 }
 
 @Composable
-fun WriteCharactertisticDialog(
+fun WriteCharacteristicsDialog(
 	state: CharacteristicWriteDialogState,
 	onEvent: (WriteCharacteristicEvent) -> Unit,
 	modifier: Modifier = Modifier, properties: DialogProperties = DialogProperties(),
@@ -141,10 +140,10 @@ fun WriteCharactertisticDialog(
 	textContentColor: Color = AlertDialogDefaults.textContentColor,
 	tonalElevation: Dp = AlertDialogDefaults.TonalElevation
 ) {
-	WriteCharactertisticDialog(
-		showDialog = state.showWriteDialog,
-		errorString = state.error,
-		textFieldValue = state.writeTextFieldValue,
+	WriteCharacteristicsDialog(
+		showDialog = state.showDialog,
+		errorString = state.errorText,
+		textFieldValue = state.textFieldValue,
 		onValueChange = { onEvent(WriteCharacteristicEvent.OnTextFieldValueChange(it)) },
 		onSend = { onEvent(WriteCharacteristicEvent.WriteCharacteristicValue) },
 		onCancel = { onEvent(WriteCharacteristicEvent.CloseDialog) },
@@ -162,7 +161,7 @@ fun WriteCharactertisticDialog(
 @PreviewLightDark
 @Composable
 private fun WriteCharacteristicDialogPreview() = BlueToothTerminalAppTheme {
-	WriteCharactertisticDialog(
+	WriteCharacteristicsDialog(
 		showDialog = true,
 		errorString = "Empty string are not allowed",
 		textFieldValue = "",
