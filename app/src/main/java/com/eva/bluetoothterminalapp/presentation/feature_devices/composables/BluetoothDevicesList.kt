@@ -61,15 +61,17 @@ fun BluetoothDevicesList(
 		contentPadding = contentPadding
 	) {
 
-		PairedDevicesHeader()
+		pairedDevicesHeader()
 
 		if (isPairedListEmpty) {
 			item {
 				Text(
 					text = stringResource(id = R.string.paired_device_not_found),
-					modifier = Modifier.fillMaxWidth(),
 					textAlign = TextAlign.Center,
-					style = MaterialTheme.typography.bodyLarge
+					style = MaterialTheme.typography.bodyLarge,
+					modifier = Modifier
+						.fillMaxWidth()
+						.animateItem(),
 				)
 			}
 		}
@@ -88,7 +90,7 @@ fun BluetoothDevicesList(
 			)
 		}
 
-		AvailableDevicesHeader()
+		availableDevicesHeader()
 
 		if (showLocationPlaceholder) {
 			item {
@@ -119,7 +121,7 @@ fun BluetoothDevicesList(
 
 
 @OptIn(ExperimentalFoundationApi::class)
-private fun LazyListScope.PairedDevicesHeader() = stickyHeader {
+private fun LazyListScope.pairedDevicesHeader() = stickyHeader {
 	Column(
 		modifier = Modifier
 			.background(MaterialTheme.colorScheme.surface)
@@ -133,7 +135,7 @@ private fun LazyListScope.PairedDevicesHeader() = stickyHeader {
 		)
 		Text(
 			text = stringResource(id = R.string.paired_device_desc),
-			style = MaterialTheme.typography.labelMedium,
+			style = MaterialTheme.typography.labelLarge,
 			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
 	}
@@ -141,7 +143,7 @@ private fun LazyListScope.PairedDevicesHeader() = stickyHeader {
 
 
 @OptIn(ExperimentalFoundationApi::class)
-private fun LazyListScope.AvailableDevicesHeader() = stickyHeader {
+private fun LazyListScope.availableDevicesHeader() = stickyHeader {
 	Column(
 		modifier = Modifier
 			.background(MaterialTheme.colorScheme.surface)
@@ -155,7 +157,7 @@ private fun LazyListScope.AvailableDevicesHeader() = stickyHeader {
 		)
 		Text(
 			text = stringResource(id = R.string.available_scan_devices_desc),
-			style = MaterialTheme.typography.labelMedium,
+			style = MaterialTheme.typography.labelLarge,
 			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
 	}

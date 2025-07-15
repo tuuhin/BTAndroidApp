@@ -54,14 +54,6 @@ fun BTSettingsTabs(
 		derivedStateOf { pagerState.currentPage }
 	}
 
-	val onTabClicked: (Int) -> Unit = remember(selectedTabIndex) {
-		{ index ->
-			if (index != selectedTabIndex) scope.launch {
-				pagerState.animateScrollToPage(index)
-			}
-		}
-	}
-
 	Column(
 		modifier = modifier.padding(contentPadding),
 		verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -78,7 +70,12 @@ fun BTSettingsTabs(
 			BluetoothTypes.entries.forEach { tab ->
 				Tab(
 					selected = tab.tabIdx == selectedTabIndex,
-					onClick = { onTabClicked(tab.tabIdx) },
+					onClick = {
+						val index = tab.tabIdx
+						if (index != selectedTabIndex) scope.launch {
+							pagerState.animateScrollToPage(index)
+						}
+					},
 					text = { Text(text = tab.textResource) },
 					selectedContentColor = MaterialTheme.colorScheme.onSurface,
 					unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -95,8 +92,8 @@ fun BTSettingsTabs(
 				state = pagerState,
 				snapPositionalThreshold = .4f,
 				snapAnimationSpec = spring(
-					dampingRatio = Spring.DampingRatioNoBouncy,
-					stiffness = Spring.StiffnessLow
+					dampingRatio = Spring.DampingRatioLowBouncy,
+					stiffness = Spring.StiffnessVeryLow
 				)
 			),
 			pageSpacing = dimensionResource(id = R.dimen.page_spacing),

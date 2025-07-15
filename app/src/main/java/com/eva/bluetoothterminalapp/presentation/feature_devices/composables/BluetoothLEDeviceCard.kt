@@ -1,15 +1,13 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -21,6 +19,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -33,30 +32,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
-import com.eva.bluetoothterminalapp.presentation.feature_devices.util.imageVector
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
+import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
+import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun BluetoothLEDeviceCard(
 	leDeviceModel: BluetoothLEDeviceModel,
 	modifier: Modifier = Modifier,
 	onItemSelect: () -> Unit = {},
 	shape: Shape = MaterialTheme.shapes.medium,
+	selectedColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
+	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
 	var isMenuExpanded by remember { mutableStateOf(false) }
 	var localRssi by remember { mutableIntStateOf(leDeviceModel.rssi) }
@@ -70,9 +74,7 @@ fun BluetoothLEDeviceCard(
 	}
 
 	val cardContainerColor by animateColorAsState(
-		targetValue = if (isMenuExpanded)
-			MaterialTheme.colorScheme.surfaceContainerHighest
-		else MaterialTheme.colorScheme.surfaceContainerHigh,
+		targetValue = if (isMenuExpanded) selectedColor else containerColor,
 		label = "Card container color",
 		animationSpec = tween(durationMillis = 200)
 	)
@@ -85,33 +87,22 @@ fun BluetoothLEDeviceCard(
 		),
 		elevation = CardDefaults.elevatedCardElevation(),
 		shape = shape,
-		modifier = modifier.fillMaxWidth(),
+		modifier = modifier
+			.sharedBoundsWrapper(
+				key = SharedElementTransitionKeys.leDeviceCardToLeDeviceProfile(
+					leDeviceModel.deviceModel.address
+				)
+			),
 	) {
 		Row(
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.spacedBy(12.dp),
 			modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
 		) {
-			Box(
-				modifier = Modifier
-					.defaultMinSize(
-						minWidth = dimensionResource(id = R.dimen.min_device_image_size),
-						minHeight = dimensionResource(id = R.dimen.min_device_image_size),
-					)
-					.clip(MaterialTheme.shapes.medium)
-					.background(MaterialTheme.colorScheme.onPrimaryContainer),
-				contentAlignment = Alignment.Center
-			) {
-				Icon(
-					imageVector = leDeviceModel.deviceModel.imageVector,
-					contentDescription = stringResource(
-						id = R.string.devices_image_type,
-						leDeviceModel.deviceName
-					),
-					tint = MaterialTheme.colorScheme.primaryContainer,
-					modifier = Modifier.padding(8.dp)
-				)
-			}
+			BTDeviceIcon(
+				device = leDeviceModel.deviceModel,
+				deviceName = leDeviceModel.deviceName
+			)
 			Column {
 				Text(
 					text = leDeviceModel.deviceName,
@@ -124,6 +115,9 @@ fun BluetoothLEDeviceCard(
 						leDeviceModel.deviceModel.address
 					),
 					style = MaterialTheme.typography.bodyMedium,
+					fontFamily = FontFamily.Monospace,
+					fontWeight = FontWeight.Medium,
+					letterSpacing = .25.sp
 				)
 			}
 			Spacer(modifier = Modifier.weight(1f))
@@ -145,7 +139,9 @@ fun BluetoothLEDeviceCard(
 			Box(modifier = Modifier) {
 				DropdownMenu(
 					expanded = isMenuExpanded,
-					onDismissRequest = { isMenuExpanded = false }
+					onDismissRequest = { isMenuExpanded = false },
+					shape = MaterialTheme.shapes.large,
+					tonalElevation = 2.dp
 				) {
 					DropdownMenuItem(
 						text = { Text(text = stringResource(R.string.connect_to_client)) },
@@ -156,6 +152,7 @@ fun BluetoothLEDeviceCard(
 								contentDescription = stringResource(R.string.connect_to_client)
 							)
 						},
+						colors = MenuDefaults.itemColors(textColor = MaterialTheme.colorScheme.primary)
 					)
 				}
 			}

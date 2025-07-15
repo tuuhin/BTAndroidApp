@@ -2,13 +2,11 @@ package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -28,15 +26,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
-import com.eva.bluetoothterminalapp.presentation.feature_devices.util.imageVector
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
@@ -46,22 +42,23 @@ fun BluetoothDeviceCard(
 	onConnect: () -> Unit,
 	modifier: Modifier = Modifier,
 	shape: Shape = MaterialTheme.shapes.medium,
+	selectedColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
+	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
-	var showDropDown by remember { mutableStateOf(false) }
+	var isExpanded by remember { mutableStateOf(false) }
 
 	val cardContainerColor by animateColorAsState(
-		targetValue = if (showDropDown) MaterialTheme.colorScheme.surfaceContainerHighest
-		else MaterialTheme.colorScheme.surfaceContainerHigh,
+		targetValue = if (isExpanded) selectedColor else containerColor,
 		label = "Card container color",
 		animationSpec = tween(durationMillis = 200)
 	)
 
 	Card(
-		onClick = { showDropDown = !showDropDown },
+		onClick = { isExpanded = true },
 		shape = shape,
 		colors = CardDefaults.cardColors(
 			containerColor = cardContainerColor,
-			contentColor = contentColorFor(cardContainerColor)
+			contentColor = contentColorFor(if (isExpanded) selectedColor else containerColor)
 		),
 		elevation = CardDefaults.elevatedCardElevation(),
 		modifier = modifier
@@ -69,27 +66,14 @@ fun BluetoothDeviceCard(
 		Row(
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.spacedBy(12.dp),
-			modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
+			modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp)
 		) {
-			Box(
-				modifier = Modifier
-					.defaultMinSize(
-						minWidth = dimensionResource(id = R.dimen.min_device_image_size),
-						minHeight = dimensionResource(id = R.dimen.min_device_image_size),
-					)
-					.clip(MaterialTheme.shapes.medium)
-					.background(MaterialTheme.colorScheme.onPrimaryContainer),
-				contentAlignment = Alignment.Center
-			) {
-				Icon(
-					imageVector = device.imageVector,
-					contentDescription = stringResource(
-						id = R.string.devices_image_type, "${device.type}"
-					),
-					tint = MaterialTheme.colorScheme.primaryContainer,
-					modifier = Modifier.padding(8.dp)
-				)
-			}
+			BTDeviceIcon(
+				device = device,
+				deviceName = device.name,
+				contentColor = MaterialTheme.colorScheme.secondaryContainer,
+				containerColor = MaterialTheme.colorScheme.onSecondaryContainer
+			)
 			Column {
 				Text(
 					text = device.name,
@@ -110,8 +94,10 @@ fun BluetoothDeviceCard(
 					contentDescription = stringResource(id = R.string.menu_option_more)
 				)
 				DropdownMenu(
-					expanded = showDropDown,
-					onDismissRequest = { showDropDown = false }
+					expanded = isExpanded,
+					onDismissRequest = { isExpanded = false },
+					shape = MaterialTheme.shapes.medium,
+					tonalElevation = 4.dp
 				) {
 					DropdownMenuItem(
 						text = { Text(text = stringResource(R.string.connect_to_client)) },

@@ -5,8 +5,8 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.launch
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -33,18 +33,17 @@ fun BTDeviceRouteTopBar(
 
 	val launcher = rememberLauncherForActivityResult(
 		contract = StartBluetoothDiscovery(),
-	) { secondsOrCanceled ->
+		onResult = { result ->
+			val message = when (result) {
+				Activity.RESULT_CANCELED -> context.getString(R.string.device_discoverable_denied)
+				else -> context.getString(R.string.device_discoverable_success, result)
+			}
+			Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+		},
+	)
 
-		val message = when (secondsOrCanceled) {
-			Activity.RESULT_CANCELED -> context.getString(R.string.device_discoverable_denied)
-			else -> context.getString(R.string.device_discoverable_success, secondsOrCanceled)
-		}
-		Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
-	}
-
-
-	TopAppBar(
+	MediumTopAppBar(
 		title = { Text(text = stringResource(id = R.string.devices_route)) },
 		navigationIcon = navigation,
 		actions = {
@@ -54,7 +53,7 @@ fun BTDeviceRouteTopBar(
 				startScan = startScan,
 				stopScan = stopScan
 			)
-			BTDevicesTopBarDropDownMenu(
+			BTDevicesTopBarMenu(
 				hasDiscoverPermission = canShowScanOption,
 				onStartDiscovery = launcher::launch
 			)

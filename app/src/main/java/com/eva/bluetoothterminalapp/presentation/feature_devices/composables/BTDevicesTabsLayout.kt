@@ -124,10 +124,10 @@ fun BTDevicesTabsLayout(
 				state = pagerState,
 				snapPositionalThreshold = .4f,
 				snapAnimationSpec = spring(
-					dampingRatio = Spring.DampingRatioNoBouncy,
-					stiffness = Spring.StiffnessLow
+					dampingRatio = Spring.DampingRatioLowBouncy,
+					stiffness = Spring.StiffnessVeryLow
 				)
-			)
+			),
 		) { idx ->
 			when (idx) {
 				BluetoothTypes.CLASSIC.tabIdx -> classicTabContent()

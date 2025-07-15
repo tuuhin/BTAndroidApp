@@ -49,7 +49,7 @@ fun LocationPermissionBox(
 		Spacer(modifier = Modifier.height(4.dp))
 		Text(
 			text = stringResource(id = R.string.location_perms_desc),
-			style = MaterialTheme.typography.bodySmall,
+			style = MaterialTheme.typography.bodyMedium,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 			textAlign = TextAlign.Center
 		)
