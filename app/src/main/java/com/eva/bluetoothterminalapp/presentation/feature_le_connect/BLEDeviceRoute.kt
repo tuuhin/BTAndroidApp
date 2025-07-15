@@ -1,6 +1,7 @@
 package com.eva.bluetoothterminalapp.presentation.feature_le_connect
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -36,11 +37,17 @@ import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLEDev
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLEDeviceProfileState
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.SelectedCharacteristicState
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
+import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
+import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+	ExperimentalMaterial3Api::class,
+	ExperimentalSharedTransitionApi::class
+)
 @Composable
 fun BLEDeviceRoute(
+	deviceAddress: String,
 	profile: BLEDeviceProfileState,
 	selectedCharacteristic: SelectedCharacteristicState,
 	onSelectEvent: (BLECharacteristicEvent) -> Unit,
@@ -59,7 +66,11 @@ fun BLEDeviceRoute(
 				scrollConnection = scrollConnection,
 			)
 		},
-		modifier = modifier.nestedScroll(scrollConnection.nestedScrollConnection)
+		modifier = modifier
+			.nestedScroll(scrollConnection.nestedScrollConnection)
+			.sharedBoundsWrapper(
+				key = SharedElementTransitionKeys.leDeviceCardToLeDeviceProfile(deviceAddress)
+			)
 	) { scPadding ->
 		Column(
 			modifier = Modifier
@@ -110,6 +121,7 @@ private fun BLEDevicesRoutePreview(
 	profile: BLEDeviceProfileState,
 ) = BlueToothTerminalAppTheme {
 	BLEDeviceRoute(
+		deviceAddress = PreviewFakes.FAKE_DEVICE_MODEL.address,
 		profile = profile,
 		selectedCharacteristic = SelectedCharacteristicState(),
 		onSelectEvent = {},

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <dimen name="sc_padding">12dp</dimen>
-  <dimen name="min_device_image_size">32dp</dimen>
+  <dimen name="min_device_image_size">40dp</dimen>
   <dimen name="sc_padding_secondary">6dp</dimen>
   <dimen name="connection_chip_offset">10dp</dimen>
   <dimen name="lazy_colum_content_padding">16dp</dimen>
@@ -9,4 +9,5 @@
   <dimen name="messages_list_vertical_padding">6dp</dimen>
   <dimen name="messages_text_field_spacing">12dp</dimen>
   <dimen name="page_spacing">12dp</dimen>
+  <dimen name="min_bl_image_container_size">100dp</dimen>
 </resources>

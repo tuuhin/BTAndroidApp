@@ -119,10 +119,11 @@ fun BLECharacteristicsCard(
 				exit = slideOutVertically { height -> -height } + fadeOut()
 			) {
 				Text(
-					text = stringResource(
-						id = R.string.ble_value_hex,
-						characteristic.valueHexString
-					),
+					text = buildAnnotatedString {
+						append(stringResource(id = R.string.ble_value_hex))
+						append(" :")
+						append(characteristic.valueHexString)
+					},
 					style = MaterialTheme.typography.labelLarge,
 					color = valuesColor,
 				)
@@ -134,10 +135,11 @@ fun BLECharacteristicsCard(
 				exit = slideOutVertically { height -> -height } + fadeOut()
 			) {
 				Text(
-					text = stringResource(
-						R.string.ble_descriptor_readble_value,
-						characteristic.valueAsString ?: ""
-					),
+					text = buildAnnotatedString {
+						append(stringResource(R.string.ble_readable_value))
+						append(" :")
+						append(characteristic.valueAsString ?: "None")
+					},
 					style = MaterialTheme.typography.labelLarge,
 					color = valuesColor,
 				)

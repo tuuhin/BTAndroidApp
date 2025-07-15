@@ -42,11 +42,12 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AnimatedVisibilityScope.BTLEClientScreen(
 	navigator: DestinationsNavigator,
+	args: BluetoothDeviceArgs,
 ) {
 	val viewModel = koinViewModel<BLEDeviceViewModel>()
 	val bleProfile by viewModel.bLEProfile.collectAsStateWithLifecycle()
 	val readableCharacteristic by viewModel.readCharacteristic.collectAsStateWithLifecycle()
-	val selectedCharcteristics by viewModel.selectedCharacteristic.collectAsStateWithLifecycle()
+	val selectedCharacteristics by viewModel.selectedCharacteristic.collectAsStateWithLifecycle()
 	val writeDialogState by viewModel.writeDialogState.collectAsStateWithLifecycle()
 	val showEndConnectionDialog by viewModel.showConnectionDialog.collectAsStateWithLifecycle()
 
@@ -73,7 +74,7 @@ fun AnimatedVisibilityScope.BTLEClientScreen(
 	)
 
 	BLECharacteristicSheet(
-		isExpanded = selectedCharcteristics.isSheetExpanded,
+		isExpanded = selectedCharacteristics.isSheetExpanded,
 		characteristic = readableCharacteristic,
 		onEvent = viewModel::onCharacteristicEvent,
 	)
@@ -85,8 +86,9 @@ fun AnimatedVisibilityScope.BTLEClientScreen(
 
 	CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 		BLEDeviceRoute(
+			deviceAddress = args.address,
 			profile = bleProfile,
-			selectedCharacteristic = selectedCharcteristics,
+			selectedCharacteristic = selectedCharacteristics,
 			onSelectEvent = viewModel::onCharacteristicEvent,
 			onConfigEvent = viewModel::onConfigEvents,
 			navigation = {

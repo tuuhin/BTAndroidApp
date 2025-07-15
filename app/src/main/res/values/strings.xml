@@ -92,30 +92,28 @@
   <string name="write_characteristic_dialog_desc">Enter text value in utf-8 to write to.</string>
   <string name="device_rssi_value">Current Device RSSI value</string>
   <string name="bluetooth_device_mac_address">MAC : %s</string>
-  <string name="ble_value_hex">Value Hex (0x) : %s</string>
   <string name="ble_disable_notification">Notification are disabled</string>
   <string name="ble_enable_indication">Indications are enabled</string>
   <string name="ble_enable_notification">Notifications are enabled</string>
   <string name="ble_property_notify_stop">Stop Notify</string>
-  <string name="ble_descriptor_readble_value">Value (Readable) : %s</string>
+  <string name="ble_value_hex">Value Hex (0x)</string>
+  <string name="ble_readable_value">Value (Readable)</string>
   <string name="ble_property_indicate_stop">Stop Indicate</string>
   <string name="ble_characteristic_properties">Properties : %s</string>
   <string name="close_ble_connection_dialog">Close connection</string>
-  <!--  Inforamtion Route-->
-  <string name="information_ble_assign_url">https://www.bluetooth.com/specifications/assigned-numbers/</string>
+  <!--  About Route-->
   <string name="cannot_launch_activity">Cannot launch Activity</string>
   <string name="ble_assigned_numbers_title">BLE Assignment Numbers</string>
-  <string name="ble_assigned_numbers_desc">Check assigned numbers for the bluetooth low energy.</string>
+  <string name="ble_assigned_numbers_desc">Check assigned numbers for BLE.</string>
   <string name="info_visit_link">Visit</string>
   <string name="information_baud_rate">Baud Rate</string>
   <string name="information_baud_rate_desc">Communication is done at full bluetooth speed so these properties are not configurable</string>
   <string name="information_title_bluetooth_and_ble">Bluetooth and Bluetooth Low Energy</string>
   <string name="information_title_development">Development</string>
   <string name="information_source_code">Source Code</string>
-  <string name="information_source_code_desc">Check out source code for the app</string>
+  <string name="information_source_code_desc">Source code for this application</string>
   <string name="info_visit_github">GitHub</string>
-  <string name="information_source_code_link">https://github.com/tuuhin/BTAndroidApp</string>
-  <string name="information_route_title">Information</string>
+  <string name="about_route_title">About</string>
   <string name="settings_route_title">Settings</string>
   <string name="cannot_find_email_clients">Cannot find any email clients</string>
   <string name="send_email_via">Send Email Via</string>
@@ -191,4 +189,6 @@
   <string name="mail_title">Email</string>
   <string name="ble_device_profile_action_refresh_rssi">Refresh RSSI</string>
   <string name="ble_device_profile_action_refresh_services">Refresh Services</string>
+  <string name="drawer_option_servers">Servers</string>
+  <string name="drawer_option_others">Others</string>
 </resources>

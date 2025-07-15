@@ -48,8 +48,7 @@ fun AnimatedVisibilityScope.SettingsScreen(
 			onBLEEvent = viewModel::onBLEEvents,
 			onBTEvent = viewModel::onBTClassicEvents,
 			navigation = {
-				val onBackPress = dropUnlessResumed(block = navigator::popBackStack)
-				IconButton(onClick = onBackPress) {
+				IconButton(onClick = dropUnlessResumed(block = navigator::popBackStack)) {
 					Icon(
 						imageVector = Icons.AutoMirrored.Default.ArrowBack,
 						contentDescription = stringResource(id = R.string.back_arrow)

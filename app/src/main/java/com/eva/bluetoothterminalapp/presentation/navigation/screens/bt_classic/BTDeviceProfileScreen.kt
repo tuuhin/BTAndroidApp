@@ -1,10 +1,12 @@
 package com.eva.bluetoothterminalapp.presentation.navigation.screens.bt_classic
 
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -16,6 +18,7 @@ import com.eva.bluetoothterminalapp.presentation.navigation.UIEventsSideEffect
 import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothDeviceArgs
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
+import com.eva.bluetoothterminalapp.presentation.util.LocalSharedTransitionVisibilityScopeProvider
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.BlProfileDestination
@@ -29,7 +32,7 @@ import org.koin.androidx.compose.koinViewModel
 	navArgs = BluetoothDeviceArgs::class
 )
 @Composable
-fun BTDeviceProfileScreen(
+fun AnimatedVisibilityScope.BTDeviceProfileScreen(
 	navigator: DestinationsNavigator,
 	args: BluetoothDeviceArgs,
 ) {
@@ -42,26 +45,28 @@ fun BTDeviceProfileScreen(
 		onPopBack = dropUnlessResumed { navigator.popBackStack() }
 	)
 
-	BluetoothProfileRoute(
-		state = profile,
-		onEvent = viewmodel::onEvent,
-		onConnect = { uuid ->
-			navigator.navigate(
-				direction = ClientRouteDestination(address = args.address, uuid = uuid),
-			) {
-				popUpTo(BlProfileDestination) {
-					inclusive = true
+	CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
+		BluetoothProfileRoute(
+			state = profile,
+			onEvent = viewmodel::onEvent,
+			onConnect = { uuid ->
+				navigator.navigate(
+					direction = ClientRouteDestination(address = args.address, uuid = uuid),
+				) {
+					popUpTo(BlProfileDestination) {
+						inclusive = true
+					}
+				}
+			},
+			navigation = {
+				val onBack = dropUnlessResumed(block = navigator::popBackStack)
+				IconButton(onClick = onBack) {
+					Icon(
+						imageVector = Icons.AutoMirrored.Default.ArrowBack,
+						contentDescription = stringResource(id = R.string.back_arrow)
+					)
 				}
 			}
-		},
-		navigation = {
-			val onBack = dropUnlessResumed(block = navigator::popBackStack)
-			IconButton(onClick = onBack) {
-				Icon(
-					imageVector = Icons.AutoMirrored.Default.ArrowBack,
-					contentDescription = stringResource(id = R.string.back_arrow)
-				)
-			}
-		}
-	)
+		)
+	}
 }

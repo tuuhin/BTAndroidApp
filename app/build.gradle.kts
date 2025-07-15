@@ -104,7 +104,8 @@ dependencies {
 	implementation(libs.koin.android)
 	implementation(libs.koin.compose)
 	implementation(libs.koin.android.startup)
-
+	// shapes
+	implementation(libs.androidx.graphics.shapes)
 	// kotlinx-serialization
 	implementation(libs.kotlinx.serialization.json)
 	//icons

@@ -1,13 +1,14 @@
 package com.eva.bluetoothterminalapp.presentation.feature_settings
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,9 +27,14 @@ import com.eva.bluetoothterminalapp.presentation.feature_settings.util.BLESettin
 import com.eva.bluetoothterminalapp.presentation.feature_settings.util.BTSettingsEvent
 import com.eva.bluetoothterminalapp.presentation.util.BluetoothTypes
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
+import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
+import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+	ExperimentalMaterial3Api::class,
+	ExperimentalSharedTransitionApi::class
+)
 @Composable
 fun AppSettingsRoute(
 	bleSettings: BLESettingsModel,
@@ -39,17 +45,19 @@ fun AppSettingsRoute(
 	initialTab: BluetoothTypes = BluetoothTypes.CLASSIC,
 	navigation: @Composable () -> Unit = {},
 ) {
-	val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
 	Scaffold(
 		topBar = {
-			TopAppBar(
+			MediumTopAppBar(
 				title = { Text(text = stringResource(id = R.string.settings_route_title)) },
 				scrollBehavior = scrollBehavior,
 				navigationIcon = navigation
 			)
 		},
-		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+		modifier = modifier
+			.nestedScroll(scrollBehavior.nestedScrollConnection)
+			.sharedBoundsWrapper(SharedElementTransitionKeys.SETTINGS_ITEM_TO_SETTING_SCREEN),
 	) { scPadding ->
 		BTSettingsTabs(
 			initialTab = initialTab,
@@ -69,7 +77,6 @@ fun AppSettingsRoute(
 				)
 			},
 		)
-
 	}
 }
 

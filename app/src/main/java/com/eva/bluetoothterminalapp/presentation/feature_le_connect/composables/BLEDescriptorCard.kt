@@ -109,10 +109,11 @@ fun BLEDescriptorCard(
 				exit = slideOutVertically { height -> -height } + fadeOut()
 			) {
 				Text(
-					text = stringResource(
-						id = R.string.ble_descriptor_readble_value,
-						descriptor.textValue
-					),
+					text = buildAnnotatedString {
+						append(stringResource(R.string.ble_readable_value))
+						append(" :")
+						append(descriptor.textValue)
+					},
 					style = MaterialTheme.typography.labelMedium,
 					color = valuesColor,
 				)

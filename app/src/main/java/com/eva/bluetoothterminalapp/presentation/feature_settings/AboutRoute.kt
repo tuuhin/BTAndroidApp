@@ -3,17 +3,17 @@ package com.eva.bluetoothterminalapp.presentation.feature_settings
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.outlined.Mail
-import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -34,39 +33,42 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.presentation.util.BTConstants
+import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
+import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+	ExperimentalMaterial3Api::class,
+	ExperimentalSharedTransitionApi::class
+)
 @Composable
-fun InformationRoute(
+fun AboutRoute(
 	modifier: Modifier = Modifier,
 	navigation: @Composable () -> Unit = {}
 ) {
 	val context = LocalContext.current
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-	val openAssignedNumbersLambda: () -> Unit = remember {
-		context::openAssignedNumbersList
-	}
-
-	val openGitubLambda: () -> Unit = remember {
-		context::openGithub
-	}
-
-	val openEmailLambda: () -> Unit = remember {
-		context::sendEmailToMe
-	}
 
 	Scaffold(
 		topBar = {
 			MediumTopAppBar(
-				title = { Text(text = stringResource(id = R.string.information_route_title)) },
+				title = {
+					Text(
+						text = stringResource(id = R.string.about_route_title),
+
+						)
+				},
 				navigationIcon = navigation,
 				scrollBehavior = scrollBehavior
 			)
 		},
-		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+		modifier = modifier
+			.nestedScroll(scrollBehavior.nestedScrollConnection)
+			.sharedBoundsWrapper(SharedElementTransitionKeys.ABOUT_ITEM_TO_ABOUT_SCREEN)
 	) { scPadding ->
 		LazyColumn(
 			contentPadding = scPadding,
@@ -115,12 +117,12 @@ fun InformationRoute(
 					},
 					leadingContent = {
 						Icon(
-							imageVector = Icons.Outlined.PictureAsPdf,
+							imageVector = Icons.Default.Numbers,
 							contentDescription = stringResource(id = R.string.ble_assigned_numbers_title)
 						)
 					},
 					trailingContent = {
-						TextButton(onClick = openAssignedNumbersLambda) {
+						TextButton(onClick = context::openAssignedNumbersList) {
 							Text(text = stringResource(id = R.string.info_visit_link))
 						}
 					},
@@ -152,7 +154,7 @@ fun InformationRoute(
 						)
 					},
 					trailingContent = {
-						TextButton(onClick = openGitubLambda) {
+						TextButton(onClick = context::openGithub) {
 							Text(text = stringResource(id = R.string.info_visit_github))
 						}
 					},
@@ -171,7 +173,7 @@ fun InformationRoute(
 						)
 					},
 					trailingContent = {
-						TextButton(onClick = openEmailLambda) {
+						TextButton(onClick = context::sendEmailToMe) {
 							Text(text = stringResource(id = R.string.mail_title))
 						}
 					},
@@ -184,11 +186,11 @@ fun InformationRoute(
 }
 
 private fun Context.openAssignedNumbersList() {
-	val uri = getString(R.string.information_ble_assign_url)
+	val uri = BTConstants.BLE_ASSIGNED_NUMBERS_WEBSITE.toUri()
 	val error = getString(R.string.cannot_launch_activity)
 	try {
 		Intent(Intent.ACTION_VIEW).apply {
-			data = Uri.parse(uri)
+			data = uri
 			startActivity(this@apply)
 		}
 	} catch (_: ActivityNotFoundException) {
@@ -197,11 +199,11 @@ private fun Context.openAssignedNumbersList() {
 }
 
 private fun Context.openGithub() {
-	val uri = getString(R.string.information_source_code_link)
+	val uri = BTConstants.SOURCE_CODE_REPO.toUri()
 	val error = getString(R.string.cannot_launch_activity)
 	try {
 		Intent(Intent.ACTION_VIEW).apply {
-			data = Uri.parse(uri)
+			data = uri
 			startActivity(this@apply)
 		}
 	} catch (_: ActivityNotFoundException) {
@@ -215,7 +217,7 @@ private fun Context.sendEmailToMe() {
 
 	try {
 		val intent = Intent(Intent.ACTION_SENDTO).apply {
-			data = Uri.parse("mailto:")
+			data = "mailto:".toUri()
 			putExtra(Intent.EXTRA_EMAIL, arrayOf("tuhinbhowmick2513@gmail.com"))
 			putExtra(Intent.EXTRA_SUBJECT, "Query regarding BluetoothAndroid App")
 			putExtra(Intent.EXTRA_TEXT, "Query")
@@ -232,7 +234,7 @@ private fun Context.sendEmailToMe() {
 @PreviewLightDark
 @Composable
 private fun InformationRoutePreview() = BlueToothTerminalAppTheme {
-	InformationRoute(
+	AboutRoute(
 		navigation = {
 			Icon(
 				imageVector = Icons.AutoMirrored.Default.ArrowBack,

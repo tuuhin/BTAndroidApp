@@ -1,9 +1,10 @@
 [versions]
-agp = "8.11.0"
+agp = "8.11.1"
 compose_destination_animation_version = "1.11.9"
 compose_destination_core_version = "2.2.0"
 coreSplashscreen = "1.0.1"
 datastore = "1.1.7"
+graphicsShapes = "1.0.1"
 kotlin = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -36,6 +37,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-graphics-shapes = { module = "androidx.graphics:graphics-shapes", version.ref = "graphicsShapes" }
 #splash
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 #lifecyle compose runtime

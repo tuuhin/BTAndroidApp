@@ -36,7 +36,7 @@ fun CloseConnectionDialog(
 		confirmButton = {
 			TextButton(
 				onClick = onConfirm,
-				colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+				colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
 			) {
 				Text(text = stringResource(id = R.string.dialog_action_close))
 			}
@@ -44,7 +44,7 @@ fun CloseConnectionDialog(
 		dismissButton = {
 			TextButton(
 				onClick = onDismiss,
-				colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+				colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
 			) {
 				Text(text = stringResource(id = R.string.dialog_action_cancel))
 			}
