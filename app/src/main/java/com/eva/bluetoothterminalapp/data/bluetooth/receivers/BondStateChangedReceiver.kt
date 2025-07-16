@@ -26,7 +26,7 @@ class BondStateChangedReceiver(
 		val isNewDevice = previousBondState == BluetoothDevice.BOND_BONDING
 				&& currentBondState == BluetoothDevice.BOND_BONDED
 
-		// Bonded -> Bond Node , device removed
+		// Bonded -> Bond None , device removed
 		val isOldRemove = previousBondState == BluetoothDevice.BOND_BONDED
 				&& currentBondState == BluetoothDevice.BOND_NONE
 

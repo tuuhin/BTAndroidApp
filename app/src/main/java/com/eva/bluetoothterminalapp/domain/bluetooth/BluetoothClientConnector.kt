@@ -2,11 +2,10 @@ package com.eva.bluetoothterminalapp.domain.bluetooth
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
-import android.content.BroadcastReceiver
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 
 interface BluetoothClientConnector {
@@ -16,7 +15,7 @@ interface BluetoothClientConnector {
 	 * is doing currently
 	 * @see [ClientConnectionState]
 	 */
-	val connectionState: StateFlow<ClientConnectionState>
+	val connectionState: Flow<ClientConnectionState>
 
 	/**
 	 * Connect the client either to a device via its UUID or current server via specified uuid
@@ -26,7 +25,7 @@ interface BluetoothClientConnector {
 	 * @return [Result] indicating is everything gone correct and socket is accepted.
 	 */
 	suspend fun connectClient(address: String, connectUUID: UUID, secure: Boolean = true)
-			: Result<Unit>
+			: Result<BluetoothDeviceModel>
 
 	/**
 	 * Fetches the uuids from the device
@@ -51,10 +50,5 @@ interface BluetoothClientConnector {
 	 * @return [Result] indicating if sockets are closed properly
 	 */
 	fun closeClient(): Result<Unit>
-
-	/**
-	 * Closes all the [BroadcastReceiver] for the client
-	 */
-	fun releaseResources()
 
 }

@@ -34,32 +34,29 @@ enum class ClientConnectionState {
 	/**
 	 * New Device Paired
 	 */
-	CONNECTION_BONDED,
-}
+	CONNECTION_BONDED;
 
-fun checkIfStateChangeAllowed(
-	previous: ClientConnectionState,
-	next: ClientConnectionState
-): Boolean {
-	val newStates = when (previous) {
-		ClientConnectionState.CONNECTION_INITIALIZING -> setOf(
-			ClientConnectionState.CONNECTION_DISCONNECTED,
-			ClientConnectionState.CONNECTION_DEVICE_CONNECTED
-		)
+	fun checkCorrectNextState(nextState: ClientConnectionState): Boolean {
+		val newStates = when (this) {
+			CONNECTION_INITIALIZING -> setOf(
+				CONNECTION_DISCONNECTED,
+				CONNECTION_DEVICE_CONNECTED
+			)
 
-		ClientConnectionState.CONNECTION_DEVICE_CONNECTED -> setOf(
-			ClientConnectionState.CONNECTION_BONDING,
-			ClientConnectionState.CONNECTION_DENIED,
-			ClientConnectionState.CONNECTION_ACCEPTED,
-			ClientConnectionState.CONNECTION_DISCONNECTED
-		)
+			CONNECTION_DEVICE_CONNECTED -> setOf(
+				CONNECTION_BONDING,
+				CONNECTION_DENIED,
+				CONNECTION_ACCEPTED,
+				CONNECTION_DISCONNECTED
+			)
 
-		ClientConnectionState.CONNECTION_ACCEPTED -> setOf(ClientConnectionState.CONNECTION_DISCONNECTED)
-		ClientConnectionState.CONNECTION_DENIED -> setOf(ClientConnectionState.CONNECTION_DEVICE_CONNECTED)
-		ClientConnectionState.CONNECTION_DISCONNECTED -> setOf(ClientConnectionState.CONNECTION_DEVICE_CONNECTED)
-		ClientConnectionState.CONNECTION_BONDING -> setOf(ClientConnectionState.CONNECTION_BONDED)
-		ClientConnectionState.CONNECTION_BONDED -> setOf(ClientConnectionState.CONNECTION_ACCEPTED)
+			CONNECTION_ACCEPTED -> setOf(CONNECTION_DISCONNECTED)
+			CONNECTION_DENIED -> setOf(CONNECTION_DEVICE_CONNECTED)
+			CONNECTION_DISCONNECTED -> setOf(CONNECTION_DEVICE_CONNECTED)
+			CONNECTION_BONDING -> setOf(CONNECTION_BONDED)
+			CONNECTION_BONDED -> setOf(CONNECTION_ACCEPTED)
+		}
+
+		return newStates.any { it == nextState }
 	}
-
-	return newStates.any { it == next }
 }
