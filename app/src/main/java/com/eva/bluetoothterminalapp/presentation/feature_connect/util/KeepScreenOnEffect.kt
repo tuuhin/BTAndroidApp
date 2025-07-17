@@ -1,8 +1,8 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.util
 
-import android.app.Activity
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
@@ -11,19 +11,19 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 
 @Composable
-fun KeepScreenOnEffect(
+fun KeepScreenOnSideEffect(
 	connectionState: ClientConnectionState,
 	isKeepScreenOn: Boolean
 ) {
-
 	if (!isKeepScreenOn) return
 
 	val context = LocalContext.current
+	val activity = LocalActivity.current
 
-	DisposableEffect(connectionState, isKeepScreenOn) {
+	DisposableEffect(connectionState) {
 		// otherwise
 		val isAccepted = connectionState == ClientConnectionState.CONNECTION_ACCEPTED
-		val window = (context as? Activity)?.window ?: return@DisposableEffect onDispose { }
+		val window = activity?.window ?: return@DisposableEffect onDispose { }
 
 		when {
 			isAccepted -> window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -46,7 +46,7 @@ fun KeepScreenOnEffect(
 }
 
 @Composable
-fun KeepScreenOnEffect(
+fun KeepScreenOnSideEffect(
 	connectionState: ServerConnectionState,
 	isKeepScreenOn: Boolean
 ) {
@@ -54,11 +54,12 @@ fun KeepScreenOnEffect(
 	if (!isKeepScreenOn) return
 
 	val context = LocalContext.current
+	val activity = LocalActivity.current
 
-	DisposableEffect(connectionState, isKeepScreenOn) {
+	DisposableEffect(connectionState) {
 		// otherwise
 		val isAccepted = connectionState == ServerConnectionState.CONNECTION_ACCEPTED
-		val window = (context as? Activity)?.window ?: return@DisposableEffect onDispose { }
+		val window = activity?.window ?: return@DisposableEffect onDispose { }
 
 		when {
 			isAccepted -> window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

@@ -1,5 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.composables
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -7,10 +8,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
@@ -26,6 +30,8 @@ fun BTMessagesList(
 	scrollToEnd: Boolean = true,
 	contentPadding: PaddingValues = PaddingValues(0.dp),
 	verticalArrangement: Arrangement.Vertical = Arrangement.Bottom,
+	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+	shape: Shape = MaterialTheme.shapes.medium,
 ) {
 
 	val isInspectionMode = LocalInspectionMode.current
@@ -46,7 +52,7 @@ fun BTMessagesList(
 
 	LazyColumn(
 		state = lazyListState,
-		modifier = modifier,
+		modifier = modifier.background(containerColor, shape),
 		verticalArrangement = verticalArrangement,
 		contentPadding = contentPadding,
 		reverseLayout = isReversed,

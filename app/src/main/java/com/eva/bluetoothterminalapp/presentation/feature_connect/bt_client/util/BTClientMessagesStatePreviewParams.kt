@@ -1,16 +1,15 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.util
 
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
-import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientMessagesState
 import kotlinx.collections.immutable.persistentListOf
 
-class BTClientRoutePreviewParams : CollectionPreviewParameterProvider<BTClientRouteState>(
+class BTClientMessagesStatePreviewParams :
+	CollectionPreviewParameterProvider<BTClientMessagesState>(
 	listOf(
-		BTClientRouteState(
-			connectionMode = ClientConnectionState.CONNECTION_ACCEPTED,
+		BTClientMessagesState(
 			messages = persistentListOf(
 				BluetoothMessage(
 					message = "Hello",
@@ -22,14 +21,12 @@ class BTClientRoutePreviewParams : CollectionPreviewParameterProvider<BTClientRo
 				)
 			)
 		),
-		BTClientRouteState(
-			connectionMode = ClientConnectionState.CONNECTION_DISCONNECTED,
+		BTClientMessagesState(
 			messages = persistentListOf(
 				BluetoothMessage("Hello", BluetoothMessageType.MESSAGE_FROM_SELF)
 			),
 		),
-		BTClientRouteState(
-			connectionMode = ClientConnectionState.CONNECTION_ACCEPTED,
+		BTClientMessagesState(
 			messages = persistentListOf(
 				BluetoothMessage(
 					"Hello this is an long message please note this one that can effect the list styling",

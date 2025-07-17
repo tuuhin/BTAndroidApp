@@ -1,6 +1,7 @@
 package com.eva.bluetoothterminalapp.presentation.navigation.screens.bt_classic
 
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -8,11 +9,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.BTClientRoute
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.BTClientViewModel
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.CloseConnectionDialog
@@ -22,12 +23,15 @@ import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothClient
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
 import com.eva.bluetoothterminalapp.presentation.util.LocalSharedTransitionVisibilityScopeProvider
+import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
+import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
 	route = Routes.CLIENT_CONNECTION_ROUTE,
 	style = RouteAnimation::class,
@@ -36,9 +40,11 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AnimatedVisibilityScope.BTClassicClientScreen(
 	navigator: DestinationsNavigator,
+	args: BluetoothClientConnectArgs,
 ) {
 	val viewModel = koinViewModel<BTClientViewModel>()
-	val clientState by viewModel.clientState.collectAsStateWithLifecycle()
+	val messagesState by viewModel.messagesState.collectAsStateWithLifecycle()
+	val deviceState by viewModel.clientState.collectAsStateWithLifecycle()
 	val showCloseDialog by viewModel.showCloseDialog.collectAsStateWithLifecycle()
 	val btSettings by viewModel.btSettings.collectAsStateWithLifecycle()
 
@@ -54,14 +60,15 @@ fun AnimatedVisibilityScope.BTClassicClientScreen(
 
 	CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 		BTClientRoute(
-			state = clientState,
+			messages = messagesState,
+			device = deviceState,
 			btSettings = btSettings,
 			onConnectionEvent = viewModel::onClientConnectionEvents,
 			onBackPress = { viewModel.onCloseConnectionEvent(EndConnectionEvents.OnOpenDisconnectDialog) },
 			navigation = {
 				val onBack = dropUnlessResumed {
 					// open close dialog if connection running
-					if (clientState.connectionMode == ClientConnectionState.CONNECTION_ACCEPTED)
+					if (deviceState.isConnected)
 						viewModel.onCloseConnectionEvent(EndConnectionEvents.OnOpenDisconnectDialog)
 					// else pop backstack
 					else navigator.popBackStack()
@@ -73,6 +80,9 @@ fun AnimatedVisibilityScope.BTClassicClientScreen(
 					)
 				}
 			},
+			modifier = Modifier.sharedBoundsWrapper(
+				SharedElementTransitionKeys.btClientScreen(args.address)
+			)
 		)
 	}
 }

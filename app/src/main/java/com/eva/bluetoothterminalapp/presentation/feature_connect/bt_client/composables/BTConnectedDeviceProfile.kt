@@ -1,17 +1,15 @@
-package com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables
+package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,18 +25,17 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
-import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.presentation.composables.BTDeviceIconLarge
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
-fun BLEDeviceProfile(
+fun BTConnectedDeviceProfile(
 	device: BluetoothDeviceModel?,
 	modifier: Modifier = Modifier,
-	connectionState: BLEConnectionState = BLEConnectionState.CONNECTED,
-	rssi: Int = 0,
+	connectionState: ClientConnectionState = ClientConnectionState.CONNECTION_ACCEPTED,
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.secondaryContainer
 ) {
@@ -82,15 +79,7 @@ fun BLEDeviceProfile(
 						fontFamily = FontFamily.Monospace,
 					)
 					Spacer(modifier = Modifier.height(4.dp))
-					Text(
-						text = "RSSI : $rssi ${BluetoothDeviceModel.RSSI_UNIT}",
-						style = MaterialTheme.typography.labelLarge,
-						modifier = Modifier.width(IntrinsicSize.Max)
-					)
-					BLEConnectionStatusChip(
-						state = connectionState,
-						shape = MaterialTheme.shapes.small
-					)
+					ClientConnectionStateChip(connectionState = connectionState)
 				}
 				BTDeviceIconLarge(device = device)
 			}
@@ -101,11 +90,10 @@ fun BLEDeviceProfile(
 
 @PreviewLightDark
 @Composable
-private fun BLEDeviceProfilePreview() = BlueToothTerminalAppTheme {
+private fun BTDeviceProfilePreview() = BlueToothTerminalAppTheme {
 	Surface {
-		BLEDeviceProfile(
+		BTConnectedDeviceProfile(
 			device = PreviewFakes.FAKE_DEVICE_MODEL,
-			rssi = -50,
 			modifier = Modifier
 				.padding(12.dp)
 				.fillMaxWidth()
