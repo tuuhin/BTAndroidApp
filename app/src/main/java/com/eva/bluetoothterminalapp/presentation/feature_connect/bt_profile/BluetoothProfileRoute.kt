@@ -2,6 +2,7 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile
 
 import android.os.ParcelUuid
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -29,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.eva.bluetoothterminalapp.R
@@ -38,12 +40,18 @@ import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.stat
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileScreenState
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
+import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
+import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 import java.util.UUID
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+	ExperimentalMaterial3Api::class,
+	ExperimentalSharedTransitionApi::class
+)
 @Composable
 fun BluetoothProfileRoute(
+	address: String,
 	state: BTProfileScreenState,
 	onEvent: (BTProfileEvents) -> Unit,
 	onConnect: (UUID) -> Unit,
@@ -74,10 +82,6 @@ fun BluetoothProfileRoute(
 				},
 				navigation = navigation,
 				scrollBehavior = scrollBehavior,
-				colors = TopAppBarDefaults.mediumTopAppBarColors(
-					scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-					actionIconContentColor = MaterialTheme.colorScheme.primary
-				)
 			)
 		},
 		floatingActionButton = {
@@ -89,14 +93,23 @@ fun BluetoothProfileRoute(
 				ExtendedFloatingActionButton(
 					onClick = { selectedUUID?.let(onConnect) },
 					shape = MaterialTheme.shapes.medium,
-					elevation = FloatingActionButtonDefaults.loweredElevation()
+					elevation = FloatingActionButtonDefaults.loweredElevation(),
+					modifier = Modifier.sharedBoundsWrapper(
+						SharedElementTransitionKeys.btClientScreen(address)
+					)
 				) {
+					Icon(
+						painter = painterResource(R.drawable.ic_connect_variant),
+						contentDescription = "Connect"
+					)
 					Text(text = stringResource(id = R.string.dialog_action_connect))
 				}
 			}
 		},
 		snackbarHost = { SnackbarHost(hostState = snackBarHost) },
-		modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+		modifier = modifier
+			.nestedScroll(scrollBehavior.nestedScrollConnection)
+			.sharedBoundsWrapper(SharedElementTransitionKeys.btProfileScreen(address)),
 	) { scPadding ->
 		ConnectionProfileList(
 			selected = selectedUUID,
@@ -122,6 +135,7 @@ private val uuidSaver = object : Saver<UUID?, ParcelUuid> {
 @Composable
 private fun BluetoothProfileRoutePreview() = BlueToothTerminalAppTheme {
 	BluetoothProfileRoute(
+		address = "",
 		state = PreviewFakes.FAKE_BT_DEVICE_PROFILE,
 		onEvent = {},
 		onConnect = {},

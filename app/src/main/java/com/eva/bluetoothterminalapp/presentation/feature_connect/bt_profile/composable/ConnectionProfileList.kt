@@ -3,6 +3,7 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.com
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -17,8 +18,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.util.BTConstants
@@ -67,9 +71,10 @@ fun ConnectionProfileList(
 		item(contentType = UUID::class.simpleName) {
 			SelectableUUIDCard(
 				uuid = BTConstants.SERVICE_UUID,
-				specialName = stringResource(id = R.string.bl_connect_profile_server_uuid),
+				uniqueName = stringResource(id = R.string.bl_connect_profile_server_uuid),
 				isSelected = selected == BTConstants.SERVICE_UUID,
 				onSelect = { onUUIDSelect(BTConstants.SERVICE_UUID) },
+				fontFamily = FontFamily.Default,
 				modifier = Modifier.fillMaxWidth()
 			)
 		}
@@ -84,8 +89,8 @@ fun ConnectionProfileList(
 			item {
 				Text(
 					text = stringResource(id = R.string.bl_connect_profile_device_uuid_fetching),
-					style = MaterialTheme.typography.labelLarge,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
+					style = MaterialTheme.typography.bodyMedium,
+					color = MaterialTheme.colorScheme.tertiary,
 					textAlign = TextAlign.Center,
 					modifier = Modifier
 						.fillMaxWidth()
@@ -96,8 +101,8 @@ fun ConnectionProfileList(
 			item {
 				Text(
 					text = stringResource(id = R.string.bl_connect_profile_device_uuids_not_found),
-					style = MaterialTheme.typography.labelLarge,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
+					style = MaterialTheme.typography.bodyMedium,
+					color = MaterialTheme.colorScheme.secondary,
 					textAlign = TextAlign.Center,
 					modifier = Modifier
 						.fillMaxWidth()
@@ -119,13 +124,21 @@ fun ConnectionProfileList(
 	}
 }
 
+private class IsDiscoveringBooleanParams :
+	CollectionPreviewParameterProvider<Boolean>(listOf(true, false))
+
 @PreviewLightDark
 @Composable
-private fun ConnectionProfileListPreview() = BlueToothTerminalAppTheme {
+private fun ConnectionProfileListPreview(
+	@PreviewParameter(IsDiscoveringBooleanParams::class)
+	isDiscovering: Boolean
+) = BlueToothTerminalAppTheme {
 	Surface {
 		ConnectionProfileList(
 			selected = BTConstants.SERVICE_UUID,
-			available = PreviewFakes.FAKE_UUID_LIST.toImmutableList()
+			available = PreviewFakes.FAKE_UUID_LIST.toImmutableList(),
+			isDiscovering = isDiscovering,
+			modifier = Modifier.fillMaxSize()
 		)
 	}
 }

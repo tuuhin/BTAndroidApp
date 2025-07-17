@@ -8,14 +8,15 @@ object Routes {
 	const val CLIENT_CONNECTION_ROUTE = "client_route"
 
 	// client profile route
-	const val CLIENT_PROFILE_ROUTE = "bl_profile"
+	const val CLIENT_PROFILE_ROUTE = "bt_profile"
 
 	// classic server route
-	const val SERVER_ROUTE = "bl_server_route"
+	const val SERVER_ROUTE = "bt_server_route"
 
 	// ble client terminal route
 	const val BLE_CLIENT_ROUTE = "ble_client_route"
 
+	//settings route
 	const val SETTINGS_ROUTE = "settings"
 
 	//info route

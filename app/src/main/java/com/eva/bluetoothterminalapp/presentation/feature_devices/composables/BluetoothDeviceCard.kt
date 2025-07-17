@@ -1,5 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -34,8 +35,11 @@ import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
+import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
+import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun BluetoothDeviceCard(
 	device: BluetoothDeviceModel,
@@ -61,7 +65,7 @@ fun BluetoothDeviceCard(
 			contentColor = contentColorFor(if (isExpanded) selectedColor else containerColor)
 		),
 		elevation = CardDefaults.elevatedCardElevation(),
-		modifier = modifier
+		modifier = modifier.sharedBoundsWrapper(SharedElementTransitionKeys.btProfileScreen(device.address))
 	) {
 		Row(
 			verticalAlignment = Alignment.CenterVertically,

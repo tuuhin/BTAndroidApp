@@ -21,7 +21,7 @@ import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
 import com.eva.bluetoothterminalapp.presentation.util.LocalSharedTransitionVisibilityScopeProvider
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.BlProfileDestination
+import com.ramcosta.composedestinations.generated.destinations.BtProfileDestination
 import com.ramcosta.composedestinations.generated.destinations.ClientRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
@@ -47,20 +47,20 @@ fun AnimatedVisibilityScope.BTDeviceProfileScreen(
 
 	CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 		BluetoothProfileRoute(
+			address = args.address,
 			state = profile,
 			onEvent = viewmodel::onEvent,
 			onConnect = { uuid ->
 				navigator.navigate(
 					direction = ClientRouteDestination(address = args.address, uuid = uuid),
 				) {
-					popUpTo(BlProfileDestination) {
+					popUpTo(BtProfileDestination) {
 						inclusive = true
 					}
 				}
 			},
 			navigation = {
-				val onBack = dropUnlessResumed(block = navigator::popBackStack)
-				IconButton(onClick = onBack) {
+				IconButton(onClick = dropUnlessResumed(block = navigator::popBackStack)) {
 					Icon(
 						imageVector = Icons.AutoMirrored.Default.ArrowBack,
 						contentDescription = stringResource(id = R.string.back_arrow)

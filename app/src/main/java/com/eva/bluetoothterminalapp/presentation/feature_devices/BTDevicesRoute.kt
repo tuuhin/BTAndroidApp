@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices
 
-import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,7 +10,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,9 +22,9 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
-import androidx.core.content.ContextCompat
-import androidx.core.content.PermissionChecker
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.data.utils.hasBTScanPermission
+import com.eva.bluetoothterminalapp.data.utils.hasLocationPermission
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTDeviceRouteTopBar
@@ -52,6 +50,7 @@ fun BTDevicesRoute(
 	state: BTDevicesScreenState,
 	onEvent: (BTDevicesScreenEvents) -> Unit,
 	modifier: Modifier = Modifier,
+	initialTab: BluetoothTypes = BluetoothTypes.CLASSIC,
 	onSelectDevice: (BluetoothDeviceModel) -> Unit = {},
 	onSelectLeDevice: (BluetoothLEDeviceModel) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
@@ -59,26 +58,14 @@ fun BTDevicesRoute(
 	val context = LocalContext.current
 	val snackBarHostState = LocalSnackBarProvider.current
 
-	var currentTab by remember {
-		mutableStateOf(BluetoothTypes.CLASSIC)
-	}
+	var currentTab by remember { mutableStateOf(initialTab) }
 
 	var hasBtPermission by remember(context) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-			mutableStateOf(
-				ContextCompat.checkSelfPermission(
-					context, Manifest.permission.BLUETOOTH_SCAN
-				) == PermissionChecker.PERMISSION_GRANTED
-			)
-		else mutableStateOf(true)
+		mutableStateOf(context.hasBTScanPermission)
 	}
 
 	var hasLocationPermission by remember(context) {
-		mutableStateOf(
-			ContextCompat.checkSelfPermission(
-				context, Manifest.permission.ACCESS_FINE_LOCATION
-			) == PermissionChecker.PERMISSION_GRANTED
-		)
+		mutableStateOf(context.hasLocationPermission)
 	}
 
 	val showLocationBlock by remember(hasLocationPermission) {
@@ -92,37 +79,7 @@ fun BTDevicesRoute(
 		}
 	}
 
-	val scrollBehaviour = TopAppBarDefaults.pinnedScrollBehavior()
-
-	LaunchedEffect(hasBtPermission) {
-		// responds when bt permission has changed
-		onEvent(BTDevicesScreenEvents.OnBTPermissionChanged(hasBtPermission))
-	}
-
-	val onCurrentTabChanged: (BluetoothTypes) -> Unit = remember {
-		{ tab ->
-			currentTab = tab
-			onEvent(BTDevicesScreenEvents.OnStopAnyRunningScan)
-		}
-	}
-
-	val onStartScan: () -> Unit = remember {
-		{
-			when (currentTab) {
-				BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StartScan)
-				BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StartLEDeviceScan)
-			}
-		}
-	}
-
-	val onStopScan: () -> Unit = remember {
-		{
-			when (currentTab) {
-				BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StopScan)
-				BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StopLEDevicesScan)
-			}
-		}
-	}
+	val scrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
 	Scaffold(
 		topBar = {
@@ -130,8 +87,18 @@ fun BTDevicesRoute(
 				isScanning = isScanning,
 				canShowScanOption = showScanButton,
 				navigation = navigation,
-				startScan = onStartScan,
-				stopScan = onStopScan,
+				startScan = {
+					when (currentTab) {
+						BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StartScan)
+						BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StartLEDeviceScan)
+					}
+				},
+				stopScan = {
+					when (currentTab) {
+						BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StopScan)
+						BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StopLEDevicesScan)
+					}
+				},
 				scrollBehavior = scrollBehaviour
 			)
 		},
@@ -141,15 +108,21 @@ fun BTDevicesRoute(
 		DevicesScreenModeContainer(
 			isActive = isBTActive,
 			hasPermission = hasBtPermission,
-			onBTPermissionChanged = { hasBtPermission = it },
+			onBTPermissionChanged = { isGranted ->
+				hasBtPermission = isGranted
+				onEvent(BTDevicesScreenEvents.OnBTPermissionChanged(isGranted))
+			},
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(scPadding)
 		) {
 			BTDevicesTabsLayout(
 				isScanning = isScanning,
-				onCurrentTabChanged = onCurrentTabChanged,
-				initialTab = BluetoothTypes.CLASSIC,
+				initialTab = initialTab,
+				onCurrentTabChanged = { type ->
+					currentTab = type
+					onEvent(BTDevicesScreenEvents.OnStopAnyRunningScan)
+				},
 				classicTabContent = {
 					BluetoothDevicesList(
 						pairedDevices = state.pairedDevices,
@@ -157,8 +130,9 @@ fun BTDevicesRoute(
 						showLocationPlaceholder = showLocationBlock,
 						onSelectDevice = onSelectDevice,
 						contentPadding = PaddingValues(all = dimensionResource(R.dimen.sc_padding)),
-						onLocationPermsAccept = { isAccepted ->
-							hasLocationPermission = isAccepted
+						onLocationPermsAccept = { isGranted ->
+							hasLocationPermission = isGranted
+							onEvent(BTDevicesScreenEvents.OnLocationPermissionChanged(isGranted))
 						},
 						modifier = Modifier.fillMaxSize(),
 					)

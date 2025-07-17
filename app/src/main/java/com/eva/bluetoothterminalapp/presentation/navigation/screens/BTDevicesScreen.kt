@@ -28,9 +28,9 @@ import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
 import com.eva.bluetoothterminalapp.presentation.util.LocalSharedTransitionVisibilityScopeProvider
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.BlProfileDestination
-import com.ramcosta.composedestinations.generated.destinations.BlServerRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.BleClientRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.BtProfileDestination
+import com.ramcosta.composedestinations.generated.destinations.BtServerRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.InfoDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -75,7 +75,7 @@ fun AnimatedVisibilityScope.BTDevicesScreen(
 						navigator.navigate(SettingsDestination)
 					},
 					onNavigateToClassicServer = {
-						navigator.navigate(BlServerRouteDestination)
+						navigator.navigate(BtServerRouteDestination)
 					}
 				)
 			},
@@ -87,7 +87,7 @@ fun AnimatedVisibilityScope.BTDevicesScreen(
 				onEvent = viewModel::onEvents,
 				onSelectDevice = { device ->
 					val args = device.toArgs()
-					navigator.navigate(BlProfileDestination(args))
+					navigator.navigate(BtProfileDestination(args))
 				},
 				onSelectLeDevice = { device ->
 					val args = device.toArgs()

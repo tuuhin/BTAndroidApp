@@ -3,7 +3,6 @@ package com.eva.bluetoothterminalapp.data.bluetooth.util
 import com.eva.bluetoothterminalapp.domain.settings.enums.BTTerminalDisplayMode
 import java.io.InputStream
 
-@OptIn(ExperimentalStdlibApi::class)
 fun InputStream.readResponseFromStream(
 	buffer: ByteArray = ByteArray(1024),
 	mode: BTTerminalDisplayMode = BTTerminalDisplayMode.DISPLAY_MODE_TEXT

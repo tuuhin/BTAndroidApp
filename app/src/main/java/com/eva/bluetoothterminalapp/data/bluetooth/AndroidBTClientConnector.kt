@@ -33,11 +33,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.UUID
@@ -72,9 +70,9 @@ class AndroidBTClientConnector(
 		if (!_hasBtPermission)
 			return Result.failure(BluetoothPermissionNotProvided())
 		// get the remote device
-		val device = withContext(Dispatchers.IO) {
-			_btAdapter?.getRemoteDevice(address)
-		} ?: return Result.failure(InvalidBluetoothAddressException())
+		val deviceResult = bluetoothDeviceFromAddress(address)
+		if (deviceResult.isFailure) return Result.failure(deviceResult.exceptionOrNull()!!)
+		val device = deviceResult.getOrThrow()
 
 		if (secure && device.bondState == BluetoothDevice.BOND_NONE) {
 			// if the device is not bonded with the device
@@ -82,19 +80,20 @@ class AndroidBTClientConnector(
 			device.createBond()
 		}
 
-		_btClientSocket = if (secure) device.createRfcommSocketToServiceRecord(connectUUID)
-		else device.createInsecureRfcommSocketToServiceRecord(connectUUID)
-
-		Log.d(CLIENT_LOGGER, "CREATED_SOCKET SECURE:$secure SPECIFIED UUID: $connectUUID")
-
-		//  stop if any discovery is running
-		if (_btAdapter?.isDiscovering == true)
-			_btAdapter?.cancelDiscovery()
-
-		val socket = _btClientSocket ?: return Result.failure(Exception("Client Socket Not ready"))
-
-		return withContext(Dispatchers.Default) {
+		return withContext(Dispatchers.IO) {
 			try {
+				_btClientSocket = if (secure) device.createRfcommSocketToServiceRecord(connectUUID)
+				else device.createInsecureRfcommSocketToServiceRecord(connectUUID)
+
+				Log.d(CLIENT_LOGGER, "CREATED_SOCKET SECURE:$secure SPECIFIED UUID: $connectUUID")
+
+				//  stop if any discovery is running
+				if (_btAdapter?.isDiscovering == true)
+					_btAdapter?.cancelDiscovery()
+
+				val socket = _btClientSocket
+					?: return@withContext Result.failure(Exception("Client Socket Not ready"))
+
 				// blocks the thread until a connection is found
 				socket.connect()
 				Log.d(CLIENT_LOGGER, "CLIENT CONNECTED")
@@ -104,18 +103,15 @@ class AndroidBTClientConnector(
 				_connectState.update { ClientConnectionState.CONNECTION_ACCEPTED }
 
 				Result.success(device.toDomainModel())
-			} catch (e: CancellationException) {
-				// close the connection if any
-				closeClient()
-				// throw cancellation exception
-				Log.i(CLIENT_LOGGER, "CONNECTION COROUTINE IS CANCELLED")
-				throw e
 			} catch (e: Exception) {
 				// close the connection if any
 				closeClient()
 				_connectState.update { ClientConnectionState.CONNECTION_DENIED }
 				//error handling
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && e is BluetoothSocketException) {
+				if (e is CancellationException) {
+					Log.d(CLIENT_LOGGER, "CONNECTION COROUTINE IS CANCELLED")
+					throw e
+				} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && e is BluetoothSocketException) {
 					return@withContext Result.failure(
 						BluetoothConnectException(e.errorCode, e.message ?: "")
 					)
@@ -127,9 +123,18 @@ class AndroidBTClientConnector(
 		}
 	}
 
+	override suspend fun loadDeviceFeatureUUID(address: String): Result<List<UUID>> {
+		val deviceResult = bluetoothDeviceFromAddress(address)
+		if (deviceResult.isFailure) return Result.failure(deviceResult.exceptionOrNull()!!)
+		val device = deviceResult.getOrThrow()
 
-	override fun fetchUUIDs(address: String): Flow<List<UUID>> = callbackFlow {
-		val device = _btAdapter?.getRemoteDevice(address)
+		val probableUUIDS = device.uuids.map { it.uuid }.distinct()
+		return Result.success(probableUUIDS)
+	}
+
+	override fun refreshDeviceFeatureUUID(address: String): Flow<List<UUID>> = callbackFlow {
+		val deviceResult = bluetoothDeviceFromAddress(address)
+		val device = deviceResult.getOrNull()
 
 //		if (device?.bondState == BluetoothDevice.BOND_NONE)
 //			device.createBond()
@@ -138,8 +143,8 @@ class AndroidBTClientConnector(
 			onReceivedUUIDs = { uuids ->
 				// remove the client-server uuid
 				val uuidSet = uuids.distinct()
-				Log.d(CLIENT_LOGGER, "FOUND UUIDS: $uuids")
-				launch { send(uuidSet) }
+				Log.d(CLIENT_LOGGER, "SEARCHED FOUND UUIDS: $uuids")
+				trySend(uuidSet)
 			},
 		)
 
@@ -166,11 +171,11 @@ class AndroidBTClientConnector(
 			// will return an empty flow
 			val canRead = status == ClientConnectionState.CONNECTION_ACCEPTED
 			_transferService?.readFromStream(canRead = canRead) ?: emptyFlow()
-		}.flowOn(Dispatchers.IO)
+		}
 
 
-	override suspend fun sendData(data: String): Result<Boolean> {
-		val valueToSend = data.trim()
+	override suspend fun sendData(data: String, trimData: Boolean): Result<Boolean> {
+		val valueToSend = if (trimData) data.trim() else data
 		if (valueToSend.isEmpty()) return Result.success(false)
 
 		return _transferService?.writeToStream(value = valueToSend)
@@ -198,9 +203,23 @@ class AndroidBTClientConnector(
 	}
 
 
-	val androidBTConnectionFlow: Flow<ClientConnectionState>
-		get() = callbackFlow {
+	private suspend fun bluetoothDeviceFromAddress(address: String): Result<BluetoothDevice> {
+		return withContext(Dispatchers.IO) {
+			try {
+				val isValid = BluetoothAdapter.checkBluetoothAddress(address)
+				if (!isValid)
+					return@withContext Result.failure(InvalidBluetoothAddressException())
+				val device = _btAdapter?.getRemoteDevice(address)
+					?: return@withContext Result.failure(InvalidBluetoothAddressException())
+				Result.success(device)
+			} catch (_: IllegalArgumentException) {
+				Result.failure(InvalidBluetoothAddressException())
+			}
+		}
+	}
 
+	private val androidBTConnectionFlow: Flow<ClientConnectionState>
+		get() = callbackFlow {
 			trySend(ClientConnectionState.CONNECTION_INITIALIZING)
 
 			val remoteConnectInfoReceiver = RemoteConnectionReceiver(
@@ -223,9 +242,11 @@ class AndroidBTClientConnector(
 				ContextCompat.RECEIVER_EXPORTED
 			)
 
+			Log.d(CLIENT_LOGGER, " CONNECTION INFO RECEIVER")
+
 			awaitClose {
 				// cancel the scope
-				Log.d(CLIENT_LOGGER, "CLOSING CLIENT INFO RECEIVER")
+				Log.d(CLIENT_LOGGER, "CLOSING CLIENT CONNECTION INFO RECEIVER")
 				context.unregisterReceiver(remoteConnectInfoReceiver)
 			}
 		}.scan(ClientConnectionState.CONNECTION_INITIALIZING) { old, new ->

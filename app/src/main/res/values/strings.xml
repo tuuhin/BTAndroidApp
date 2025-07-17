@@ -52,11 +52,11 @@
   <string name="bt_le_device_desc">Bluetooth low energy devices in your range</string>
   <string name="location_settings">Location Settings</string>
   <string name="le_available_devices">Services</string>
-  <string name="bl_connect_profile_server_uuid_text">Special UUID</string>
-  <string name="bl_connect_profile_server_uuid_desc">This UUID can be used to connect to a server started by this app, on other phone</string>
+  <string name="bl_connect_profile_server_uuid_text">Special Feature</string>
+  <string name="bl_connect_profile_server_uuid_desc">Special feature (uuid) that is used to connect to a server started by this app, on other device</string>
   <string name="bl_connect_profile_server_uuid">Connect to Server</string>
-  <string name="bl_connect_profile_device_uuid_text">Available UUIDs</string>
-  <string name="bl_connect_profile_device_uuid_desc">This option is used when you want to connect to a particular uuid for the selected device</string>
+  <string name="bl_connect_profile_device_uuid_text">Available Features</string>
+  <string name="bl_connect_profile_device_uuid_desc">The list of features (uuid) the device provides for connection</string>
   <string name="bl_connect_profile_device_uuid_fetching">Fetching device information…</string>
   <string name="bl_connect_profile_device_uuids_not_found">No UUIDs found</string>
   <string name="bl_connect_profile_title">Connection Profile</string>

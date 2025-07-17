@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import java.util.UUID
@@ -28,12 +29,13 @@ fun SelectableUUIDCard(
 	onSelect: () -> Unit,
 	modifier: Modifier = Modifier,
 	isSelected: Boolean = false,
-	specialName: String? = null,
-	shape: Shape = MaterialTheme.shapes.medium
+	uniqueName: String? = null,
+	shape: Shape = MaterialTheme.shapes.medium,
+	fontFamily: FontFamily = FontFamily.Monospace,
 ) {
 
-	val uuidName by remember(uuid, specialName) {
-		derivedStateOf { specialName ?: "$uuid" }
+	val uuidName by remember(uuid, uniqueName) {
+		derivedStateOf { uniqueName ?: "$uuid" }
 	}
 
 	Row(
@@ -53,7 +55,8 @@ fun SelectableUUIDCard(
 		Text(
 			text = uuidName,
 			style = MaterialTheme.typography.labelLarge,
-			color = MaterialTheme.colorScheme.onSurface
+			fontFamily = fontFamily,
+			color = MaterialTheme.colorScheme.onSurface,
 		)
 	}
 }

@@ -28,9 +28,16 @@ interface BluetoothClientConnector {
 			: Result<BluetoothDeviceModel>
 
 	/**
-	 * Fetches the uuids from the device
+	 * Loads the available feature uuid if available otherwise a empty list
+	 * @see refreshDeviceFeatureUUID
 	 */
-	fun fetchUUIDs(address: String): Flow<List<UUID>>
+	suspend fun loadDeviceFeatureUUID(address: String): Result<List<UUID>>
+
+	/**
+	 * fetches device feature uuids mostly done if a new feature is added or
+	 * new device is to be paired
+	 */
+	fun refreshDeviceFeatureUUID(address: String): Flow<List<UUID>>
 
 	/**
 	 * Reads the incoming data for the connect client
@@ -41,9 +48,10 @@ interface BluetoothClientConnector {
 	/**
 	 * Sends the information to the end server from this device
 	 * @param data [ByteArray] of the data to be sent
+	 * @param trimData whether to trim the empty spaces around the given string
 	 * @return [Result] inculcating data is sent without any error
 	 */
-	suspend fun sendData(data: String): Result<Boolean>
+	suspend fun sendData(data: String, trimData: Boolean = true): Result<Boolean>
 
 	/**
 	 * Closes the [BluetoothSocket] to which the client is connected
