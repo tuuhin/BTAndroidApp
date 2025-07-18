@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ fun BTAppNavigationDrawer(
 	onNavigateToClassicServer: () -> Unit = {},
 	onNavigateToFeedBackRoute: () -> Unit = {},
 	onNavigateToSettingsRoute: () -> Unit = {},
+	onNavigateToBLEServer: () -> Unit = {},
 ) {
 	ModalDrawerSheet(
 		drawerShape = drawerShape,
@@ -63,7 +65,7 @@ fun BTAppNavigationDrawer(
 				modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
 			)
 			NavigationDrawerItem(
-				label = { Text(text = stringResource(R.string.drawer_option_classic_server)) },
+				label = { Text(text = stringResource(R.string.bt_server_route)) },
 				selected = false,
 				onClick = onNavigateToClassicServer,
 				icon = {
@@ -71,7 +73,24 @@ fun BTAppNavigationDrawer(
 						painter = painterResource(R.drawable.ic_server),
 						contentDescription = "Server Icon"
 					)
-				}
+				},
+				modifier = Modifier.sharedBoundsWrapper(SharedElementTransitionKeys.CLASSIC_SERVER_ITEM_TO_SERVER)
+			)
+			NavigationDrawerItem(
+				label = { Text(text = stringResource(R.string.drawer_option_ble_server)) },
+				selected = false,
+				onClick = onNavigateToBLEServer,
+				icon = {
+					Icon(
+						painter = painterResource(R.drawable.ic_server),
+						contentDescription = "Server Icon"
+					)
+				},
+				colors = NavigationDrawerItemDefaults.colors(
+					unselectedTextColor = MaterialTheme.colorScheme.outline,
+					unselectedIconColor = MaterialTheme.colorScheme.outline
+				),
+				modifier = Modifier.sharedBoundsWrapper(SharedElementTransitionKeys.BLE_SERVER_ITEM_TO_SERVER)
 			)
 			HorizontalDivider(
 				color = MaterialTheme.colorScheme.outlineVariant,

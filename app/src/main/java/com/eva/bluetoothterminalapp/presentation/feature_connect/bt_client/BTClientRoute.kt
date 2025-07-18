@@ -37,15 +37,15 @@ import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.BTClientTopBar
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.BTConnectedDeviceProfile
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientDeviceState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientMessagesState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.util.BTClientDeviceStatePreviewParam
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.util.BTClientMessagesStatePreviewParams
+import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTConnectedDeviceProfile
 import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTMessagesList
+import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.KeepScreenOnSideEffect
 import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.SendCommandTextField
-import com.eva.bluetoothterminalapp.presentation.feature_connect.util.KeepScreenOnSideEffect
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme

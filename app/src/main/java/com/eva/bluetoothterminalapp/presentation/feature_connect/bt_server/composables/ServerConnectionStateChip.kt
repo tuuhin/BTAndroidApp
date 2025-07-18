@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.AssistChip
@@ -38,11 +37,7 @@ fun ServerConnectionStateChip(
 
 	AssistChip(
 		onClick = {},
-		label = {
-			Crossfade(targetState = connectionState) { state ->
-				Text(text = state.textResouces)
-			}
-		},
+		label = { Text(text = connectionState.textResources) },
 		shape = shape,
 		colors = AssistChipDefaults.assistChipColors(
 			containerColor = animatedCardColors,
@@ -55,7 +50,7 @@ fun ServerConnectionStateChip(
 
 }
 
-private val ServerConnectionState.textResouces: String
+private val ServerConnectionState.textResources: String
 	@Composable
 	get() = when (this) {
 		ServerConnectionState.CONNECTION_INITIALIZING -> stringResource(id = R.string.connection_init_server)
@@ -67,8 +62,7 @@ private val ServerConnectionState.textResouces: String
 private val ServerConnectionState.color: Color
 	@Composable
 	get() = when (this) {
-		ServerConnectionState.CONNECTION_INITIALIZING -> MaterialTheme.colorScheme.surfaceContainerHigh
-		ServerConnectionState.CONNECTION_LISTENING -> MaterialTheme.colorScheme.surfaceContainerHighest
+		ServerConnectionState.CONNECTION_INITIALIZING, ServerConnectionState.CONNECTION_LISTENING -> MaterialTheme.colorScheme.tertiaryContainer
 		ServerConnectionState.CONNECTION_ACCEPTED -> MaterialTheme.colorScheme.primaryContainer
 		ServerConnectionState.CONNECTION_DISCONNECTED -> MaterialTheme.colorScheme.secondaryContainer
 	}

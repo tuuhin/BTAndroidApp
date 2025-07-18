@@ -6,8 +6,9 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
 import com.eva.bluetoothterminalapp.domain.settings.repository.BTSettingsDataSore
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerDeviceState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerEvents
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerRouteState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerScreenState
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,48 +18,62 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class BTServerViewModel(
-	private val btConnector: BluetoothServerConnector,
-	private val settings: BTSettingsDataSore,
+	private val serverConnector: BluetoothServerConnector,
+	private val bTSettings: BTSettingsDataSore,
 ) : AppViewModel() {
 
-	private val _serverState = MutableStateFlow(BTServerRouteState())
-	val state = _serverState.asStateFlow()
+	private val _serverState = MutableStateFlow(BTServerScreenState())
+	val serverState = _serverState.onStart { readIncommingOrOutGoingData() }
+		.stateIn(
+			scope = viewModelScope,
+			started = SharingStarted.WhileSubscribed(8_000L),
+			initialValue = BTServerScreenState()
+		)
+
+	// remote device need to emit something in order to be collected
+	private val _remoteDevice = serverConnector.remoteDevice.stateIn(
+		scope = viewModelScope,
+		started = SharingStarted.Eagerly,
+		initialValue = null
+	)
+
+	val connectedDevice = combine(
+		_remoteDevice,
+		serverConnector.connectMode
+	) { device, status ->
+		BTServerDeviceState(device = device, status = status)
+	}.stateIn(
+		scope = viewModelScope,
+		started = SharingStarted.WhileSubscribed(8_000L),
+		initialValue = BTServerDeviceState()
+	)
 
 	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	override val uiEvents: SharedFlow<UiEvents>
 		get() = _uiEvents.asSharedFlow()
 
-	val btSettings = settings.settingsFlow.stateIn(
+	val btSettings = bTSettings.settingsFlow.stateIn(
 		scope = viewModelScope,
 		started = SharingStarted.WhileSubscribed(2000),
 		initialValue = BTSettingsModel()
 	)
 
-	private val _textFieldText: String
-		get() = _serverState.value.textFieldValue.trim()
-
 	private val _localEcho = MutableSharedFlow<BluetoothMessage>()
-	private var _startServer: Job? = null
-
-	init {
-		//update connection state
-		updateConnectionState()
-		//read incomming state
-		readIncommingOrOutGoingData()
-	}
+	private var _startServerJob: Job? = null
 
 
 	fun onEvent(event: BTServerEvents) {
@@ -73,13 +88,12 @@ class BTServerViewModel(
 			is BTServerEvents.OnTextFieldValue -> _serverState.update { state ->
 				state.copy(textFieldValue = event.message)
 			}
-
 		}
 	}
 
 
 	private fun cancelServerStartAndPopBack() = viewModelScope.launch {
-		_serverState.update { state -> state.copy(showStartServerDialog = false) }
+		_serverState.update { state -> state.copy(showServerTerminal = false) }
 		_uiEvents.emit(UiEvents.NavigateBack)
 	}
 
@@ -92,36 +106,39 @@ class BTServerViewModel(
 	}
 
 	private fun toggleDialog(isOpen: Boolean) = _serverState.update { state ->
-		state.copy(showDisconnectDialog = isOpen)
+		state.copy(showExitDialog = isOpen)
 	}
 
 
 	private fun startServer() {
-		_startServer = viewModelScope.launch { btConnector.startServer() }
-		_serverState.update { state -> state.copy(showStartServerDialog = false) }
+		_startServerJob = viewModelScope.launch { serverConnector.startServer() }
+		_serverState.update { state -> state.copy(showServerTerminal = true) }
 	}
 
 	private fun sendText() = viewModelScope.launch {
 
-		val isClearTextField = settings.settings.clearInputOnSend
-		val message = _textFieldText.trim()
+		val settings = bTSettings.getSettings()
 
+		val isClearTextField = settings.clearInputOnSend
+		val isLocalEchoEnabled = settings.localEchoEnabled
+
+		val message = _serverState.value.textFieldValue.trim()
 		if (message.isEmpty()) {
-			_uiEvents.emit(UiEvents.ShowToast("Cannot send empty message"))
+			_uiEvents.emit(UiEvents.ShowSnackBar("Cannot send empty message"))
 			return@launch
 		}
-		val result = btConnector.sendData(message)
+		val result = serverConnector.sendData(message)
 
 		result.fold(
 			onSuccess = {
-				val addedMessage = BluetoothMessage(
-					message = message,
-					type = BluetoothMessageType.MESSAGE_FROM_SELF
-				)
-				_localEcho.emit(addedMessage)
-
-				if (isClearTextField)
-					_serverState.update { state -> state.copy(textFieldValue = "") }
+				if (isLocalEchoEnabled) {
+					val selfMessage = BluetoothMessage(
+						message = message,
+						type = BluetoothMessageType.MESSAGE_FROM_SELF
+					)
+					_localEcho.emit(selfMessage)
+				}
+				if (isClearTextField) _serverState.update { state -> state.copy(textFieldValue = "") }
 			},
 			onFailure = { err ->
 				_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "Failed to send message"))
@@ -129,27 +146,24 @@ class BTServerViewModel(
 		)
 	}
 
-	private fun updateConnectionState() = btConnector.connectMode.onEach { mode ->
-		_serverState.update { state ->
-			state.copy(connectionMode = mode)
-		}
-	}.launchIn(viewModelScope)
-
-
 	@OptIn(ExperimentalCoroutinesApi::class)
-	private fun readIncommingOrOutGoingData() = settings.settingsFlow
+	private fun readIncommingOrOutGoingData() = bTSettings.settingsFlow
 		.map { settings -> settings.localEchoEnabled }
 		.distinctUntilChanged()
 		.flatMapConcat { enabled ->
 			// if local echo enabled then check both flows
-			if (enabled) merge(btConnector.readIncomingData, _localEcho)
+			if (enabled) merge(serverConnector.readIncomingData, _localEcho)
 			// otherwise only the incomming flow
-			else btConnector.readIncomingData
+			else serverConnector.readIncomingData
 		}
 		.catch { err ->
-			_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: ""))
-			// if there is an error stop the server
-			stopServerAndClearResources()
+			_uiEvents.emit(
+				UiEvents.ShowSnackBarWithActions(
+					message = "Unable to read incoming data",
+					actionText = "Disconnect",
+					action = ::stopServerAndClearResources
+				)
+			)
 		}
 		.onEach { message ->
 			_serverState.update { state ->
@@ -158,10 +172,11 @@ class BTServerViewModel(
 			}
 		}.launchIn(viewModelScope)
 
+
 	private fun stopServerAndClearResources() {
-		_startServer?.cancel()
-		btConnector.closeServer()
-		_startServer = null
+		_startServerJob?.cancel()
+		_startServerJob = null
+		serverConnector.closeServer()
 	}
 
 	override fun onCleared() {

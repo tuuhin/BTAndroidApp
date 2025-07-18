@@ -26,7 +26,7 @@
   <string name="device_discoverable_success">Device is now discoverable %d seconds</string>
   <string name="device_discoverable_denied">Device Discoverability denied</string>
   <string name="close_connection_dialog_title">Close Connection</string>
-  <string name="close_connection_dialog_text">Are you sure you want to cancel the connection, its always better to disconnect then leave the device</string>
+  <string name="close_connection_dialog_text">Are you sure you want to cancel the connection, it\'s always better to disconnect then leave the device</string>
   <string name="dialog_action_close">Close</string>
   <string name="dialog_action_cancel">Cancel</string>
   <string name="text_field_placeholder">Enter Text to Send</string>
@@ -36,11 +36,11 @@
   <string name="connection_device_bonding">Bonding…</string>
   <string name="connection_bonded">Connection Bonded</string>
   <string name="connection_init">Connecting to device…</string>
-  <string name="connection_init_server">Initilizing Server…</string>
+  <string name="connection_init_server">Preparing Server…</string>
   <string name="connection_accepted">Device Connected</string>
   <string name="devices_image_type">Device Image type %s</string>
   <string name="connection_server_listening">Listening…</string>
-  <string name="bt_server_route">Bluetooth Server</string>
+  <string name="bt_server_route">Classic BT Server</string>
   <!--  Settings receive-->
   <string name="connect_to_client">Connect</string>
   <string name="disconnect_from_client">Disconnect</string>
@@ -66,7 +66,7 @@
   <string name="ble_connection_connected">Connected</string>
   <string name="ble_connection_connecting">Connecting</string>
   <string name="ble_connection_disconnecting">Disconnecting</string>
-  <string name="ble_connection_disconnnected">Disconnected</string>
+  <string name="ble_connection_disconnected">Disconnected</string>
   <string name="ble_connection_failed">Failed</string>
   <string name="ble_property_broadcast">BroadCast</string>
   <string name="ble_property_read">Read</string>
@@ -159,7 +159,7 @@
   <string name="bt_classic_settings_new_line_title">End Of Line Character</string>
   <!--  Settings Local echo-->
   <string name="bt_classic_settings_local_echo_title">Local Echo</string>
-  <string name="bt_classic_settings_local_echo_desc">Show send data in termial</string>
+  <string name="bt_classic_settings_local_echo_desc">Show send data in terminal</string>
   <!--  Settings keep screen on-->
   <string name="bt_classic_settings_keep_screen_on_title">Keep screen On</string>
   <string name="bt_classic_settings_keep_screen_on_desc">Keep screen on when connected</string>
@@ -178,8 +178,8 @@
   <string name="dialog_action_start">Start</string>
   <string name="bt_server_close_connection_dialog_title">Stop Server</string>
   <string name="bt_server_close_connection_dialog_text">A running server must be stopped before leaving</string>
-  <string name="bt_server_start_connection_dialog_title">Start Server</string>
-  <string name="bt_server_start_connection_dialog_text">On starting the server, other devices can connect with this device via bluetooth. Make sure the device is dicoverable before starting the server</string>
+  <string name="bt_server_start_connection_text">Start Server</string>
+  <string name="bt_server_start_connection_desc">Starts a bluetooth server for application running on other device to connect.</string>
   <string name="topbar_action_stop">Stop</string>
   <string name="topbar_action_restart">Restart</string>
   <string name="topbar_action_refresh">Refresh</string>
@@ -192,4 +192,6 @@
   <string name="drawer_option_servers">Servers</string>
   <string name="drawer_option_others">Others</string>
   <string name="drawer_option_classic_server">Classic Server</string>
+  <string name="drawer_option_ble_server">BLE Server</string>
+  <string name="bt_server_start_connection_extra_info">Make use the other device is discoverable, otherwise the other peer cannot be connected\n</string>
 </resources>

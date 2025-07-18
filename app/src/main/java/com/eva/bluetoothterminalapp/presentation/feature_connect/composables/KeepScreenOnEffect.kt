@@ -1,4 +1,4 @@
-package com.eva.bluetoothterminalapp.presentation.feature_connect.util
+package com.eva.bluetoothterminalapp.presentation.feature_connect.composables
 
 import android.view.WindowManager
 import android.widget.Toast

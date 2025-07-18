@@ -17,7 +17,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.presentation.feature_connect.util.toReadableTimeText
@@ -28,7 +27,7 @@ fun BTMessageText(
 	message: BluetoothMessage,
 	modifier: Modifier = Modifier,
 	showTime: Boolean = true,
-	fontSize: TextUnit = 20.sp,
+	fontSize: TextUnit = TextUnit.Unspecified,
 	fontWeight: FontWeight = FontWeight.Medium,
 	fontFamily: FontFamily = FontFamily.Monospace,
 	textStyle: TextStyle = MaterialTheme.typography.bodyMedium,

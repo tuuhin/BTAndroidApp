@@ -20,7 +20,7 @@ val BLEConnectionState.color: Color
 val BLEConnectionState.textResource: String
 	@Composable
 	get() = when (this) {
-		BLEConnectionState.DISCONNECTED -> stringResource(id = R.string.ble_connection_disconnnected)
+		BLEConnectionState.DISCONNECTED -> stringResource(id = R.string.ble_connection_disconnected)
 		BLEConnectionState.FAILED -> stringResource(id = R.string.ble_connection_failed)
 		BLEConnectionState.DISCONNECTING -> stringResource(id = R.string.ble_connection_disconnecting)
 		BLEConnectionState.CONNECTING -> stringResource(R.string.ble_connection_connecting)

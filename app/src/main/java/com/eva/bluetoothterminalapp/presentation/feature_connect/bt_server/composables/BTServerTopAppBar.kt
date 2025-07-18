@@ -2,8 +2,8 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.comp
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -22,7 +22,7 @@ fun BTServerTopAppBar(
 	navigation: @Composable () -> Unit = {},
 	scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-	TopAppBar(
+	MediumTopAppBar(
 		title = { Text(text = stringResource(id = R.string.bt_server_route)) },
 		navigationIcon = navigation,
 		actions = {

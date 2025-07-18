@@ -6,29 +6,20 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerDeviceState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTConnectedDeviceProfile
 
 @Composable
-fun AnimatedStopAndRestartButton(
-	state: ServerConnectionState,
-	onRestart: () -> Unit,
-	onStop: () -> Unit,
+fun BTServerConnectionHeader(
+	device: BTServerDeviceState,
 	modifier: Modifier = Modifier
 ) {
-
 	AnimatedContent(
-		targetState = state,
+		targetState = device.status,
 		label = "Device is accepted or disconnected",
 		transitionSpec = {
 			if (targetState > initialState) {
@@ -43,29 +34,11 @@ fun AnimatedStopAndRestartButton(
 		modifier = modifier,
 	) { connectionState ->
 		when (connectionState) {
-			ServerConnectionState.CONNECTION_ACCEPTED -> {
-				TextButton(onClick = onStop) {
-					Text(
-						text = stringResource(id = R.string.topbar_action_stop),
-						style = MaterialTheme.typography.titleMedium
-					)
-				}
-			}
+			ServerConnectionState.CONNECTION_INITIALIZING, ServerConnectionState.CONNECTION_LISTENING ->
+				ServerConnectionStateChip(connectionState)
 
-			ServerConnectionState.CONNECTION_DISCONNECTED -> {
-				TextButton(
-					onClick = onRestart
-				) {
-					Text(
-						text = stringResource(id = R.string.topbar_action_restart),
-						style = MaterialTheme.typography.titleMedium
-					)
-				}
-			}
-
-			else -> {
-				Box(modifier = Modifier.size(60.dp, 40.dp))
-			}
+			ServerConnectionState.CONNECTION_ACCEPTED, ServerConnectionState.CONNECTION_DISCONNECTED ->
+				BTConnectedDeviceProfile(device.device, connectionState = connectionState)
 		}
 	}
 }
