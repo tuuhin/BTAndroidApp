@@ -22,7 +22,7 @@ fun KeepScreenOnSideEffect(
 
 	DisposableEffect(connectionState) {
 		// otherwise
-		val isAccepted = connectionState == ClientConnectionState.CONNECTION_ACCEPTED
+		val isAccepted = connectionState == ClientConnectionState.CONNECTION_CONNECTED
 		val window = activity?.window ?: return@DisposableEffect onDispose { }
 
 		when {

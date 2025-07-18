@@ -67,7 +67,7 @@ fun BTClientRoute(
 	val snackBarHostState = LocalSnackBarProvider.current
 
 	val isConnected by remember(device.connectionStatus) {
-		derivedStateOf { device.connectionStatus == ClientConnectionState.CONNECTION_ACCEPTED }
+		derivedStateOf { device.connectionStatus == ClientConnectionState.CONNECTION_CONNECTED }
 	}
 
 	KeepScreenOnSideEffect(
@@ -152,7 +152,7 @@ private fun BTClientRouteMessagesPreview(
 	BTClientRoute(
 		messages = state,
 		device = BTClientDeviceState(
-			connectionStatus = ClientConnectionState.CONNECTION_ACCEPTED,
+			connectionStatus = ClientConnectionState.CONNECTION_CONNECTED,
 			device = PreviewFakes.FAKE_DEVICE_MODEL
 		),
 		btSettings = BTSettingsModel(),

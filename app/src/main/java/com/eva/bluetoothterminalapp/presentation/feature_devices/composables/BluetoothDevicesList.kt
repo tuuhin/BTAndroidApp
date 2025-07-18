@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +26,6 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.presentation.composables.LocationPermissionCard
 import kotlinx.collections.immutable.ImmutableList
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BluetoothDevicesList(
 	showLocationPlaceholder: Boolean,
@@ -119,8 +117,6 @@ fun BluetoothDevicesList(
 	}
 }
 
-
-@OptIn(ExperimentalFoundationApi::class)
 private fun LazyListScope.pairedDevicesHeader() = stickyHeader {
 	Column(
 		modifier = Modifier
@@ -141,8 +137,6 @@ private fun LazyListScope.pairedDevicesHeader() = stickyHeader {
 	}
 }
 
-
-@OptIn(ExperimentalFoundationApi::class)
 private fun LazyListScope.availableDevicesHeader() = stickyHeader {
 	Column(
 		modifier = Modifier

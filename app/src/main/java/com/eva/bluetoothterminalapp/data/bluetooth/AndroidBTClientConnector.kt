@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.scan
@@ -57,15 +58,25 @@ class AndroidBTClientConnector(
 		get() = context.hasBTConnectPermission
 
 	private val _connectState = MutableStateFlow(ClientConnectionState.CONNECTION_INITIALIZING)
+	private val _remoteDevice = MutableStateFlow<BluetoothDeviceModel?>(null)
+
+
 	override val connectionState: Flow<ClientConnectionState>
 		get() = merge(androidBTConnectionFlow, _connectState)
+			.scan(ClientConnectionState.CONNECTION_INITIALIZING) { old, new ->
+				Log.d(CLIENT_LOGGER, "PREVIOUS: $old NEW:$new")
+				if (old.checkCorrectNextState(new)) new else old
+			}
+
+	override val remoteDevice: Flow<BluetoothDeviceModel>
+		get() = _remoteDevice.filterNotNull()
 
 
 	private var _transferService: BluetoothTransferService? = null
 	private var _btClientSocket: BluetoothSocket? = null
 
 	override suspend fun connectClient(address: String, connectUUID: UUID, secure: Boolean)
-			: Result<BluetoothDeviceModel> {
+			: Result<Unit> {
 		// if no permission don't do a thing
 		if (!_hasBtPermission)
 			return Result.failure(BluetoothPermissionNotProvided())
@@ -73,6 +84,7 @@ class AndroidBTClientConnector(
 		val deviceResult = bluetoothDeviceFromAddress(address)
 		if (deviceResult.isFailure) return Result.failure(deviceResult.exceptionOrNull()!!)
 		val device = deviceResult.getOrThrow()
+		_remoteDevice.update { device.toDomainModel() }
 
 		if (secure && device.bondState == BluetoothDevice.BOND_NONE) {
 			// if the device is not bonded with the device
@@ -100,9 +112,8 @@ class AndroidBTClientConnector(
 				// set socket
 				_transferService = BluetoothTransferService(socket, btSettings)
 				// set connection mode to accepted
-				_connectState.update { ClientConnectionState.CONNECTION_ACCEPTED }
-
-				Result.success(device.toDomainModel())
+				_connectState.update { ClientConnectionState.CONNECTION_CONNECTED }
+				Result.success(Unit)
 			} catch (e: Exception) {
 				// close the connection if any
 				closeClient()
@@ -128,7 +139,7 @@ class AndroidBTClientConnector(
 		if (deviceResult.isFailure) return Result.failure(deviceResult.exceptionOrNull()!!)
 		val device = deviceResult.getOrThrow()
 
-		val probableUUIDS = device.uuids.map { it.uuid }.distinct()
+		val probableUUIDS = device.uuids?.map { it.uuid }?.distinct() ?: emptyList()
 		return Result.success(probableUUIDS)
 	}
 
@@ -169,7 +180,7 @@ class AndroidBTClientConnector(
 		get() = _connectState.flatMapLatest { status ->
 			// start reading from the flow is status is connected otherwise it
 			// will return an empty flow
-			val canRead = status == ClientConnectionState.CONNECTION_ACCEPTED
+			val canRead = status == ClientConnectionState.CONNECTION_CONNECTED
 			_transferService?.readFromStream(canRead = canRead) ?: emptyFlow()
 		}
 
@@ -191,6 +202,7 @@ class AndroidBTClientConnector(
 			_btClientSocket?.close()
 			//update the status
 			_connectState.update { ClientConnectionState.CONNECTION_DISCONNECTED }
+			_remoteDevice.update { null }
 			// set socket and service to null
 			_btClientSocket = null
 			_transferService = null
@@ -249,7 +261,5 @@ class AndroidBTClientConnector(
 				Log.d(CLIENT_LOGGER, "CLOSING CLIENT CONNECTION INFO RECEIVER")
 				context.unregisterReceiver(remoteConnectInfoReceiver)
 			}
-		}.scan(ClientConnectionState.CONNECTION_INITIALIZING) { old, new ->
-			if (old.checkCorrectNextState(new)) new else old
 		}
 }

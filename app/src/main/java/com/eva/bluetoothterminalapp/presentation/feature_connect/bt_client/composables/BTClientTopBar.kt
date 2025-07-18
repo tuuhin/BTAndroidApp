@@ -50,7 +50,7 @@ fun BTClientTopBar(
 private class ClientConnectionStatePreviewParmas :
 	CollectionPreviewParameterProvider<ClientConnectionState>(
 		listOf(
-			ClientConnectionState.CONNECTION_ACCEPTED,
+			ClientConnectionState.CONNECTION_CONNECTED,
 			ClientConnectionState.CONNECTION_DISCONNECTED,
 			ClientConnectionState.CONNECTION_DENIED
 		)

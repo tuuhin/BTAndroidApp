@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.composable
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,7 +31,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import java.util.UUID
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ConnectionProfileList(
 	selected: UUID?,

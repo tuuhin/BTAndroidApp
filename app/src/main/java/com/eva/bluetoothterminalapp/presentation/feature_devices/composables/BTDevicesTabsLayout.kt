@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,7 +39,6 @@ import com.eva.bluetoothterminalapp.presentation.util.textResource
 import kotlinx.coroutines.launch
 
 @OptIn(
-	ExperimentalFoundationApi::class,
 	ExperimentalMaterial3Api::class
 )
 @Composable

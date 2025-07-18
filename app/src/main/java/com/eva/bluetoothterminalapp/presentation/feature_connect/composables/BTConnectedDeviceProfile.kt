@@ -1,8 +1,14 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,15 +44,31 @@ import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 fun BTConnectedDeviceProfile(
 	device: BluetoothDeviceModel?,
 	modifier: Modifier = Modifier,
-	connectionState: ClientConnectionState = ClientConnectionState.CONNECTION_ACCEPTED,
+	connectionState: ClientConnectionState = ClientConnectionState.CONNECTION_CONNECTED,
 	shape: Shape = MaterialTheme.shapes.large,
-	containerColor: Color = MaterialTheme.colorScheme.secondaryContainer
+	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest
 ) {
 
 	AnimatedVisibility(
 		visible = device != null,
-		enter = slideInVertically { height -> height },
-		exit = slideOutVertically { height -> -height }
+		enter = expandIn(
+			animationSpec = spring(
+				dampingRatio = Spring.DampingRatioMediumBouncy,
+				stiffness = Spring.StiffnessMedium
+			),
+			expandFrom = Alignment.TopCenter,
+		) + fadeIn(
+			animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+		),
+		exit = shrinkOut(
+			animationSpec = spring(
+				dampingRatio = Spring.DampingRatioMediumBouncy,
+				stiffness = Spring.StiffnessMedium
+			),
+			shrinkTowards = Alignment.TopCenter,
+		) + fadeOut(
+			animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+		)
 	) {
 		// the content will not be visible if its null
 		if (device == null) return@AnimatedVisibility
@@ -100,8 +122,24 @@ fun BTConnectedDeviceProfile(
 ) {
 	AnimatedVisibility(
 		visible = device != null,
-		enter = slideInVertically { height -> height },
-		exit = slideOutVertically { height -> -height }
+		enter = expandIn(
+			animationSpec = spring(
+				dampingRatio = Spring.DampingRatioMediumBouncy,
+				stiffness = Spring.StiffnessMedium
+			),
+			expandFrom = Alignment.TopCenter,
+		) + fadeIn(
+			animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+		),
+		exit = shrinkOut(
+			animationSpec = spring(
+				dampingRatio = Spring.DampingRatioMediumBouncy,
+				stiffness = Spring.StiffnessMedium
+			),
+			shrinkTowards = Alignment.TopCenter,
+		) + fadeOut(
+			animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+		)
 	) {
 		// the content will not be visible if its null
 		if (device == null) return@AnimatedVisibility
@@ -151,7 +189,7 @@ private fun BTDeviceClientProfilePreview() = BlueToothTerminalAppTheme {
 	Surface {
 		BTConnectedDeviceProfile(
 			device = PreviewFakes.FAKE_DEVICE_MODEL,
-			connectionState = ClientConnectionState.CONNECTION_ACCEPTED,
+			connectionState = ClientConnectionState.CONNECTION_CONNECTED,
 			modifier = Modifier
 				.padding(12.dp)
 				.fillMaxWidth()

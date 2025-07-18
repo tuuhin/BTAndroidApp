@@ -17,6 +17,8 @@ interface BluetoothClientConnector {
 	 */
 	val connectionState: Flow<ClientConnectionState>
 
+	val remoteDevice: Flow<BluetoothDeviceModel>
+
 	/**
 	 * Connect the client either to a device via its UUID or current server via specified uuid
 	 * @param address Address of the [BluetoothDevice]
@@ -25,7 +27,7 @@ interface BluetoothClientConnector {
 	 * @return [Result] indicating is everything gone correct and socket is accepted.
 	 */
 	suspend fun connectClient(address: String, connectUUID: UUID, secure: Boolean = true)
-			: Result<BluetoothDeviceModel>
+			: Result<Unit>
 
 	/**
 	 * Loads the available feature uuid if available otherwise a empty list

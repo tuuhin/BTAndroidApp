@@ -8,8 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -37,11 +36,11 @@ fun AnimatedConnectDisconnectButton(
 		targetState = clientState,
 		label = "Connect and disconnect states",
 		transitionSpec = { slideInOutAnimation() },
-		modifier = modifier,
+		modifier = modifier.sizeIn(minWidth = 60.dp, minHeight = 40.dp),
 		contentAlignment = Alignment.Center
 	) { state ->
 		when (state) {
-			ClientConnectionState.CONNECTION_ACCEPTED -> {
+			ClientConnectionState.CONNECTION_CONNECTED -> {
 				TextButton(onClick = onDisConnect, colors = colors) {
 					Text(
 						text = stringResource(id = R.string.disconnect_from_client),
@@ -56,13 +55,13 @@ fun AnimatedConnectDisconnectButton(
 				}
 			}
 
-			else -> Box(modifier = Modifier.size(60.dp, 40.dp))
+			else -> {}
 		}
 	}
 }
 
 private fun AnimatedContentTransitionScope<ClientConnectionState>.slideInOutAnimation(): ContentTransform =
-	if (targetState == ClientConnectionState.CONNECTION_ACCEPTED || targetState == ClientConnectionState.CONNECTION_DEVICE_CONNECTED) {
+	if (targetState == ClientConnectionState.CONNECTION_CONNECTED || targetState == ClientConnectionState.CONNECTION_PEER_FOUND) {
 		slideInVertically { height -> -height } + fadeIn(initialAlpha = .25f) togetherWith
 				slideOutVertically { height -> height } + fadeOut(targetAlpha = .25f)
 	} else {

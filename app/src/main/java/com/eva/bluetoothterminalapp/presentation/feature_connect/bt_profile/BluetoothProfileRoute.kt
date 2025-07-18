@@ -7,11 +7,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -33,6 +34,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.composable.ConnectionProfileList
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.composable.ConnectionProfileTopBar
@@ -92,8 +94,7 @@ fun BluetoothProfileRoute(
 			) {
 				ExtendedFloatingActionButton(
 					onClick = { selectedUUID?.let(onConnect) },
-					shape = MaterialTheme.shapes.medium,
-					elevation = FloatingActionButtonDefaults.loweredElevation(),
+					shape = MaterialTheme.shapes.large,
 					modifier = Modifier.sharedBoundsWrapper(
 						SharedElementTransitionKeys.btClientScreen(address)
 					)
@@ -102,6 +103,7 @@ fun BluetoothProfileRoute(
 						painter = painterResource(R.drawable.ic_connect_variant),
 						contentDescription = "Connect"
 					)
+					Spacer(modifier = Modifier.widthIn(4.dp))
 					Text(text = stringResource(id = R.string.dialog_action_connect))
 				}
 			}

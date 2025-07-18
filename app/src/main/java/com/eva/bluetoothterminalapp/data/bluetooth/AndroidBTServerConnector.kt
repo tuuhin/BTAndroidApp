@@ -139,6 +139,7 @@ class AndroidBTServerConnector(
 			_serverSocket?.close()
 			_clientSocket = null
 			_serverSocket = null
+			_remoteDevice.update { null }
 			_connectMode.update { ServerConnectionState.CONNECTION_DISCONNECTED }
 			Log.d(SERVER_LOGGER, "CLOSED SERVER SUCCESSFULLY")
 		} catch (e: IOException) {

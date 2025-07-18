@@ -9,7 +9,7 @@ class BTClientDeviceStatePreviewParam : CollectionPreviewParameterProvider<BTCli
 	listOf(
 		BTClientDeviceState(),
 		BTClientDeviceState(
-			connectionStatus = ClientConnectionState.CONNECTION_ACCEPTED,
+			connectionStatus = ClientConnectionState.CONNECTION_CONNECTED,
 			device = PreviewFakes.FAKE_DEVICE_MODEL
 		),
 		BTClientDeviceState(

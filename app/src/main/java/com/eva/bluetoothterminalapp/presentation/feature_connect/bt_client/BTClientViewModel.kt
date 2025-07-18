@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
-import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
@@ -55,7 +54,12 @@ class BTClientViewModel(
 			initialValue = BTClientMessagesState()
 		)
 
-	private val _connectedDevice = MutableStateFlow<BluetoothDeviceModel?>(null)
+	// remote device need to emit something in order to be collected
+	private val _connectedDevice = connector.remoteDevice.stateIn(
+		scope = viewModelScope,
+		started = SharingStarted.Eagerly,
+		initialValue = null
+	)
 
 	val clientState = combine(_connectedDevice, connector.connectionState) { device, connection ->
 		BTClientDeviceState(
@@ -136,7 +140,7 @@ class BTClientViewModel(
 		_connectAsClientJob = viewModelScope.launch {
 			val results = connector.connectClient(clientConnect.address, clientConnect.uuid)
 			results.fold(
-				onSuccess = { device -> _connectedDevice.update { device } },
+				onSuccess = {},
 				onFailure = { err ->
 					_uiEvents.emit(UiEvents.ShowSnackBar(message = err.message ?: ""))
 				},

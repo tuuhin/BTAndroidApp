@@ -26,7 +26,7 @@
   <string name="device_discoverable_success">Device is now discoverable %d seconds</string>
   <string name="device_discoverable_denied">Device Discoverability denied</string>
   <string name="close_connection_dialog_title">Close Connection</string>
-  <string name="close_connection_dialog_text">Are you sure you want to cancel the connection, it\'s always better to disconnect then leave the device</string>
+  <string name="close_connection_dialog_text">Are you sure you want to disconnect and close this connection</string>
   <string name="dialog_action_close">Close</string>
   <string name="dialog_action_cancel">Cancel</string>
   <string name="text_field_placeholder">Enter Text to Send</string>

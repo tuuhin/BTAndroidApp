@@ -8,5 +8,5 @@ data class BTClientDeviceState(
 	val device: BluetoothDeviceModel? = null
 ) {
 	val isConnected: Boolean
-		get() = connectionStatus == ClientConnectionState.CONNECTION_ACCEPTED
+		get() = connectionStatus == ClientConnectionState.CONNECTION_CONNECTED
 }

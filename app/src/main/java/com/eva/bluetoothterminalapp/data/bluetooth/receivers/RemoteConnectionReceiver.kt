@@ -34,7 +34,7 @@ class RemoteConnectionReceiver(
 
 		val connectionState = when (intent.action) {
 			BluetoothDevice.ACTION_BOND_STATE_CHANGED -> bondStateToConnectionMode(bondState)
-			BluetoothDevice.ACTION_ACL_CONNECTED -> ClientConnectionState.CONNECTION_DEVICE_CONNECTED
+			BluetoothDevice.ACTION_ACL_CONNECTED -> ClientConnectionState.CONNECTION_PEER_FOUND
 			BluetoothDevice.ACTION_ACL_DISCONNECTED -> ClientConnectionState.CONNECTION_DISCONNECTED
 			else -> null
 		}
@@ -46,8 +46,8 @@ class RemoteConnectionReceiver(
 
 	private fun bondStateToConnectionMode(bondState: Int): ClientConnectionState? {
 		return when (bondState) {
-			BluetoothDevice.BOND_BONDED -> ClientConnectionState.CONNECTION_BONDED
-			BluetoothDevice.BOND_BONDING -> ClientConnectionState.CONNECTION_BONDING
+			BluetoothDevice.BOND_BONDED -> ClientConnectionState.CONNECTION_PAIRED
+			BluetoothDevice.BOND_BONDING -> ClientConnectionState.CONNECTION_PAIRING
 			else -> null
 		}
 	}

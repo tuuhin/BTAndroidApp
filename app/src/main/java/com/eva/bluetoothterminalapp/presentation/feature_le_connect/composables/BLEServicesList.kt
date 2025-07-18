@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +22,6 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristic
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import kotlinx.collections.immutable.ImmutableList
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BLEServicesList(
 	services: ImmutableList<BLEServiceModel>,

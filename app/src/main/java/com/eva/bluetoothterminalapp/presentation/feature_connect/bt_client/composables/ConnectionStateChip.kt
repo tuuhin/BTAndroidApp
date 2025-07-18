@@ -1,16 +1,12 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ChipElevation
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
@@ -20,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -46,57 +43,51 @@ fun ClientConnectionStateChip(
 		label = "Card Colors Animation",
 	)
 
-	ProvideTextStyle(value = MaterialTheme.typography.titleSmall) {
-		AssistChip(
-			onClick = onClick,
-			label = {
-				Crossfade(
-					targetState = connectionState,
-					label = "Current client state",
-					animationSpec = tween(durationMillis = 300, easing = LinearEasing),
-					modifier = Modifier.padding(4.dp)
-				) { state ->
-					Text(
-						text = state.textResource,
-						textAlign = TextAlign.Center
-					)
-				}
-			},
-			shape = shape,
-			colors = AssistChipDefaults.assistChipColors(
-				containerColor = animatedCardColors,
-				labelColor = contentColorFor(connectionState.color)
-			),
-			border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface),
-			elevation = elevation,
-			modifier = modifier,
-		)
-	}
+	AssistChip(
+		onClick = onClick,
+		label = {
+			Text(
+				text = connectionState.textResource,
+				style = MaterialTheme.typography.titleSmall,
+				fontWeight = FontWeight.Medium,
+				textAlign = TextAlign.Center
+			)
+		},
+		shape = shape,
+		colors = AssistChipDefaults.assistChipColors(
+			containerColor = animatedCardColors,
+			labelColor = contentColorFor(connectionState.color)
+		),
+		border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface),
+		elevation = elevation,
+		modifier = modifier,
+	)
 }
+
 
 private val ClientConnectionState.textResource: String
 	@Composable
 	get() = when (this) {
-		ClientConnectionState.CONNECTION_DEVICE_CONNECTED -> stringResource(id = R.string.connection_device_found)
-		ClientConnectionState.CONNECTION_DENIED -> stringResource(id = R.string.connection_denied)
-		ClientConnectionState.CONNECTION_DISCONNECTED -> stringResource(id = R.string.connection_disconnected)
-		ClientConnectionState.CONNECTION_BONDING -> stringResource(id = R.string.connection_device_bonding)
-		ClientConnectionState.CONNECTION_BONDED -> stringResource(id = R.string.connection_bonded)
 		ClientConnectionState.CONNECTION_INITIALIZING -> stringResource(R.string.connection_init)
-		ClientConnectionState.CONNECTION_ACCEPTED -> stringResource(id = R.string.connection_accepted)
+		ClientConnectionState.CONNECTION_DENIED -> stringResource(id = R.string.connection_denied)
+		ClientConnectionState.CONNECTION_CONNECTED -> stringResource(id = R.string.connection_accepted)
+		ClientConnectionState.CONNECTION_PEER_FOUND -> stringResource(id = R.string.connection_device_found)
+		ClientConnectionState.CONNECTION_DISCONNECTED -> stringResource(id = R.string.connection_disconnected)
+		ClientConnectionState.CONNECTION_PAIRING -> stringResource(id = R.string.connection_device_bonding)
+		ClientConnectionState.CONNECTION_PAIRED -> stringResource(id = R.string.connection_bonded)
 	}
 
 private val ClientConnectionState.color: Color
 	@Composable
 	get() = when (this) {
 		ClientConnectionState.CONNECTION_INITIALIZING -> MaterialTheme.colorScheme.surfaceContainer
-		ClientConnectionState.CONNECTION_ACCEPTED, ClientConnectionState.CONNECTION_DEVICE_CONNECTED ->
+		ClientConnectionState.CONNECTION_CONNECTED, ClientConnectionState.CONNECTION_PEER_FOUND ->
 			MaterialTheme.colorScheme.primaryContainer
 
 		ClientConnectionState.CONNECTION_DENIED, ClientConnectionState.CONNECTION_DISCONNECTED ->
 			MaterialTheme.colorScheme.tertiaryContainer
 
-		ClientConnectionState.CONNECTION_BONDING, ClientConnectionState.CONNECTION_BONDED ->
+		ClientConnectionState.CONNECTION_PAIRING, ClientConnectionState.CONNECTION_PAIRED ->
 			MaterialTheme.colorScheme.secondaryContainer
 	}
 
