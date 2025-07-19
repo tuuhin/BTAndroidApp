@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerDeviceState
-import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTConnectedDeviceProfile
+import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTServerPeerProfile
 
 @Composable
 fun BTServerConnectionHeader(
@@ -19,7 +19,7 @@ fun BTServerConnectionHeader(
 	modifier: Modifier = Modifier
 ) {
 	AnimatedContent(
-		targetState = device.status,
+		targetState = device.serverState,
 		label = "Device is accepted or disconnected",
 		transitionSpec = {
 			if (targetState > initialState) {
@@ -34,11 +34,11 @@ fun BTServerConnectionHeader(
 		modifier = modifier,
 	) { connectionState ->
 		when (connectionState) {
-			ServerConnectionState.CONNECTION_INITIALIZING, ServerConnectionState.CONNECTION_LISTENING ->
+			ServerConnectionState.SERVER_STARTING, ServerConnectionState.SERVER_LISTENING, ServerConnectionState.SERVER_STOPPED ->
 				ServerConnectionStateChip(connectionState)
 
-			ServerConnectionState.CONNECTION_ACCEPTED, ServerConnectionState.CONNECTION_DISCONNECTED ->
-				BTConnectedDeviceProfile(device.device, connectionState = connectionState)
+			ServerConnectionState.PEER_CONNECTION_ACCEPTED ->
+				BTServerPeerProfile(device.device, connectionState = device.peerState)
 		}
 	}
 }

@@ -34,6 +34,7 @@ fun BluetoothDevicesList(
 	onSelectDevice: (BluetoothDeviceModel) -> Unit,
 	onLocationPermsAccept: (Boolean) -> Unit,
 	modifier: Modifier = Modifier,
+	isPairedDevicesReady: Boolean = true,
 	contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
 
@@ -61,7 +62,7 @@ fun BluetoothDevicesList(
 
 		pairedDevicesHeader()
 
-		if (isPairedListEmpty) {
+		if (isPairedDevicesReady && isPairedListEmpty) {
 			item {
 				Text(
 					text = stringResource(id = R.string.paired_device_not_found),

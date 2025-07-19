@@ -194,4 +194,6 @@
   <string name="drawer_option_classic_server">Classic Server</string>
   <string name="drawer_option_ble_server">BLE Server</string>
   <string name="bt_server_start_connection_extra_info">Make use the other device is discoverable, otherwise the other peer cannot be connected\n</string>
+  <string name="connection_server_stopped">Stopped</string>
+  <string name="connected_device_not_found">Not ready</string>
 </resources>

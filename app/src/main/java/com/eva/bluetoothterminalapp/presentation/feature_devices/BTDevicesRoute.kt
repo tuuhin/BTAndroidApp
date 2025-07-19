@@ -123,6 +123,7 @@ fun BTDevicesRoute(
 					BluetoothDevicesList(
 						pairedDevices = state.pairedDevices,
 						availableDevices = state.availableDevices,
+						isPairedDevicesReady = state.isPairedDevicesLoaded,
 						showLocationPlaceholder = showLocationBlock,
 						onSelectDevice = onSelectDevice,
 						contentPadding = PaddingValues(all = dimensionResource(R.dimen.sc_padding)),

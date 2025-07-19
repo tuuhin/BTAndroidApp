@@ -10,12 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.PeerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BTServerTopAppBar(
-	connectionState: ServerConnectionState,
+	serverState: ServerConnectionState,
+	peerState: PeerConnectionState,
 	onStop: () -> Unit,
 	onRestart: () -> Unit,
 	modifier: Modifier = Modifier,
@@ -27,7 +29,8 @@ fun BTServerTopAppBar(
 		navigationIcon = navigation,
 		actions = {
 			AnimatedStopAndRestartButton(
-				state = connectionState,
+				serverState = serverState,
+				peerState = peerState,
 				onRestart = onRestart,
 				onStop = onStop,
 			)

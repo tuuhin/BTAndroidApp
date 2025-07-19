@@ -2,15 +2,20 @@ package com.eva.bluetoothterminalapp.data.bluetooth
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import android.content.IntentFilter
 import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import com.eva.bluetoothterminalapp.data.bluetooth.receivers.PeerConnectionReceiver
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
 import com.eva.bluetoothterminalapp.data.utils.hasBTConnectPermission
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothServerConnector
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.PeerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
@@ -19,15 +24,15 @@ import com.eva.bluetoothterminalapp.presentation.util.BTConstants
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -48,17 +53,54 @@ class AndroidBTServerConnector(
 	private val _hasBtPermission: Boolean
 		get() = context.hasBTConnectPermission
 
-	private val _connectMode = MutableStateFlow(ServerConnectionState.CONNECTION_INITIALIZING)
-	override val connectMode: StateFlow<ServerConnectionState>
-		get() = _connectMode.asStateFlow()
-
-	private val _remoteDevice = MutableStateFlow<BluetoothDeviceModel?>(null)
-	override val remoteDevice: Flow<BluetoothDeviceModel>
-		get() = _remoteDevice.filterNotNull()
-
 	private var _serverSocket: BluetoothServerSocket? = null
 	private var _clientSocket: BluetoothSocket? = null
 	private var _transferService: BluetoothTransferService? = null
+
+	private val _serverState = MutableStateFlow(ServerConnectionState.SERVER_STARTING)
+	private val _peerConnection = MutableStateFlow(PeerConnectionState.PEER_NOT_FOUND)
+	private val _remoteDevice = MutableStateFlow<BluetoothDeviceModel?>(null)
+
+	override val serverState: StateFlow<ServerConnectionState>
+		get() = _serverState
+
+	override val remoteDevice: StateFlow<BluetoothDeviceModel?>
+		get() = _remoteDevice
+
+	override val peerConnectionState: Flow<PeerConnectionState>
+		get() = callbackFlow {
+			trySend(PeerConnectionState.PEER_NOT_FOUND)
+
+			val remoteConnectInfoReceiver = PeerConnectionReceiver(
+				onResults = { newState, _ ->
+					// need a local update for reader to work
+					_peerConnection.update { newState }
+					trySend(newState)
+				},
+			)
+
+			val filters = IntentFilter().apply {
+				// connection establish with a remote device
+				addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+				// disconnect a remote device
+				addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+			}
+
+			ContextCompat.registerReceiver(
+				context,
+				remoteConnectInfoReceiver,
+				filters,
+				ContextCompat.RECEIVER_EXPORTED
+			)
+
+			Log.d(SERVER_LOGGER, "PEER CONNECTION RECEIVER ADDED")
+
+			awaitClose {
+				Log.d(SERVER_LOGGER, "PEER CONNECTION RECEIVER REMOVED")
+				context.unregisterReceiver(remoteConnectInfoReceiver)
+			}
+		}.distinctUntilChanged()
+
 
 	override suspend fun startServer(secure: Boolean) {
 		// if no permission provided return
@@ -78,7 +120,7 @@ class AndroidBTServerConnector(
 
 
 				Log.d(SERVER_LOGGER, "SOCKET CREATED LISTENING FOR CONNECTION")
-				_connectMode.update { ServerConnectionState.CONNECTION_LISTENING }
+				_serverState.update { ServerConnectionState.SERVER_LISTENING }
 
 				do {
 					// ensure the coroutine is active
@@ -97,7 +139,7 @@ class AndroidBTServerConnector(
 					val clientSocket = _clientSocket ?: continue
 					_transferService = BluetoothTransferService(clientSocket, settings)
 
-					_connectMode.update { ServerConnectionState.CONNECTION_ACCEPTED }
+					_serverState.update { ServerConnectionState.PEER_CONNECTION_ACCEPTED }
 					_remoteDevice.update { clientSocket.remoteDevice.toDomainModel() }
 
 					Log.d(SERVER_LOGGER, "NEW DEVICE CONNECTED")
@@ -118,12 +160,12 @@ class AndroidBTServerConnector(
 
 	@OptIn(ExperimentalCoroutinesApi::class)
 	override val readIncomingData: Flow<BluetoothMessage>
-		get() = _connectMode.flatMapLatest { status ->
-			// start reading from the flow is status is connected otherwise it
+		get() = _peerConnection.flatMapLatest { status ->
+			// start reading from the flow is remote device is connected
 			// will return an empty flow
-			val canRead = status == ServerConnectionState.CONNECTION_ACCEPTED
+			val canRead = status == PeerConnectionState.PEER_CONNECTED
 			_transferService?.readFromStream(canRead = canRead) ?: emptyFlow()
-		}.flowOn(Dispatchers.IO)
+		}
 
 
 	override suspend fun sendData(data: String, trimData: Boolean): Result<Boolean> {
@@ -135,15 +177,19 @@ class AndroidBTServerConnector(
 
 	override fun closeServer() {
 		try {
+			// close client if present
 			_clientSocket?.close()
-			_serverSocket?.close()
 			_clientSocket = null
+			// close server if present
+			_serverSocket?.close()
 			_serverSocket = null
+			// update the states
 			_remoteDevice.update { null }
-			_connectMode.update { ServerConnectionState.CONNECTION_DISCONNECTED }
+			_serverState.update { ServerConnectionState.SERVER_STOPPED }
 			Log.d(SERVER_LOGGER, "CLOSED SERVER SUCCESSFULLY")
 		} catch (e: IOException) {
 			Log.e(SERVER_LOGGER, "CANNOT CLOSE SERVER SOCKET", e)
 		}
 	}
+
 }

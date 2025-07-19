@@ -2,6 +2,7 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server
 
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothServerConnector
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.PeerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
@@ -53,14 +54,16 @@ class BTServerViewModel(
 
 	val connectedDevice = combine(
 		_remoteDevice,
-		serverConnector.connectMode
-	) { device, status ->
-		BTServerDeviceState(device = device, status = status)
-	}.stateIn(
-		scope = viewModelScope,
-		started = SharingStarted.WhileSubscribed(8_000L),
-		initialValue = BTServerDeviceState()
-	)
+		serverConnector.peerConnectionState,
+		serverConnector.serverState
+	) { device, peerState, serverState ->
+		BTServerDeviceState(device = device, peerState = peerState, serverState = serverState)
+	}.onStart { checkClientDisconnect() }
+		.stateIn(
+			scope = viewModelScope,
+			started = SharingStarted.WhileSubscribed(8_000L),
+			initialValue = BTServerDeviceState()
+		)
 
 	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	override val uiEvents: SharedFlow<UiEvents>
@@ -103,6 +106,25 @@ class BTServerViewModel(
 		stopServerAndClearResources()
 		//starts the server
 		startServer()
+		// clear the messages
+		_serverState.update { state ->
+			val messages = state.messages.clear()
+			state.copy(messages = messages)
+		}
+	}
+
+	private fun checkClientDisconnect() {
+		connectedDevice.map { it.peerState }.distinctUntilChanged()
+			.onEach { state ->
+				if (state == PeerConnectionState.PEER_DISCONNECTED) {
+					val event = UiEvents.ShowSnackBarWithActions(
+						message = "Client Disconnected",
+						"Restart",
+						::restartServer
+					)
+					_uiEvents.emit(event)
+				}
+			}.launchIn(viewModelScope)
 	}
 
 	private fun toggleDialog(isOpen: Boolean) = _serverState.update { state ->

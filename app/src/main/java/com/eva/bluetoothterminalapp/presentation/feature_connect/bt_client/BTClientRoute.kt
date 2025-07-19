@@ -42,7 +42,7 @@ import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.util.BTClientDeviceStatePreviewParam
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.util.BTClientMessagesStatePreviewParams
-import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTConnectedDeviceProfile
+import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTClientDeviceProfile
 import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTMessagesList
 import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.KeepScreenOnSideEffect
 import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.SendCommandTextField
@@ -108,7 +108,7 @@ fun BTClientRoute(
 				.fillMaxSize(),
 			verticalArrangement = Arrangement.spacedBy(6.dp)
 		) {
-			BTConnectedDeviceProfile(
+			BTClientDeviceProfile(
 				device = device.device,
 				connectionState = device.connectionStatus
 			)

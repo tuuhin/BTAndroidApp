@@ -5,20 +5,20 @@ enum class ServerConnectionState {
 	/**
 	 * Creating the server use this to initiate the flow
 	 */
-	CONNECTION_INITIALIZING,
+	SERVER_STARTING,
 
 	/**
 	 * Socket created and the socket is listening for incomming connections
 	 */
-	CONNECTION_LISTENING,
+	SERVER_LISTENING,
 
 	/**
-	 * Connection is accepted and 2 way communication can occur now
+	 * Some peer had accepted the connection
 	 */
-	CONNECTION_ACCEPTED,
+	PEER_CONNECTION_ACCEPTED,
 
 	/**
-	 * Connection is disconnected
+	 * Server is stopped need to start again to continue
 	 */
-	CONNECTION_DISCONNECTED
+	SERVER_STOPPED
 }

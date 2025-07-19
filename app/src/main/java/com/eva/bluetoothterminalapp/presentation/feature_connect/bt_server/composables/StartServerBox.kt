@@ -2,10 +2,14 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.comp
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -28,10 +32,9 @@ fun StartServerBox(
 	onStartServer: () -> Unit,
 	modifier: Modifier = Modifier,
 ) {
-
 	Column(
 		modifier = modifier.widthIn(max = dimensionResource(R.dimen.permission_box_min_size)),
-		verticalArrangement = Arrangement.spacedBy(6.dp),
+		verticalArrangement = Arrangement.Center,
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
 		Icon(
@@ -40,6 +43,7 @@ fun StartServerBox(
 			tint = MaterialTheme.colorScheme.secondary,
 			modifier = Modifier.size(128.dp),
 		)
+		Spacer(modifier = Modifier.height(12.dp))
 		Text(
 			text = stringResource(id = R.string.bt_server_start_connection_text),
 			style = MaterialTheme.typography.titleMedium,
@@ -51,22 +55,24 @@ fun StartServerBox(
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 			textAlign = TextAlign.Center
 		)
-		Text(
-			text = stringResource(R.string.bt_server_start_connection_extra_info),
-			style = MaterialTheme.typography.labelMedium,
-			color = MaterialTheme.colorScheme.tertiary,
-			textAlign = TextAlign.Center
-		)
+
 		Button(
 			onClick = onStartServer,
 			shape = MaterialTheme.shapes.medium,
-			modifier = Modifier.defaultMinSize(minWidth = 220.dp)
+			modifier = Modifier.fillMaxWidth(.85f)
 		) {
 			Text(
 				text = stringResource(id = R.string.bt_server_start_connection_text),
 				fontWeight = FontWeight.SemiBold
 			)
 		}
+		HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+		Text(
+			text = stringResource(R.string.bt_server_start_connection_extra_info),
+			style = MaterialTheme.typography.labelMedium,
+			color = MaterialTheme.colorScheme.tertiary,
+			textAlign = TextAlign.Center
+		)
 	}
 }
 

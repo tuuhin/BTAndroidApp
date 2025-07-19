@@ -31,92 +31,17 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
-import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.PeerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.presentation.composables.BTDeviceIconLarge
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.ClientConnectionStateChip
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.ServerConnectionStateChip
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
-fun BTConnectedDeviceProfile(
+fun BTServerPeerProfile(
 	device: BluetoothDeviceModel?,
 	modifier: Modifier = Modifier,
-	connectionState: ClientConnectionState = ClientConnectionState.CONNECTION_CONNECTED,
-	shape: Shape = MaterialTheme.shapes.large,
-	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest
-) {
-
-	AnimatedVisibility(
-		visible = device != null,
-		enter = expandIn(
-			animationSpec = spring(
-				dampingRatio = Spring.DampingRatioMediumBouncy,
-				stiffness = Spring.StiffnessMedium
-			),
-			expandFrom = Alignment.TopCenter,
-		) + fadeIn(
-			animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-		),
-		exit = shrinkOut(
-			animationSpec = spring(
-				dampingRatio = Spring.DampingRatioMediumBouncy,
-				stiffness = Spring.StiffnessMedium
-			),
-			shrinkTowards = Alignment.TopCenter,
-		) + fadeOut(
-			animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-		)
-	) {
-		// the content will not be visible if its null
-		if (device == null) return@AnimatedVisibility
-
-		Card(
-			colors = CardDefaults.cardColors(
-				containerColor = containerColor,
-				contentColor = contentColorFor(containerColor)
-			),
-			elevation = CardDefaults.elevatedCardElevation(),
-			shape = shape,
-			modifier = modifier,
-		) {
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(16.dp),
-			) {
-				Column(
-					verticalArrangement = Arrangement.spacedBy(2.dp),
-					horizontalAlignment = Alignment.Start,
-					modifier = Modifier.weight(.7f)
-				) {
-					Text(
-						text = device.name,
-						style = MaterialTheme.typography.titleLarge,
-						fontWeight = FontWeight.SemiBold
-					)
-					Text(
-						text = device.address,
-						style = MaterialTheme.typography.labelLarge,
-						fontFamily = FontFamily.Monospace,
-					)
-					Spacer(modifier = Modifier.height(4.dp))
-					ClientConnectionStateChip(connectionState = connectionState)
-				}
-				BTDeviceIconLarge(device = device)
-			}
-		}
-	}
-}
-
-@Composable
-fun BTConnectedDeviceProfile(
-	device: BluetoothDeviceModel?,
-	modifier: Modifier = Modifier,
-	connectionState: ServerConnectionState = ServerConnectionState.CONNECTION_ACCEPTED,
+	connectionState: PeerConnectionState = PeerConnectionState.PEER_DISCONNECTED,
 	shape: Shape = MaterialTheme.shapes.large,
 	containerColor: Color = MaterialTheme.colorScheme.secondaryContainer
 ) {
@@ -175,7 +100,7 @@ fun BTConnectedDeviceProfile(
 						fontFamily = FontFamily.Monospace,
 					)
 					Spacer(modifier = Modifier.height(4.dp))
-					ServerConnectionStateChip(connectionState = connectionState)
+					PeerConnectionChip(connectionState = connectionState)
 				}
 				BTDeviceIconLarge(device = device)
 			}
@@ -185,25 +110,11 @@ fun BTConnectedDeviceProfile(
 
 @PreviewLightDark
 @Composable
-private fun BTDeviceClientProfilePreview() = BlueToothTerminalAppTheme {
+private fun BTServerPeerProfilePreview() = BlueToothTerminalAppTheme {
 	Surface {
-		BTConnectedDeviceProfile(
+		BTServerPeerProfile(
 			device = PreviewFakes.FAKE_DEVICE_MODEL,
-			connectionState = ClientConnectionState.CONNECTION_CONNECTED,
-			modifier = Modifier
-				.padding(12.dp)
-				.fillMaxWidth()
-		)
-	}
-}
-
-@PreviewLightDark
-@Composable
-private fun BTDeviceServerProfilePreview() = BlueToothTerminalAppTheme {
-	Surface {
-		BTConnectedDeviceProfile(
-			device = PreviewFakes.FAKE_DEVICE_MODEL,
-			connectionState = ServerConnectionState.CONNECTION_ACCEPTED,
+			connectionState = PeerConnectionState.PEER_CONNECTED,
 			modifier = Modifier
 				.padding(12.dp)
 				.fillMaxWidth()

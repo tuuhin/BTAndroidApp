@@ -27,6 +27,8 @@ class BTDeviceViewmodel(
 	private val bLEScanner: BluetoothLEScanner,
 ) : AppViewModel() {
 
+	private val _isPairedDevicesReady = MutableStateFlow(false)
+
 	val isBTActive = bluetoothScanner.isBluetoothActive
 		.stateIn(
 			scope = viewModelScope,
@@ -45,9 +47,11 @@ class BTDeviceViewmodel(
 		bluetoothScanner.pairedDevices,
 		bluetoothScanner.availableDevices,
 		bLEScanner.leDevices,
-	) { paired, available, leDevices ->
+		_isPairedDevicesReady,
+	) { paired, available, leDevices, pairedDevicesLoaded ->
 		BTDevicesScreenState(
 			pairedDevices = paired.toPersistentList(),
+			isPairedDevicesLoaded = pairedDevicesLoaded,
 			availableDevices = available.toPersistentList(),
 			leDevices = leDevices.toPersistentList()
 		)
@@ -110,12 +114,15 @@ class BTDeviceViewmodel(
 		merge(bluetoothScanner.isBluetoothActive, _hasBtPermission).onEach { canCheck ->
 			if (!canCheck) return@onEach
 			val status = bluetoothScanner.findPairedDevices()
-			status.onFailure { exp ->
-				val message = exp.message ?: "Some issues in loading paired devices"
-				viewModelScope.launch {
-					_uiEvents.emit(UiEvents.ShowSnackBar(message))
-				}
-			}
+			status.fold(
+				onSuccess = { _isPairedDevicesReady.update { true } },
+				onFailure = { exp ->
+					val message = exp.message ?: "Some issues in loading paired devices"
+					viewModelScope.launch {
+						_uiEvents.emit(UiEvents.ShowSnackBar(message))
+					}
+				},
+			)
 		}.launchIn(viewModelScope)
 	}
 
