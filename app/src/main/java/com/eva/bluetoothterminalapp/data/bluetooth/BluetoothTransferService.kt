@@ -22,7 +22,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-private const val TRANSFER_LOGGER = "TRANSFER_LOGGER"
+private const val TAG = "TRANSFER_LOGGER"
 
 class BluetoothTransferService(
 	private val socket: BluetoothSocket,
@@ -59,19 +59,19 @@ class BluetoothTransferService(
 						message = convertedMessage,
 						type = BluetoothMessageType.MESSAGE_FROM_OTHER
 					)
+					Log.d(TAG, "MESSAGES!!")
 					emit(btMessage)
 				}
 			} catch (e: IOException) {
-				Log.e(TRANSFER_LOGGER, "ERROR OCCCURED", e)
+				Log.e(TAG, "ERROR OCCCURED", e)
 				e.printStackTrace()
 			}
 		}
 			.flowOn(Dispatchers.IO)
-			.catch { err -> Log.e(TRANSFER_LOGGER, "ERROR", err) }
+			.catch { err -> Log.e(TAG, "ERROR", err) }
 			.onCompletion {
-				if (!canRead) return@onCompletion
 				// ensures logs when the socket is disconnected
-				Log.d(TRANSFER_LOGGER, "FINISHED READING THE FLOW")
+				Log.d(TAG, "FINISHED READING THE FLOW")
 			}
 	}
 
@@ -91,7 +91,7 @@ class BluetoothTransferService(
 					return@withContext Result.failure(BTSocketNotConnectedException())
 				// else write the bytes to the output stream
 				_outputStream.write(bytes)
-				Log.d(TRANSFER_LOGGER, "WRITTEN TO STREAM")
+				Log.d(TAG, "WRITTEN TO STREAM")
 				Result.success(true)
 			} catch (e: Exception) {
 				e.printStackTrace()

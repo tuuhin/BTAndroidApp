@@ -3,6 +3,7 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothServerConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.PeerConnectionState
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
@@ -114,9 +115,11 @@ class BTServerViewModel(
 	}
 
 	private fun checkClientDisconnect() {
-		connectedDevice.map { it.peerState }.distinctUntilChanged()
-			.onEach { state ->
-				if (state == PeerConnectionState.PEER_DISCONNECTED) {
+		connectedDevice.map { it.peerState to it.serverState }.distinctUntilChanged()
+			.onEach { (peerState, serverState) ->
+				if (serverState != ServerConnectionState.PEER_CONNECTION_ACCEPTED) return@onEach
+				// there was a peer connection but not the peer has disconnected
+				if (peerState == PeerConnectionState.PEER_DISCONNECTED) {
 					val event = UiEvents.ShowSnackBarWithActions(
 						message = "Client Disconnected",
 						"Restart",

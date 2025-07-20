@@ -24,6 +24,7 @@ import com.eva.bluetoothterminalapp.presentation.util.BTConstants
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -58,7 +60,6 @@ class AndroidBTServerConnector(
 	private var _transferService: BluetoothTransferService? = null
 
 	private val _serverState = MutableStateFlow(ServerConnectionState.SERVER_STARTING)
-	private val _peerConnection = MutableStateFlow(PeerConnectionState.PEER_NOT_FOUND)
 	private val _remoteDevice = MutableStateFlow<BluetoothDeviceModel?>(null)
 
 	override val serverState: StateFlow<ServerConnectionState>
@@ -67,6 +68,7 @@ class AndroidBTServerConnector(
 	override val remoteDevice: StateFlow<BluetoothDeviceModel?>
 		get() = _remoteDevice
 
+	@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 	override val peerConnectionState: Flow<PeerConnectionState>
 		get() = callbackFlow {
 			trySend(PeerConnectionState.PEER_NOT_FOUND)
@@ -74,7 +76,6 @@ class AndroidBTServerConnector(
 			val remoteConnectInfoReceiver = PeerConnectionReceiver(
 				onResults = { newState, _ ->
 					// need a local update for reader to work
-					_peerConnection.update { newState }
 					trySend(newState)
 				},
 			)
@@ -99,8 +100,8 @@ class AndroidBTServerConnector(
 				Log.d(SERVER_LOGGER, "PEER CONNECTION RECEIVER REMOVED")
 				context.unregisterReceiver(remoteConnectInfoReceiver)
 			}
-		}.distinctUntilChanged()
-
+		}.sample(200)
+			.distinctUntilChanged()
 
 	override suspend fun startServer(secure: Boolean) {
 		// if no permission provided return
@@ -149,7 +150,7 @@ class AndroidBTServerConnector(
 				} while (_clientSocket == null)
 			} catch (e: Exception) {
 				if (e is CancellationException) {
-					Log.d(SERVER_LOGGER, "COROUTINE IS CANCELLED !!")
+					Log.e(SERVER_LOGGER, "COROUTINE IS CANCELLED !!")
 					throw e
 				} else if (e is IOException) {
 					Log.e(SERVER_LOGGER, "BLUETOOTH CONNECTION EXCEPTION", e)
@@ -160,10 +161,10 @@ class AndroidBTServerConnector(
 
 	@OptIn(ExperimentalCoroutinesApi::class)
 	override val readIncomingData: Flow<BluetoothMessage>
-		get() = _peerConnection.flatMapLatest { status ->
+		get() = _serverState.flatMapLatest { status ->
 			// start reading from the flow is remote device is connected
 			// will return an empty flow
-			val canRead = status == PeerConnectionState.PEER_CONNECTED
+			val canRead = status == ServerConnectionState.PEER_CONNECTION_ACCEPTED
 			_transferService?.readFromStream(canRead = canRead) ?: emptyFlow()
 		}
 
