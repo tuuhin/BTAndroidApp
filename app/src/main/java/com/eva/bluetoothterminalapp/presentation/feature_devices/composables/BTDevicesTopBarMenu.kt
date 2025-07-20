@@ -36,9 +36,9 @@ import com.eva.bluetoothterminalapp.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BTDevicesTopBarMenu(
-	hasDiscoverPermission: Boolean,
 	onStartDiscovery: () -> Unit,
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
+	isBTEnabled: Boolean = true,
 ) {
 
 	val context = LocalContext.current
@@ -135,7 +135,7 @@ fun BTDevicesTopBarMenu(
 			DropdownMenuItem(
 				text = { Text(text = stringResource(id = R.string.allow_discover)) },
 				onClick = onStartDiscovery,
-				enabled = hasDiscoverPermission,
+				enabled = isBTEnabled,
 				leadingIcon = {
 					Icon(
 						painter = painterResource(id = R.drawable.ic_radar),

@@ -82,20 +82,14 @@ fun BTDevicesRoute(
 			BTDeviceRouteTopBar(
 				isScanning = isScanning,
 				canShowScanOption = showScanButton,
+				currentTab = currentTab,
+				hasLocationPermission = hasLocationPermission,
+				startClassicScan = { onEvent(BTDevicesScreenEvents.StartScan) },
+				stopClassicScan = { onEvent(BTDevicesScreenEvents.StopScan) },
+				startBLEScan = { onEvent(BTDevicesScreenEvents.StartLEDeviceScan) },
+				stopBLEScan = { onEvent(BTDevicesScreenEvents.StopLEDevicesScan) },
 				navigation = navigation,
-				startScan = {
-					when (currentTab) {
-						BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StartScan)
-						BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StartLEDeviceScan)
-					}
-				},
-				stopScan = {
-					when (currentTab) {
-						BluetoothTypes.CLASSIC -> onEvent(BTDevicesScreenEvents.StopScan)
-						BluetoothTypes.LOW_ENERGY -> onEvent(BTDevicesScreenEvents.StopLEDevicesScan)
-					}
-				},
-				scrollBehavior = scrollBehaviour
+				scrollBehavior = scrollBehaviour,
 			)
 		},
 		snackbarHost = { SnackbarHost(hostState = snackBarHostState) },

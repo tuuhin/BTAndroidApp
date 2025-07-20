@@ -11,11 +11,15 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.contracts.StartBluetoothDiscovery
+import com.eva.bluetoothterminalapp.presentation.util.BluetoothTypes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,8 +28,12 @@ fun BTDeviceRouteTopBar(
 	isScanning: Boolean,
 	navigation: @Composable () -> Unit,
 	modifier: Modifier = Modifier,
-	startScan: () -> Unit = {},
-	stopScan: () -> Unit = {},
+	currentTab: BluetoothTypes = BluetoothTypes.CLASSIC,
+	hasLocationPermission: Boolean = false,
+	startClassicScan: () -> Unit = {},
+	stopClassicScan: () -> Unit = {},
+	startBLEScan: () -> Unit = {},
+	stopBLEScan: () -> Unit = {},
 	colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
 	scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
@@ -42,6 +50,13 @@ fun BTDeviceRouteTopBar(
 		},
 	)
 
+	val showScanOption = remember(canShowScanOption, currentTab) {
+		if (currentTab == BluetoothTypes.LOW_ENERGY) canShowScanOption && hasLocationPermission
+		else canShowScanOption
+	}
+
+	val startScan by rememberUpdatedState(if (currentTab == BluetoothTypes.CLASSIC) startClassicScan else startBLEScan)
+	val stopScan by rememberUpdatedState(if (currentTab == BluetoothTypes.CLASSIC) stopClassicScan else stopBLEScan)
 
 	MediumTopAppBar(
 		title = { Text(text = stringResource(id = R.string.devices_route)) },
@@ -49,12 +64,12 @@ fun BTDeviceRouteTopBar(
 		actions = {
 			AnimatedScanButton(
 				isScanning = isScanning,
-				canShowScanOption = canShowScanOption,
+				canShowScanOption = showScanOption,
 				startScan = startScan,
 				stopScan = stopScan
 			)
 			BTDevicesTopBarMenu(
-				hasDiscoverPermission = canShowScanOption,
+				isBTEnabled = canShowScanOption,
 				onStartDiscovery = launcher::launch
 			)
 		},

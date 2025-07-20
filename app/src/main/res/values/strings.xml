@@ -128,9 +128,9 @@
   <string name="ble_settings_layer_le_coded">LE Coded (Long Range)</string>
   <string name="ble_settings_layer_title">Physical Layer (PHY)</string>
   <!--  Ble settings compatibility mode-->
-  <string name="ble_settings_compatibilty_mode_title">Compatibility Mode</string>
-  <string name="ble_settings_compatibilty_mode_legacy_only">Legacy Advertising only</string>
-  <string name="ble_settings_compatibilty_mode_all">Legacy and Advertising Extension</string>
+  <string name="ble_settings_compatibility_mode_title">Compatibility Mode</string>
+  <string name="ble_settings_compatibility_mode_legacy_only">Legacy Advertising only</string>
+  <string name="ble_settings_compatibility_mode_all">Legacy and Advertising Extension</string>
   <!--  BLE settings scan period-->
   <string name="ble_settings_scan_period_title">Scan Period</string>
   <string name="ble_settings_scan_period_time_minute">%d minutes</string>
@@ -138,7 +138,7 @@
   <!--  Settings char set-->
   <string name="bt_classic_settings_char_set_utf_8">UTF-8</string>
   <string name="bt_classic_settings_char_set_utf_16">UTF-16</string>
-  <string name="bt_classic_settings_char_set_utf_32">UTF-2</string>
+  <string name="bt_classic_settings_char_set_utf_32">UTF-32</string>
   <string name="bt_classic_settings_char_set_us_ascii">US-ASCII</string>
   <string name="bt_classic_settings_char_set_iso_8859">ISO_8859_1</string>
   <string name="bt_classic_settings_char_sets_title">Charsets</string>
@@ -196,4 +196,5 @@
   <string name="bt_server_start_connection_extra_info">Make use the other device is discoverable, otherwise the other peer cannot be connected\n</string>
   <string name="connection_server_stopped">Stopped</string>
   <string name="connected_device_not_found">Not ready</string>
+  <string name="ble_settings_charset">Charset</string>
 </resources>

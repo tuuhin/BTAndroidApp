@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -18,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
@@ -68,13 +66,7 @@ fun AnimatedStopAndRestartButton(
 				)
 			}
 
-
-			else -> Box(
-				modifier = Modifier
-					.size(60.dp, 40.dp)
-					.background(Color.Red)
-			)
-
+			else -> Box(modifier = Modifier.size(60.dp, 40.dp))
 		}
 	}
 }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -15,9 +14,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
-import com.eva.bluetoothterminalapp.domain.settings.enums.BLEScanPeriodTimmings
-import com.eva.bluetoothterminalapp.domain.settings.enums.BLESettingsScanMode
-import com.eva.bluetoothterminalapp.domain.settings.enums.BLESettingsSupportedLayer
 import com.eva.bluetoothterminalapp.domain.settings.models.BLESettingsModel
 import com.eva.bluetoothterminalapp.presentation.feature_settings.util.BLESettingsEvent
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
@@ -31,22 +27,6 @@ fun BLESettingsContent(
 	contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
 
-	val onScanPeriodChange: (BLEScanPeriodTimmings) -> Unit = remember {
-		{ time -> onEvent(BLESettingsEvent.OnScanPeriodChange(time)) }
-	}
-
-	val onScanModeChange: (BLESettingsScanMode) -> Unit = remember {
-		{ mode -> onEvent(BLESettingsEvent.OnScanModeChange(mode)) }
-	}
-
-	val onSupportedLayerChange: (BLESettingsSupportedLayer) -> Unit = remember {
-		{ layer -> onEvent(BLESettingsEvent.OnPhyLayerChange(layer)) }
-	}
-
-	val onIsLegacyDeviceChange: (Boolean) -> Unit = remember {
-		{ isLegacy -> onEvent(BLESettingsEvent.OnToggleIsLegacyAdvertisement(isLegacy)) }
-	}
-
 	LazyColumn(
 		modifier = modifier.fillMaxSize(),
 		contentPadding = contentPadding,
@@ -58,25 +38,31 @@ fun BLESettingsContent(
 		item {
 			BLEScanPeriodSelector(
 				scanPeriodTime = settings.scanPeriod,
-				onScanPeriodChange = onScanPeriodChange,
+				onScanPeriodChange = { time -> onEvent(BLESettingsEvent.OnScanPeriodChange(time)) },
 			)
 		}
 		item {
 			BLEScanModeSelector(
 				scanMode = settings.scanMode,
-				onScanModeChange = onScanModeChange,
+				onScanModeChange = { mode -> onEvent(BLESettingsEvent.OnScanModeChange(mode)) },
 			)
 		}
 		item {
 			BLEPhysicalLayerSelector(
 				selectedLayer = settings.supportedLayer,
-				onLayerChange = onSupportedLayerChange
+				onLayerChange = { layer -> onEvent(BLESettingsEvent.OnPhyLayerChange(layer)) }
 			)
 		}
 		item {
 			BLECompatibilityModeSelector(
 				isLegacyOnly = settings.isLegacyOnly,
-				onChange = onIsLegacyDeviceChange
+				onChange = { isLegacy ->
+					onEvent(
+						BLESettingsEvent.OnToggleIsLegacyAdvertisement(
+							isLegacy
+						)
+					)
+				}
 			)
 		}
 	}
