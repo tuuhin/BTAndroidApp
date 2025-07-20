@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
 	alias(libs.plugins.android.application)
@@ -18,12 +19,35 @@ android {
 		applicationId = "com.eva.bluetoothterminalapp"
 		minSdk = 29
 		targetSdk = 36
-		versionCode = 1
-		versionName = "1.0"
+		versionCode = 2
+		versionName = "1.1.0"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		vectorDrawables {
 			useSupportLibrary = true
+		}
+	}
+
+	signingConfigs {
+
+		val keySecretFile = rootProject.file("keystore.properties")
+		if (keySecretFile.exists()) return@signingConfigs
+
+		val properties = Properties()
+
+		val storeFileName = properties.getProperty("STORE_FILE_NAME")
+
+		val keyStorePath = System.getenv("user.home")
+		val keyStoreFolder = File(keyStorePath, "keystore")
+		val keyStoreFile = File(keyStoreFolder, storeFileName)
+
+		if (!keyStoreFile.exists()) return@signingConfigs
+
+		create("release") {
+			storeFile = keyStoreFile
+			keyAlias = properties.getProperty("KEY_ALIAS")
+			keyPassword = properties.getProperty("KEY_PASSWORD")
+			storePassword = properties.getProperty("STORE_PASSWORD")
 		}
 	}
 
@@ -36,10 +60,13 @@ android {
 		}
 
 		release {
-			applicationIdSuffix = ".release"
 			isMinifyEnabled = true
 			isShrinkResources = true
 			multiDexEnabled = true
+			signingConfigs.findByName("release")?.let { config ->
+				signingConfig = config
+			}
+
 			proguardFiles(
 				getDefaultProguardFile("proguard-android-optimize.txt"),
 				"proguard-rules.pro"
