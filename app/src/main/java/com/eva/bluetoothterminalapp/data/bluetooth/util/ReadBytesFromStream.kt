@@ -3,7 +3,6 @@ package com.eva.bluetoothterminalapp.data.bluetooth.util
 import com.eva.bluetoothterminalapp.domain.settings.enums.BTTerminalDisplayMode
 import java.io.InputStream
 
-@OptIn(ExperimentalStdlibApi::class)
 fun InputStream.readResponseFromStream(
 	buffer: ByteArray = ByteArray(1024),
 	mode: BTTerminalDisplayMode = BTTerminalDisplayMode.DISPLAY_MODE_TEXT
@@ -19,5 +18,5 @@ fun InputStream.readResponseFromStream(
 			BTTerminalDisplayMode.DISPLAY_MODE_HEX -> buffer.toHexString(endIndex = bytesRead)
 		}
 		append(message)
-	} while (available() != 0 && bytesRead > 0)
+	} while (available() != 0)
 }

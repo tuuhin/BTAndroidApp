@@ -10,7 +10,7 @@ interface BTSettingsDataSore {
 
 	val settingsFlow: Flow<BTSettingsModel>
 
-	val settings: BTSettingsModel
+	suspend fun getSettings(): BTSettingsModel
 
 	suspend fun onCharsetChange(charSet: BTTerminalCharSet)
 

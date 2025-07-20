@@ -10,7 +10,7 @@ interface BLESettingsDataStore {
 
 	val settingsFlow: Flow<BLESettingsModel>
 
-	val settings: BLESettingsModel
+	suspend fun getSettings(): BLESettingsModel
 
 	suspend fun onUpdateScanPeriod(timming: BLEScanPeriodTimmings)
 

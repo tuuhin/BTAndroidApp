@@ -18,6 +18,11 @@ sealed interface BTDevicesScreenEvents {
 	data class OnBTPermissionChanged(val isGranted: Boolean) : BTDevicesScreenEvents
 
 	/**
+	 * Checks if location permission has changed or not
+	 */
+	data class OnLocationPermissionChanged(val isGranted: Boolean) : BTDevicesScreenEvents
+
+	/**
 	 * Start Bluetooth low energy scan
 	 */
 	data object StartLEDeviceScan : BTDevicesScreenEvents

@@ -33,6 +33,11 @@ interface BluetoothScanner {
 	val isBTDiscovering: Boolean
 
 	/**
+	 * If the device has bluetooth permission granted
+	 */
+	val hasBTPermissions: Boolean
+
+	/**
 	 * A flow to determine if scanning is running
 	 */
 	val isScanRunning: Flow<Boolean>

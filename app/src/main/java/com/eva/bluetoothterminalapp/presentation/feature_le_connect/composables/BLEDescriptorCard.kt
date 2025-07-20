@@ -21,8 +21,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
@@ -42,14 +46,10 @@ fun BLEDescriptorCard(
 	modifier: Modifier = Modifier,
 	shape: Shape = MaterialTheme.shapes.medium,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-	chipColors: Color = MaterialTheme.colorScheme.secondaryContainer,
+	titleColor: Color = MaterialTheme.colorScheme.secondary,
+	valuesColor: Color = MaterialTheme.colorScheme.tertiary,
+	buttonColor: Color = MaterialTheme.colorScheme.secondaryContainer,
 ) {
-
-	val context = LocalContext.current
-
-	val probableName = remember(descriptor.probableName) {
-		descriptor.probableName ?: context.getString(R.string.ble_descriptor_unknown)
-	}
 
 	val showHexValue = remember(descriptor.byteArray) { descriptor.valueHexString.isNotBlank() }
 
@@ -67,12 +67,25 @@ fun BLEDescriptorCard(
 			verticalArrangement = Arrangement.spacedBy(2.dp)
 		) {
 			Text(
-				text = probableName,
-				style = MaterialTheme.typography.bodyMedium
+				text = descriptor.probableName ?: stringResource(R.string.ble_descriptor_unknown),
+				style = MaterialTheme.typography.bodyMedium,
+				fontWeight = FontWeight.Medium,
+				color = titleColor,
 			)
 			Text(
-				text = "UUID : ${descriptor.uuid}",
+				text = buildAnnotatedString {
+					append("ID: ")
+					withStyle(
+						SpanStyle(
+							fontFamily = FontFamily.Monospace,
+							fontWeight = FontWeight.Medium
+						)
+					) {
+						append("${descriptor.uuid}")
+					}
+				},
 				style = MaterialTheme.typography.labelMedium,
+				color = titleColor
 			)
 			HorizontalDivider(
 				modifier = Modifier.padding(vertical = 2.dp),
@@ -86,7 +99,7 @@ fun BLEDescriptorCard(
 				Text(
 					text = stringResource(id = R.string.ble_value_hex, descriptor.valueHexString),
 					style = MaterialTheme.typography.labelMedium,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
+					color = valuesColor,
 				)
 
 			}
@@ -96,22 +109,27 @@ fun BLEDescriptorCard(
 				exit = slideOutVertically { height -> -height } + fadeOut()
 			) {
 				Text(
-					text = stringResource(
-						id = R.string.ble_descriptor_readble_value,
-						descriptor.textValue
-					),
+					text = buildAnnotatedString {
+						append(stringResource(R.string.ble_readable_value))
+						append(" :")
+						append(descriptor.textValue)
+					},
 					style = MaterialTheme.typography.labelMedium,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
+					color = valuesColor,
 				)
-
 			}
 			SuggestionChip(
 				onClick = onRead,
-				label = { Text(text = stringResource(id = R.string.ble_property_read)) },
+				label = {
+					Text(
+						text = stringResource(id = R.string.ble_property_read),
+						style = MaterialTheme.typography.labelMedium
+					)
+				},
 				enabled = isDeviceConnected,
 				colors = SuggestionChipDefaults.suggestionChipColors(
-					containerColor = chipColors,
-					labelColor = contentColorFor(backgroundColor = chipColors),
+					containerColor = buttonColor,
+					labelColor = contentColorFor(backgroundColor = buttonColor),
 					disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
 				),
 				border = SuggestionChipDefaults.suggestionChipBorder(enabled = true),
@@ -124,9 +142,9 @@ fun BLEDescriptorCard(
 private val BLEDescriptorModel.textValue: String
 	@Composable
 	get() = when (descriptorValue) {
-		BLEDescriptorValue.DisableNotifcationOrIndication -> stringResource(id = R.string.ble_disable_notification)
+		BLEDescriptorValue.DisableNotifyOrIndication -> stringResource(id = R.string.ble_disable_notification)
 		BLEDescriptorValue.EnableIndication -> stringResource(id = R.string.ble_enable_indication)
-		BLEDescriptorValue.EnableNotifcation -> stringResource(id = R.string.ble_enable_notification)
+		BLEDescriptorValue.EnableNotification -> stringResource(id = R.string.ble_enable_notification)
 		is BLEDescriptorValue.ReadableValue -> valueAsString ?: ""
 
 	}

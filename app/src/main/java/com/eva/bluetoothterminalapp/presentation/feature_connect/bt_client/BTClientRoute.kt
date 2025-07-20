@@ -1,8 +1,10 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,26 +32,32 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.BTClientTopBar
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.BTMessageListWithConnectionBanner
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientDeviceState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientMessagesState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteEvents
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteState
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.util.BTClientRoutePreviewParams
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.util.BTClientDeviceStatePreviewParam
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.util.BTClientMessagesStatePreviewParams
+import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTClientDeviceProfile
+import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTMessagesList
+import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.KeepScreenOnSideEffect
 import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.SendCommandTextField
-import com.eva.bluetoothterminalapp.presentation.feature_connect.util.KeepScreenOnEffect
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
+import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @OptIn(
 	ExperimentalLayoutApi::class,
-	ExperimentalMaterial3Api::class
+	ExperimentalMaterial3Api::class,
 )
 @Composable
 fun BTClientRoute(
-	state: BTClientRouteState,
+	device: BTClientDeviceState,
+	messages: BTClientMessagesState,
 	btSettings: BTSettingsModel,
 	onConnectionEvent: (BTClientRouteEvents) -> Unit,
 	modifier: Modifier = Modifier,
@@ -58,26 +66,26 @@ fun BTClientRoute(
 ) {
 	val snackBarHostState = LocalSnackBarProvider.current
 
-	val isStatusAccepted by remember(state.connectionMode) {
-		derivedStateOf { state.connectionMode == ClientConnectionState.CONNECTION_ACCEPTED }
+	val isConnected by remember(device.connectionStatus) {
+		derivedStateOf { device.connectionStatus == ClientConnectionState.CONNECTION_CONNECTED }
 	}
 
-	KeepScreenOnEffect(
-		connectionState = state.connectionMode,
+	KeepScreenOnSideEffect(
+		connectionState = device.connectionStatus,
 		isKeepScreenOn = btSettings.keepScreenOnWhenConnected
 	)
 
 	BackHandler(
-		enabled = isStatusAccepted,
+		enabled = isConnected,
 		onBack = onBackPress,
 	)
 
-	val topScrollState = TopAppBarDefaults.pinnedScrollBehavior()
+	val topScrollState = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
 	Scaffold(
 		topBar = {
 			BTClientTopBar(
-				clientState = state.connectionMode,
+				clientState = device.connectionStatus,
 				navigation = navigation,
 				onReconnect = { onConnectionEvent(BTClientRouteEvents.OnReconnectClient) },
 				onDisconnect = { onConnectionEvent(BTClientRouteEvents.OnDisconnectClient) },
@@ -91,19 +99,27 @@ fun BTClientRoute(
 	) { scPadding ->
 		Column(
 			modifier = Modifier
-				.padding(top = scPadding.calculateTopPadding())
+				.padding(scPadding)
 				.padding(
 					horizontal = dimensionResource(id = R.dimen.sc_padding),
-					vertical = dimensionResource(id = R.dimen.sc_padding_secondary)
+					vertical = dimensionResource(R.dimen.sc_padding_secondary)
 				)
-				.fillMaxSize()
-				.imePadding(),
+				.imePadding()
+				.fillMaxSize(),
+			verticalArrangement = Arrangement.spacedBy(6.dp)
 		) {
-			BTMessageListWithConnectionBanner(
-				connectionState = state.connectionMode,
-				messages = state.messages,
+			BTClientDeviceProfile(
+				device = device.device,
+				connectionState = device.connectionStatus
+			)
+			BTMessagesList(
+				messages = messages.messages,
 				scrollToEnd = btSettings.autoScrollEnabled,
-				showTimestamps = btSettings.showTimeStamp,
+				showTimeInMessage = btSettings.showTimeStamp,
+				contentPadding = PaddingValues(
+					horizontal = dimensionResource(id = R.dimen.messages_list_horizontal_padding),
+					vertical = dimensionResource(id = R.dimen.messages_list_vertical_padding)
+				),
 				modifier = Modifier
 					.fillMaxWidth()
 					.weight(1f)
@@ -115,8 +131,8 @@ fun BTClientRoute(
 				)
 			)
 			SendCommandTextField(
-				value = state.textFieldValue,
-				isEnable = isStatusAccepted,
+				value = messages.textFieldValue,
+				isEnable = isConnected,
 				onChange = { onConnectionEvent(BTClientRouteEvents.OnSendFieldTextChanged(it)) },
 				onImeAction = { onConnectionEvent(BTClientRouteEvents.OnSendEvents) },
 				modifier = Modifier
@@ -129,12 +145,37 @@ fun BTClientRoute(
 
 @PreviewLightDark
 @Composable
-private fun BTClientRoutePreview(
-	@PreviewParameter(BTClientRoutePreviewParams::class)
-	state: BTClientRouteState
+private fun BTClientRouteMessagesPreview(
+	@PreviewParameter(BTClientMessagesStatePreviewParams::class)
+	state: BTClientMessagesState,
 ) = BlueToothTerminalAppTheme {
 	BTClientRoute(
-		state = state,
+		messages = state,
+		device = BTClientDeviceState(
+			connectionStatus = ClientConnectionState.CONNECTION_CONNECTED,
+			device = PreviewFakes.FAKE_DEVICE_MODEL
+		),
+		btSettings = BTSettingsModel(),
+		onConnectionEvent = {},
+		onBackPress = {},
+		navigation = {
+			Icon(
+				imageVector = Icons.AutoMirrored.Default.ArrowBack,
+				contentDescription = stringResource(id = R.string.back_arrow)
+			)
+		},
+	)
+}
+
+@PreviewLightDark
+@Composable
+private fun BTClientRoutePreview(
+	@PreviewParameter(BTClientDeviceStatePreviewParam::class)
+	state: BTClientDeviceState,
+) = BlueToothTerminalAppTheme {
+	BTClientRoute(
+		messages = BTClientMessagesState(),
+		device = state,
 		btSettings = BTSettingsModel(),
 		onConnectionEvent = {},
 		onBackPress = {},

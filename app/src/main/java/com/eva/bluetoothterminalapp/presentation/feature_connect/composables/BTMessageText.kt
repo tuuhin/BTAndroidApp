@@ -9,10 +9,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
@@ -24,6 +27,10 @@ fun BTMessageText(
 	message: BluetoothMessage,
 	modifier: Modifier = Modifier,
 	showTime: Boolean = true,
+	fontSize: TextUnit = TextUnit.Unspecified,
+	fontWeight: FontWeight = FontWeight.Medium,
+	fontFamily: FontFamily = FontFamily.Monospace,
+	textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
 ) {
 	Row(
 		modifier = modifier.padding(4.dp),
@@ -39,10 +46,13 @@ fun BTMessageText(
 			)
 		Text(
 			text = message.message,
-			style = MaterialTheme.typography.bodyMedium,
+			style = textStyle,
+			fontSize = fontSize,
+			fontFamily = fontFamily,
+			fontWeight = fontWeight,
 			color = when (message.type) {
 				BluetoothMessageType.MESSAGE_FROM_OTHER -> MaterialTheme.colorScheme.primary
-				BluetoothMessageType.MESSAGE_FROM_SELF -> MaterialTheme.colorScheme.secondary
+				BluetoothMessageType.MESSAGE_FROM_SELF -> MaterialTheme.colorScheme.tertiary
 			},
 		)
 	}

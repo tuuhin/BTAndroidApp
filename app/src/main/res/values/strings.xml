@@ -26,7 +26,7 @@
   <string name="device_discoverable_success">Device is now discoverable %d seconds</string>
   <string name="device_discoverable_denied">Device Discoverability denied</string>
   <string name="close_connection_dialog_title">Close Connection</string>
-  <string name="close_connection_dialog_text">Are you sure you want to cancel the connection, its always better to disconnect then leave the device</string>
+  <string name="close_connection_dialog_text">Are you sure you want to disconnect and close this connection</string>
   <string name="dialog_action_close">Close</string>
   <string name="dialog_action_cancel">Cancel</string>
   <string name="text_field_placeholder">Enter Text to Send</string>
@@ -36,11 +36,11 @@
   <string name="connection_device_bonding">Bonding…</string>
   <string name="connection_bonded">Connection Bonded</string>
   <string name="connection_init">Connecting to device…</string>
-  <string name="connection_init_server">Initilizing Server…</string>
+  <string name="connection_init_server">Preparing Server…</string>
   <string name="connection_accepted">Device Connected</string>
   <string name="devices_image_type">Device Image type %s</string>
   <string name="connection_server_listening">Listening…</string>
-  <string name="bt_server_route">Bluetooth Server</string>
+  <string name="bt_server_route">Classic BT Server</string>
   <!--  Settings receive-->
   <string name="connect_to_client">Connect</string>
   <string name="disconnect_from_client">Disconnect</string>
@@ -51,12 +51,12 @@
   <string name="bt_le_device">Bluetooth LE Devices</string>
   <string name="bt_le_device_desc">Bluetooth low energy devices in your range</string>
   <string name="location_settings">Location Settings</string>
-  <string name="le_available_devices">Available Services</string>
-  <string name="bl_connect_profile_server_uuid_text">Special UUID</string>
-  <string name="bl_connect_profile_server_uuid_desc">This UUID can be used to connect to a server started by this app, on other phone</string>
+  <string name="le_available_devices">Services</string>
+  <string name="bl_connect_profile_server_uuid_text">Special Feature</string>
+  <string name="bl_connect_profile_server_uuid_desc">Special feature (uuid) that is used to connect to a server started by this app, on other device</string>
   <string name="bl_connect_profile_server_uuid">Connect to Server</string>
-  <string name="bl_connect_profile_device_uuid_text">Available UUIDs</string>
-  <string name="bl_connect_profile_device_uuid_desc">This option is used when you want to connect to a particular uuid for the selected device</string>
+  <string name="bl_connect_profile_device_uuid_text">Available Features</string>
+  <string name="bl_connect_profile_device_uuid_desc">The list of features (uuid) the device provides for connection</string>
   <string name="bl_connect_profile_device_uuid_fetching">Fetching device information…</string>
   <string name="bl_connect_profile_device_uuids_not_found">No UUIDs found</string>
   <string name="bl_connect_profile_title">Connection Profile</string>
@@ -66,7 +66,7 @@
   <string name="ble_connection_connected">Connected</string>
   <string name="ble_connection_connecting">Connecting</string>
   <string name="ble_connection_disconnecting">Disconnecting</string>
-  <string name="ble_connection_disconnnected">Disconnected</string>
+  <string name="ble_connection_disconnected">Disconnected</string>
   <string name="ble_connection_failed">Failed</string>
   <string name="ble_property_broadcast">BroadCast</string>
   <string name="ble_property_read">Read</string>
@@ -78,44 +78,42 @@
   <string name="ble_property_extended">Extended Props</string>
   <string name="ble_characteristic_name_unknown">Unknown Characteristic</string>
   <string name="ble_device_info_title">Device</string>
-  <string name="le_charactertics_not_present">No characteristics found with this service</string>
-  <string name="ble_device_profile">LE Device Profile</string>
+  <string name="le_characteristics_not_present">No characteristics found with this service</string>
+  <string name="ble_device_profile">BLE Device Profile</string>
   <string name="back_arrow">Arrow back</string>
   <string name="menu_option_more">Menu Option More</string>
   <string name="ble_descriptor_unknown">Unknown Descriptor</string>
   <string name="dialog_action_send">Send</string>
-  <string name="ble_selected_characteristic">Selected Characteristic</string>
+  <string name="ble_selected_characteristic">Characteristics</string>
   <string name="ble_descriptor_title">Descriptors</string>
   <string name="ble_characteristic_not_selected_title">No Selected Characteristic</string>
-  <string name="ble_characteristic_not_selected_desc">Select an characteristic in order to continue</string>
+  <string name="ble_characteristic_not_selected_desc">Select a characteristic in order to continue</string>
   <string name="write_characteristic_dialog_title">Write Characteristic</string>
   <string name="write_characteristic_dialog_desc">Enter text value in utf-8 to write to.</string>
   <string name="device_rssi_value">Current Device RSSI value</string>
   <string name="bluetooth_device_mac_address">MAC : %s</string>
-  <string name="ble_value_hex">Value Hex (0x) : %s</string>
-  <string name="ble_disable_notification">Notfication are dissabled</string>
+  <string name="ble_disable_notification">Notification are disabled</string>
   <string name="ble_enable_indication">Indications are enabled</string>
-  <string name="ble_enable_notification">Notifcations are enabled</string>
+  <string name="ble_enable_notification">Notifications are enabled</string>
   <string name="ble_property_notify_stop">Stop Notify</string>
-  <string name="ble_descriptor_readble_value">Value (Readable) : %s</string>
+  <string name="ble_value_hex">Value Hex (0x)</string>
+  <string name="ble_readable_value">Value (Readable)</string>
   <string name="ble_property_indicate_stop">Stop Indicate</string>
   <string name="ble_characteristic_properties">Properties : %s</string>
   <string name="close_ble_connection_dialog">Close connection</string>
-  <!--  Inforamtion Route-->
-  <string name="information_ble_assign_url">https://www.bluetooth.com/specifications/assigned-numbers/</string>
+  <!--  About Route-->
   <string name="cannot_launch_activity">Cannot launch Activity</string>
   <string name="ble_assigned_numbers_title">BLE Assignment Numbers</string>
-  <string name="ble_assigned_numbers_desc">Check assigned numbers for the bluetooth low energy.</string>
+  <string name="ble_assigned_numbers_desc">Check assigned numbers for BLE.</string>
   <string name="info_visit_link">Visit</string>
   <string name="information_baud_rate">Baud Rate</string>
   <string name="information_baud_rate_desc">Communication is done at full bluetooth speed so these properties are not configurable</string>
   <string name="information_title_bluetooth_and_ble">Bluetooth and Bluetooth Low Energy</string>
   <string name="information_title_development">Development</string>
   <string name="information_source_code">Source Code</string>
-  <string name="information_source_code_desc">Check out source code for the app</string>
+  <string name="information_source_code_desc">Source code for this application</string>
   <string name="info_visit_github">GitHub</string>
-  <string name="information_source_code_link">https://github.com/tuuhin/BTAndroidApp</string>
-  <string name="information_route_title">Information</string>
+  <string name="about_route_title">About</string>
   <string name="settings_route_title">Settings</string>
   <string name="cannot_find_email_clients">Cannot find any email clients</string>
   <string name="send_email_via">Send Email Via</string>
@@ -130,9 +128,9 @@
   <string name="ble_settings_layer_le_coded">LE Coded (Long Range)</string>
   <string name="ble_settings_layer_title">Physical Layer (PHY)</string>
   <!--  Ble settings compatibility mode-->
-  <string name="ble_settings_compatibilty_mode_title">Compatibility Mode</string>
-  <string name="ble_settings_compatibilty_mode_legacy_only">Legacy Advertising only</string>
-  <string name="ble_settings_compatibilty_mode_all">Legacy and Advertising Extension</string>
+  <string name="ble_settings_compatibility_mode_title">Compatibility Mode</string>
+  <string name="ble_settings_compatibility_mode_legacy_only">Legacy Advertising only</string>
+  <string name="ble_settings_compatibility_mode_all">Legacy and Advertising Extension</string>
   <!--  BLE settings scan period-->
   <string name="ble_settings_scan_period_title">Scan Period</string>
   <string name="ble_settings_scan_period_time_minute">%d minutes</string>
@@ -140,7 +138,7 @@
   <!--  Settings char set-->
   <string name="bt_classic_settings_char_set_utf_8">UTF-8</string>
   <string name="bt_classic_settings_char_set_utf_16">UTF-16</string>
-  <string name="bt_classic_settings_char_set_utf_32">UTF-2</string>
+  <string name="bt_classic_settings_char_set_utf_32">UTF-32</string>
   <string name="bt_classic_settings_char_set_us_ascii">US-ASCII</string>
   <string name="bt_classic_settings_char_set_iso_8859">ISO_8859_1</string>
   <string name="bt_classic_settings_char_sets_title">Charsets</string>
@@ -161,7 +159,7 @@
   <string name="bt_classic_settings_new_line_title">End Of Line Character</string>
   <!--  Settings Local echo-->
   <string name="bt_classic_settings_local_echo_title">Local Echo</string>
-  <string name="bt_classic_settings_local_echo_desc">Show send data in termial</string>
+  <string name="bt_classic_settings_local_echo_desc">Show send data in terminal</string>
   <!--  Settings keep screen on-->
   <string name="bt_classic_settings_keep_screen_on_title">Keep screen On</string>
   <string name="bt_classic_settings_keep_screen_on_desc">Keep screen on when connected</string>
@@ -180,8 +178,8 @@
   <string name="dialog_action_start">Start</string>
   <string name="bt_server_close_connection_dialog_title">Stop Server</string>
   <string name="bt_server_close_connection_dialog_text">A running server must be stopped before leaving</string>
-  <string name="bt_server_start_connection_dialog_title">Start Server</string>
-  <string name="bt_server_start_connection_dialog_text">On starting the server, other devices can connect with this device via bluetooth. Make sure the device is dicoverable before starting the server</string>
+  <string name="bt_server_start_connection_text">Start Server</string>
+  <string name="bt_server_start_connection_desc">Starts a bluetooth server for application running on other device to connect.</string>
   <string name="topbar_action_stop">Stop</string>
   <string name="topbar_action_restart">Restart</string>
   <string name="topbar_action_refresh">Refresh</string>
@@ -189,4 +187,14 @@
   <string name="contacts">Contacts</string>
   <string name="contracts_with_email">Contact developer with email</string>
   <string name="mail_title">Email</string>
+  <string name="ble_device_profile_action_refresh_rssi">Refresh RSSI</string>
+  <string name="ble_device_profile_action_refresh_services">Refresh Services</string>
+  <string name="drawer_option_servers">Servers</string>
+  <string name="drawer_option_others">Others</string>
+  <string name="drawer_option_classic_server">Classic Server</string>
+  <string name="drawer_option_ble_server">BLE Server</string>
+  <string name="bt_server_start_connection_extra_info">Make use the other device is discoverable, otherwise the other peer cannot be connected\n</string>
+  <string name="connection_server_stopped">Stopped</string>
+  <string name="connected_device_not_found">Not ready</string>
+  <string name="ble_settings_charset">Charset</string>
 </resources>

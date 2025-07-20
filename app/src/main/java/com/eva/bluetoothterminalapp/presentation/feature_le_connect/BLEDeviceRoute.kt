@@ -1,10 +1,14 @@
 package com.eva.bluetoothterminalapp.presentation.feature_le_connect
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,29 +20,34 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
+import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEConnectionStatusChip
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEDeviceProfile
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEDeviceRouteTopBar
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEServicesList
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLECharacteristicEvent
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceConfigEvent
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceProfileState
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.SelectedCharacteristicState
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLECharacteristicEvent
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLEDeviceConfigEvent
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLEDeviceProfileState
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.SelectedCharacteristicState
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
+import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
+import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+	ExperimentalMaterial3Api::class,
+	ExperimentalSharedTransitionApi::class
+)
 @Composable
 fun BLEDeviceRoute(
+	deviceAddress: String,
 	profile: BLEDeviceProfileState,
 	selectedCharacteristic: SelectedCharacteristicState,
 	onSelectEvent: (BLECharacteristicEvent) -> Unit,
@@ -57,30 +66,28 @@ fun BLEDeviceRoute(
 				scrollConnection = scrollConnection,
 			)
 		},
-		modifier = modifier.nestedScroll(scrollConnection.nestedScrollConnection)
+		modifier = modifier
+			.nestedScroll(scrollConnection.nestedScrollConnection)
+			.sharedBoundsWrapper(
+				key = SharedElementTransitionKeys.leDeviceCardToLeDeviceProfile(deviceAddress)
+			)
 	) { scPadding ->
 		Column(
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(scPadding)
 				.padding(horizontal = dimensionResource(id = R.dimen.sc_padding)),
+			verticalArrangement = Arrangement.spacedBy(6.dp)
 		) {
-			BLEConnectionStatusChip(
-				state = profile.connectionState,
-				modifier = Modifier.align(Alignment.CenterHorizontally)
-			)
 			BLEDeviceProfile(
 				device = profile.device,
+				connectionState = profile.connectionState,
 				rssi = profile.signalStrength,
 			)
 			AnimatedVisibility(
 				visible = profile.connectionState == BLEConnectionState.CONNECTED,
-				enter = slideInVertically(
-					animationSpec = tween(easing = FastOutLinearInEasing)
-				) { height -> height },
-				exit = slideOutVertically(
-					animationSpec = tween(easing = FastOutLinearInEasing)
-				) { height -> -height },
+				enter = slideInVertically(animationSpec = tween(easing = FastOutLinearInEasing)) { height -> height } + fadeIn(),
+				exit = slideOutVertically(animationSpec = tween(easing = FastOutLinearInEasing)) { height -> height } + fadeOut(),
 			) {
 				BLEServicesList(
 					services = profile.services,
@@ -114,6 +121,7 @@ private fun BLEDevicesRoutePreview(
 	profile: BLEDeviceProfileState,
 ) = BlueToothTerminalAppTheme {
 	BLEDeviceRoute(
+		deviceAddress = PreviewFakes.FAKE_DEVICE_MODEL.address,
 		profile = profile,
 		selectedCharacteristic = SelectedCharacteristicState(),
 		onSelectEvent = {},

@@ -16,7 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -27,8 +27,9 @@ class BTSettingsDatastoreImpl(
 	override val settingsFlow: Flow<BTSettingsModel>
 		get() = context.btClassicSettings.data.map(BluetoothClassicSettings::toModel)
 
-	override val settings: BTSettingsModel
-		get() = runBlocking(Dispatchers.Default) { settingsFlow.first() }
+	override suspend fun getSettings(): BTSettingsModel {
+		return withContext(Dispatchers.IO) { settingsFlow.first() }
+	}
 
 	override suspend fun onCharsetChange(charSet: BTTerminalCharSet) {
 		context.btClassicSettings.updateData { prefs ->

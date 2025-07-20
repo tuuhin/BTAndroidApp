@@ -1,13 +1,19 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BluetoothDisabled
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.DialogProperties
@@ -34,12 +40,26 @@ fun CloseConnectionDialog(
 			}
 		},
 		dismissButton = {
-			TextButton(onClick = onDismiss) {
+			TextButton(
+				onClick = onDismiss,
+				colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+			) {
 				Text(text = stringResource(id = R.string.dialog_action_cancel))
 			}
 		},
 		title = { Text(text = stringResource(id = R.string.close_connection_dialog_title)) },
-		text = { Text(text = stringResource(id = R.string.close_connection_dialog_text)) },
+		text = {
+			Text(
+				text = stringResource(id = R.string.close_connection_dialog_text),
+				textAlign = TextAlign.Center
+			)
+		},
+		icon = {
+			Icon(
+				imageVector = Icons.Outlined.BluetoothDisabled,
+				contentDescription = null
+			)
+		},
 		shape = shape,
 		properties = properties,
 		onDismissRequest = onDismiss,

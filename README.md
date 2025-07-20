@@ -1,26 +1,26 @@
 # :large_blue_circle: Bluetooth Terminal App
 
 This Bluetooth Android Terminal App facilitates interaction with Bluetooth and Bluetooth Low
-Energy (BLE) devices. The app provides a user-friendly interface to manage connections, interact
-with devices.
+Energy (BLE) devices.The app provides a user-friendly interface to manage connections, interactwith
+devices.
 
 ## :information_desk_person: Description
 
 The Bluetooth Android Terminal App supports both classic Bluetooth and Bluetooth Low Energy (BLE)
 connections. It allows users to scan for available devices, establish connections, and communicate
 with connected devices.
-Additionally, the app includes a built-in server functionality for simple chat interactions between
-two devices running the same app
+Additionally, the app includes a built-in server functionality for simple interactions between two
+peers running the same app
 
 ## :performing_arts: Features
 
 ### Classic Bluetooth
 
 - **Devices:** Display a list of paired devices and available unpaired devices.
-- **Connect and Interact:** Allow the user to communicate with the connected device if the
-  connection is successfully made
-- **Chat Server:** Start a server within the app to connect to other phones and chat.
-- **Settings:** You can check out some settings for you customized communication
+- **Connect and Interact:** Allow the user to communicate with the connected device
+- **Chat Server:** Start a server within the app to connect to other phones and interact with
+  messages.
+- **Settings:** You can check customize the connection terminal for clients and server.
 
 ### Bluetooth Low Energy (BLE)
 
@@ -31,24 +31,22 @@ two devices running the same app
 
 ## :camera_flash: Screenshots
 
-These are some of the screens shots showing the working of basic bluetooth connection
+These are some of the screens shots showing the working of classic bluetooth connection
 
 <p align="center">
-   <img src="./screenshots/scanning_for_device.png" width="25%" />
-   <img src="./screenshots/connect_to_device_screen.png" width="25%"/>
-   <img src="./screenshots/pairing_request_dialog.png" width="25%"/>
-   <img src="./screenshots/close_connection.png" width="25%"/>  
-   <img src="./screenshots/classic_settings.png" width="25%"/>
+   <img src="screenshots/bt_classic_scan.png" width="20%" />
+   <img src="screenshots/bt_peer_features.png" width="20%"/>
+   <img src="screenshots/bt_client_talking.png" width="20%"/>  
+   <img src="screenshots/bt_classic_settings.png" width="20%"/>
 </p>
 
-This screenshots shows the working of a bluetooth low energy servics and characteristics
+This screenshots shows the working of a bluetooth low energy device connection
 
 <p align="center">
-   <img src="./screenshots/ble_scan_running.png" width="25%" />
-   <img src="./screenshots/ble_device_profile.png" width="25%"/>
-   <img src="./screenshots/ble_notify_characteristics.png" width="25%"/>  
-   <img src="./screenshots/ble_read_characteristics_with_descriptors.png" width="25%"/>
-   <img src="./screenshots/ble_settings.png" width="25%">
+   <img src="screenshots/ble_devices_scanning.png" width="20%" />
+   <img src="screenshots/ble_device_profile.png" width="20%"/>
+   <img src="screenshots/ble_notify_running.png" width="20%"/>  
+   <img src="screenshots/ble_settings.png" width="20%">
 </p>
 
 ## :building_construction: Getting Started
@@ -60,7 +58,6 @@ its functionalities
 
    ```bash
    git clone https://github.com/tuuhin/BTAndroidApp.git
-
    ```
 
 2. **Open Project**
@@ -71,9 +68,10 @@ its functionalities
 
 ### :curly_loop: Feedback and Support
 
-If you encounter any problems or bugs in the app ,please feel to open an issue
+If you encounter any problems or bugs in the app, please raise
+an [issue](https://github.com/tuuhin/BTAndroidApp/issues/new)
 
-### :woman_cook: Contributing
+### :man_cook: Contributing
 
 Contributions are alaways welcomed from the community
 
@@ -86,12 +84,14 @@ Contributions are alaways welcomed from the community
 ## :end: Conclusiion
 
 The Bluetooth Android Terminal App is a versatile tool for interacting with Bluetooth and BLE
-devices. While the app aims to provide a seamless experience, it may contain bugs. If you encounter
-any issues, please raise an issue on the GitHub repository.
+devices. While the app aims to provide a seamless experience and was created to debug esp32 based
+microcontroller which have bluetooth features.
+These seems complete for now , but if someone encounter any issues or bugs please raise
+an [issue](https://github.com/tuuhin/BTAndroidApp/issues/new)
 
 ### :revolving_hearts: Special Thanks
 
-Special thanks two most used bluetooth terminal apps.
+Special thanks two most used open sourced bluetooth terminal apps.
 
 - [Nordic Semiconductor android app](https://github.com/NordicSemiconductor/Android-nRF-Connect)
 - [Simple Bluetooth termial](https://github.com/kai-morich/SimpleBluetoothTerminal)

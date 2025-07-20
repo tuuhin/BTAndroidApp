@@ -5,17 +5,17 @@ import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLECharacteristicEvent
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceConfigEvent
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLEDeviceProfileState
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.CharacteristicWriteDialogState
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.CloseConnectionEvents
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.SelectedCharacteristicState
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.WriteCharacteristicEvent
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLECharacteristicEvent
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLEDeviceConfigEvent
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLEDeviceProfileState
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.CharacteristicWriteDialogState
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.CloseConnectionEvents
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.SelectedCharacteristicState
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.WriteCharacteristicEvent
 import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothDeviceArgs
-import com.eva.bluetoothterminalapp.presentation.navigation.screens.navArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
+import com.ramcosta.composedestinations.generated.navArgs
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -43,12 +44,13 @@ class BLEDeviceViewModel(
 		bleConnector.readForCharacteristic,
 		selectedCharacteristic,
 		bleConnector.isNotifyOrIndicationRunning,
-		transform = ::evalutateReadCharacteristics
-	).stateIn(
-		scope = viewModelScope,
-		started = SharingStarted.WhileSubscribed(2000),
-		initialValue = null
-	)
+		transform = ::readCharacteristics
+	).onStart { initiateConnection() }
+		.stateIn(
+			scope = viewModelScope,
+			started = SharingStarted.WhileSubscribed(10_000),
+			initialValue = null
+		)
 
 	val bLEProfile = combine(
 		bleConnector.deviceRssi,
@@ -67,7 +69,7 @@ class BLEDeviceViewModel(
 		initialValue = BLEDeviceProfileState()
 	)
 
-	private val _showCloseConnectionDialog = MutableStateFlow<Boolean>(false)
+	private val _showCloseConnectionDialog = MutableStateFlow(false)
 	val showConnectionDialog = _showCloseConnectionDialog.asStateFlow()
 
 
@@ -81,10 +83,6 @@ class BLEDeviceViewModel(
 	private val isNotifyOrIndicationRunning: Boolean
 		get() = bleConnector.isNotifyOrIndicationRunning.value
 
-	init {
-		// starts the connection
-		initiateConnection()
-	}
 
 	fun onCharacteristicEvent(event: BLECharacteristicEvent) {
 		when (event) {
@@ -92,12 +90,11 @@ class BLEDeviceViewModel(
 				selected.copy(service = event.service, characteristic = event.characteristics)
 			}
 
-			BLECharacteristicEvent.OnUnSelectCharactetistic -> onUnselectCharacterisitc()
-
+			BLECharacteristicEvent.OnUnSelectCharacteristic -> onUnSelectCharacteristics()
 			is BLECharacteristicEvent.OnDescriptorRead -> readBLEDescriptor(event.desc)
 			BLECharacteristicEvent.OnIndicateCharacteristic -> onIndicateOrNotifyBLECharacteristic()
 			BLECharacteristicEvent.OnNotifyCharacteristic -> onIndicateOrNotifyBLECharacteristic()
-			BLECharacteristicEvent.ReadCharacteristic -> onReadBLECharactetistics()
+			BLECharacteristicEvent.ReadCharacteristic -> onReadBLECharacteristics()
 			BLECharacteristicEvent.WriteCharacteristic -> onWriteEvent(WriteCharacteristicEvent.OpenDialog)
 			BLECharacteristicEvent.OnStopNotifyOrIndication -> stopIndications()
 		}
@@ -106,15 +103,15 @@ class BLEDeviceViewModel(
 	fun onWriteEvent(event: WriteCharacteristicEvent) {
 		when (event) {
 			WriteCharacteristicEvent.CloseDialog -> _writeDialogState.update { state ->
-				state.copy(showWriteDialog = false)
+				state.copy(showDialog = false)
 			}
 
 			is WriteCharacteristicEvent.OnTextFieldValueChange -> _writeDialogState.update { state ->
-				state.copy(writeTextFieldValue = event.value)
+				state.copy(textFieldValue = event.value)
 			}
 
 			WriteCharacteristicEvent.OpenDialog -> _writeDialogState.update { selected ->
-				selected.copy(showWriteDialog = true)
+				selected.copy(showDialog = true)
 			}
 
 			WriteCharacteristicEvent.WriteCharacteristicValue -> onWriteBLECharacteristic()
@@ -124,8 +121,8 @@ class BLEDeviceViewModel(
 
 	fun onConfigEvents(event: BLEDeviceConfigEvent) {
 		when (event) {
-			BLEDeviceConfigEvent.OnReadRssiStrength -> bleConnector.discoverServices()
-			BLEDeviceConfigEvent.OnRefreshCharacteristics -> bleConnector.checkRssi()
+			BLEDeviceConfigEvent.OnReadRssiStrength -> onRefreshRSSI()
+			BLEDeviceConfigEvent.OnReDiscoverServices -> onRefreshServices()
 			BLEDeviceConfigEvent.OnDisconnectEvent -> bleConnector.disconnect()
 			BLEDeviceConfigEvent.OnReconnectEvent -> bleConnector.reconnect()
 		}
@@ -144,34 +141,39 @@ class BLEDeviceViewModel(
 
 	private fun stopIndications() = onIndicateOrNotifyBLECharacteristic(false)
 
-	private fun onUnselectCharacterisitc() {
-		if (isNotifyOrIndicationRunning)
-			onIndicateOrNotifyBLECharacteristic(isStart = false)
+	private fun onUnSelectCharacteristics() {
+		// turn this off
+		if (isNotifyOrIndicationRunning) stopIndications()
 
 		_selectedCharacteristic.update { SelectedCharacteristicState() }
 	}
 
-	private suspend fun evalutateReadCharacteristics(
-		readCharactertistic: BLECharacteristicsModel?,
+	private fun readCharacteristics(
+		characteristic: BLECharacteristicsModel?,
 		selected: SelectedCharacteristicState,
-		isSetNoticationActive: Boolean,
+		isSetNotificationActive: Boolean,
 	): BLECharacteristicsModel? {
 		// if not selected there is nothing to read to
 		if (selected.characteristic == null) return null
-		if (readCharactertistic == null)
-			return selected.characteristic.copy(isSetNotificationActive = isSetNoticationActive)
-		val isSameCharacteristic = readCharactertistic.uuid == selected.characteristic.uuid
-				&& readCharactertistic.instanceId == selected.characteristic.instanceId
+		if (characteristic == null)
+			return selected.characteristic.copy(isSetNotificationActive = isSetNotificationActive)
+		val isSameCharacteristic = characteristic.uuid == selected.characteristic.uuid
+				&& characteristic.instanceId == selected.characteristic.instanceId
 		// any of the reader is started match the uuids to check for data
-		val outResult = if (isSameCharacteristic) readCharactertistic else selected.characteristic
-		return outResult.copy(isSetNotificationActive = isSetNoticationActive)
+		val outResult = if (isSameCharacteristic) characteristic else selected.characteristic
+		return outResult.copy(isSetNotificationActive = isSetNotificationActive)
 	}
 
 	private fun initiateConnection() {
-		navArgs?.address?.let { deviceAddress ->
-			bleConnector.connect(deviceAddress)
-		} ?: viewModelScope.launch {
-			_uiEvents.emit(UiEvents.ShowSnackBar("Didn't find any address to connect "))
+		val address = navArgs?.address ?: return run {
+			viewModelScope.launch {
+				val event = UiEvents.ShowSnackBar("Cannot find the given address")
+				_uiEvents.emit(event)
+			}
+		}
+		// being connection
+		viewModelScope.launch {
+			bleConnector.connect(address)
 		}
 	}
 
@@ -179,31 +181,24 @@ class BLEDeviceViewModel(
 
 		val characteristic = _selectedCharacteristic.value.characteristic ?: return
 		val service = _selectedCharacteristic.value.service ?: return
-		val value = _writeDialogState.value.writeTextFieldValue
+		val value = _writeDialogState.value.textFieldValue
 
 		if (value.isBlank()) {
-			_writeDialogState.update { state -> state.copy(error = "Cant send blank value") }
+			_writeDialogState.update { state -> state.copy(errorText = "Cant send blank value") }
 			return
 		}
 
-		val result = bleConnector.write(
-			service = service,
-			characteristic = characteristic,
-			value = value
-		)
+		val result = bleConnector.write(service, characteristic, value = value)
 
 		result.fold(
 			onFailure = { err ->
-				viewModelScope.launch {
-					_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "Cannot perform action"))
-				}
+				val message = err.message ?: "Cannot perform write"
+				val event = UiEvents.ShowSnackBar(message)
+				viewModelScope.launch { _uiEvents.emit(event) }
 			},
 			onSuccess = {
 				_writeDialogState.update { state ->
-					state.copy(
-						writeTextFieldValue = "",
-						showWriteDialog = false
-					)
+					state.copy(textFieldValue = "", showDialog = false)
 				}
 			},
 		)
@@ -219,19 +214,17 @@ class BLEDeviceViewModel(
 			characteristic = characteristic,
 			enable = isStart
 		)
-		viewModelScope.launch {
-			results.fold(
-				onSuccess = { isOke ->
-					if (isOke) {
-						val message = if (isStart) "enabled" else "stopped"
-						_uiEvents.emit(UiEvents.ShowToast("Charcteristic Notifcation $message"))
-					}
-				},
-				onFailure = { err ->
-					_uiEvents.emit(UiEvents.ShowToast(err.message ?: "Cannot perform action"))
-				}
-			)
+
+		val event = if (results.isSuccess) {
+			val message = if (isStart) "enabled" else "stopped"
+			UiEvents.ShowToast("Characteristic Notification $message")
+		} else {
+			val error = results.exceptionOrNull()
+			val message = error?.message ?: "problem with starting notification or indication"
+			UiEvents.ShowSnackBar(message)
 		}
+
+		viewModelScope.launch { _uiEvents.emit(event) }
 	}
 
 	private fun readBLEDescriptor(descriptor: BLEDescriptorModel) {
@@ -245,17 +238,15 @@ class BLEDeviceViewModel(
 			descriptor = descriptor
 		)
 
-		results.onFailure { err ->
-			viewModelScope.launch {
-				_uiEvents.emit(
-					UiEvents.ShowSnackBar(err.message ?: "Cannot perform action")
-				)
-			}
+		results.onFailure { error ->
+			val error = error.message ?: "Cannot perform read operations"
+			val uiEvent = UiEvents.ShowSnackBar(error)
+			viewModelScope.launch { _uiEvents.emit(uiEvent) }
 		}
 	}
 
 
-	private fun onReadBLECharactetistics() {
+	private fun onReadBLECharacteristics() {
 
 		val characteristic = _selectedCharacteristic.value.characteristic ?: return
 		val service = _selectedCharacteristic.value.service ?: return
@@ -265,13 +256,40 @@ class BLEDeviceViewModel(
 			characteristic = characteristic
 		)
 
-		results.onFailure { err ->
-			viewModelScope.launch {
-				_uiEvents.emit(
-					UiEvents.ShowSnackBar(err.message ?: "Cannot perform read operation")
-				)
-			}
+		results.onFailure { error ->
+			val error = error.message ?: "Cannot perform read operations"
+			val uiEvent = UiEvents.ShowSnackBar(error)
+			viewModelScope.launch { _uiEvents.emit(uiEvent) }
 		}
+	}
+
+	private fun onRefreshRSSI() = viewModelScope.launch {
+		val result = bleConnector.checkRssi()
+		result.fold(
+			onSuccess = { isOk ->
+				val message = if (isOk) "Refreshed RSSI" else "Failed to refresh"
+				_uiEvents.emit(UiEvents.ShowToast(message))
+			},
+			onFailure = { error ->
+				val error = error.message ?: "Cannot perform refresh"
+				_uiEvents.emit(UiEvents.ShowSnackBar(error))
+			},
+		)
+	}
+
+	private fun onRefreshServices() = viewModelScope.launch {
+		val result = bleConnector.discoverServices()
+		result.fold(
+			onSuccess = { isOk ->
+				val message = if (isOk) "Refreshed Services" else "Failed to refresh"
+				_uiEvents.emit(UiEvents.ShowToast(message))
+			},
+			onFailure = { error ->
+				val error = error.message ?: "Cannot perform refresh"
+				_uiEvents.emit(UiEvents.ShowSnackBar(error))
+			},
+		)
+
 	}
 
 	override fun onCleared() {

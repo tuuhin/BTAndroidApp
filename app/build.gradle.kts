@@ -1,5 +1,8 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
+
 plugins {
-	alias(libs.plugins.androidApplication)
+	alias(libs.plugins.android.application)
 	alias(libs.plugins.jetbrainsKotlinAndroid)
 	alias(libs.plugins.google.devtools.ksp)
 	alias(libs.plugins.kotlinx.serialization)
@@ -10,18 +13,41 @@ plugins {
 
 android {
 	namespace = "com.eva.bluetoothterminalapp"
-	compileSdk = 34
+	compileSdk = 36
 
 	defaultConfig {
 		applicationId = "com.eva.bluetoothterminalapp"
 		minSdk = 29
-		targetSdk = 34
-		versionCode = 1
-		versionName = "1.0"
+		targetSdk = 36
+		versionCode = 2
+		versionName = "1.1.0"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		vectorDrawables {
 			useSupportLibrary = true
+		}
+	}
+
+	signingConfigs {
+
+		val keySecretFile = rootProject.file("keystore.properties")
+		if (keySecretFile.exists()) return@signingConfigs
+
+		val properties = Properties()
+
+		val storeFileName = properties.getProperty("STORE_FILE_NAME")
+
+		val keyStorePath = System.getenv("user.home")
+		val keyStoreFolder = File(keyStorePath, "keystore")
+		val keyStoreFile = File(keyStoreFolder, storeFileName)
+
+		if (!keyStoreFile.exists()) return@signingConfigs
+
+		create("release") {
+			storeFile = keyStoreFile
+			keyAlias = properties.getProperty("KEY_ALIAS")
+			keyPassword = properties.getProperty("KEY_PASSWORD")
+			storePassword = properties.getProperty("STORE_PASSWORD")
 		}
 	}
 
@@ -34,21 +60,22 @@ android {
 		}
 
 		release {
-			applicationIdSuffix = ".release"
 			isMinifyEnabled = true
 			isShrinkResources = true
 			multiDexEnabled = true
+			signingConfigs.findByName("release")?.let { config ->
+				signingConfig = config
+			}
+
 			proguardFiles(
-				getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+				getDefaultProguardFile("proguard-android-optimize.txt"),
+				"proguard-rules.pro"
 			)
 		}
 	}
 	compileOptions {
-		sourceCompatibility = JavaVersion.VERSION_1_8
-		targetCompatibility = JavaVersion.VERSION_1_8
-	}
-	kotlinOptions {
-		jvmTarget = "1.8"
+		sourceCompatibility = JavaVersion.VERSION_17
+		targetCompatibility = JavaVersion.VERSION_17
 	}
 	buildFeatures {
 		compose = true
@@ -60,11 +87,19 @@ android {
 	}
 }
 
+kotlin {
+	compilerOptions {
+		jvmTarget = JvmTarget.JVM_17
+		optIn.add("kotlin.time.ExperimentalTime")
+		optIn.add("kotlin.uuid.ExperimentalUuidApi")
+	}
+}
+
 composeCompiler {
-	enableStrongSkippingMode = true
+//	featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
 	metricsDestination = layout.buildDirectory.dir("compose_compiler")
 	reportsDestination = layout.buildDirectory.dir("compose_compiler")
-	stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
+	stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("stability_config.conf"))
 }
 
 dependencies {
@@ -95,6 +130,9 @@ dependencies {
 	implementation(libs.koin.core)
 	implementation(libs.koin.android)
 	implementation(libs.koin.compose)
+	implementation(libs.koin.android.startup)
+	// shapes
+	implementation(libs.androidx.graphics.shapes)
 	// kotlinx-serialization
 	implementation(libs.kotlinx.serialization.json)
 	//icons

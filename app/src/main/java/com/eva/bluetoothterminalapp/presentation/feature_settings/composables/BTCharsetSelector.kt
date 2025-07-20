@@ -61,7 +61,7 @@ fun BTCharsetSelector(
 				Text(text = stringResource(id = R.string.dialog_action_cancel))
 			}
 		},
-		title = { Text(text = stringResource(id = R.string.ble_settings_layer_title)) },
+		title = { Text(text = stringResource(id = R.string.ble_settings_charset)) },
 		text = {
 			Column(
 				verticalArrangement = Arrangement.spacedBy(2.dp)

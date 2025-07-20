@@ -29,6 +29,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
@@ -110,7 +112,12 @@ fun SendCommandTextField(
 		textStyle = textStyle.copy(color = color),
 		cursorBrush = cursorColor,
 		keyboardActions = KeyboardActions(onSend = { onImeAction() }),
-		keyboardOptions = KeyboardOptions(autoCorrect = false, imeAction = ImeAction.Send),
+		keyboardOptions = KeyboardOptions(
+			capitalization = KeyboardCapitalization.None,
+			autoCorrectEnabled = false,
+			keyboardType = KeyboardType.Text,
+			imeAction = ImeAction.Send
+		),
 		maxLines = maxLines,
 		interactionSource = interaction,
 		modifier = modifier.focusable(enabled = true)

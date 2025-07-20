@@ -16,6 +16,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.BLECharacteristicEvent
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLECharacteristicEvent
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
@@ -45,6 +47,11 @@ fun BLEReadWriteSheetContent(
 	modifier: Modifier = Modifier,
 	isDeviceConnected: Boolean = true,
 ) {
+
+	val hasDescriptors by remember(characteristic?.descriptors) {
+		derivedStateOf { characteristic?.descriptors?.isNotEmpty() == true }
+	}
+
 	if (characteristic == null) {
 		Column(
 			modifier = modifier.fillMaxWidth(),
@@ -71,9 +78,6 @@ fun BLEReadWriteSheetContent(
 		return
 	}
 
-	val hasDescriptors = remember(characteristic.descriptors) {
-		characteristic.descriptors.isNotEmpty()
-	}
 
 	Column(
 		modifier = modifier,
@@ -101,7 +105,7 @@ fun BLEReadWriteSheetContent(
 				text = stringResource(id = R.string.ble_descriptor_title),
 				style = MaterialTheme.typography.titleMedium,
 				fontWeight = FontWeight.Normal,
-				modifier = Modifier.padding(vertical = 2.dp)
+				modifier = Modifier.padding(vertical = 4.dp)
 			)
 			characteristic.descriptors.forEach { desc ->
 				BLEDescriptorCard(

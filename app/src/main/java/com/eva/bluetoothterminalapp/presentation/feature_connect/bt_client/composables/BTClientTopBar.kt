@@ -4,8 +4,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -30,7 +30,7 @@ fun BTClientTopBar(
 	scrollBehavior: TopAppBarScrollBehavior? = null,
 	colors: TopAppBarColors = TopAppBarDefaults.mediumTopAppBarColors(),
 ) {
-	TopAppBar(
+	MediumTopAppBar(
 		title = { Text(text = stringResource(id = R.string.bt_client_route)) },
 		navigationIcon = navigation,
 		actions = {
@@ -50,7 +50,7 @@ fun BTClientTopBar(
 private class ClientConnectionStatePreviewParmas :
 	CollectionPreviewParameterProvider<ClientConnectionState>(
 		listOf(
-			ClientConnectionState.CONNECTION_ACCEPTED,
+			ClientConnectionState.CONNECTION_CONNECTED,
 			ClientConnectionState.CONNECTION_DISCONNECTED,
 			ClientConnectionState.CONNECTION_DENIED
 		)

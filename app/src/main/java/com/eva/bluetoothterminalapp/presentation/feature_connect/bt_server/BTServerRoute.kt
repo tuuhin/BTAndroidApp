@@ -1,74 +1,85 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
-import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.domain.bluetooth.enums.PeerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.BTMessagesWithServerState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.BTPeerInteractionContent
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.BTServerTopAppBar
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.StartServerBox
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerDeviceState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerEvents
-import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerRouteState
-import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.SendCommandTextField
-import com.eva.bluetoothterminalapp.presentation.feature_connect.util.KeepScreenOnEffect
+import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.state.BTServerScreenState
+import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.KeepScreenOnSideEffect
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
+import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
+import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
+import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 import kotlinx.collections.immutable.persistentListOf
 
 @OptIn(
 	ExperimentalMaterial3Api::class,
 	ExperimentalLayoutApi::class,
+	ExperimentalSharedTransitionApi::class,
 )
 @Composable
 fun BTServerRoute(
-	state: BTServerRouteState,
+	deviceState: BTServerDeviceState,
+	messagesState: BTServerScreenState,
 	btSettings: BTSettingsModel,
 	onEvent: (BTServerEvents) -> Unit,
 	modifier: Modifier = Modifier,
 	navigation: @Composable () -> Unit = {},
 ) {
 	val snackBarHostState = LocalSnackBarProvider.current
-	val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-	KeepScreenOnEffect(
-		connectionState = state.connectionMode,
+	KeepScreenOnSideEffect(
+		connectionState = deviceState.serverState,
 		isKeepScreenOn = btSettings.keepScreenOnWhenConnected
 	)
 
+	val isConnected by remember(deviceState.serverState) {
+		derivedStateOf { deviceState.isRunning }
+	}
+
+	BackHandler(
+		enabled = isConnected,
+		onBack = { onEvent(BTServerEvents.OnOpenDisconnectDialog) },
+	)
 
 	Scaffold(
 		topBar = {
 			BTServerTopAppBar(
-				connectionState = state.connectionMode,
+				serverState = deviceState.serverState,
+				peerState = deviceState.peerState,
 				onStop = { onEvent(BTServerEvents.OnStopServer) },
 				onRestart = { onEvent(BTServerEvents.OnRestartServer) },
 				navigation = navigation,
@@ -77,10 +88,12 @@ fun BTServerRoute(
 		},
 		snackbarHost = { SnackbarHost(snackBarHostState) },
 		modifier = modifier
+			.sharedBoundsWrapper(SharedElementTransitionKeys.CLASSIC_SERVER_ITEM_TO_SERVER)
 			.nestedScroll(scrollBehavior.nestedScrollConnection)
 			.imeNestedScroll()
 	) { scPadding ->
-		Column(
+		AnimatedContent(
+			targetState = messagesState.showServerTerminal,
 			modifier = Modifier
 				.padding(top = scPadding.calculateTopPadding())
 				.padding(
@@ -89,40 +102,30 @@ fun BTServerRoute(
 				)
 				.fillMaxSize()
 				.imePadding(),
-			verticalArrangement = Arrangement.spacedBy(4.dp)
-		) {
-			BTMessagesWithServerState(
-				connectionState = state.connectionMode,
-				messages = state.messages,
-				scrollToEnd = btSettings.autoScrollEnabled,
-				showTimestamps = btSettings.showTimeStamp,
-				modifier = Modifier
-					.fillMaxWidth()
-					.weight(1f)
-			)
-			HorizontalDivider(
-				color = MaterialTheme.colorScheme.outlineVariant,
-				modifier = Modifier.padding(
-					vertical = dimensionResource(id = R.dimen.messages_text_field_spacing)
+		) { show ->
+			if (show) {
+				BTPeerInteractionContent(
+					deviceState = deviceState,
+					messagesState = messagesState,
+					btSettings = btSettings,
+					onEvent = onEvent
 				)
-			)
-			SendCommandTextField(
-				value = state.textFieldValue,
-				isEnable = state.connectionMode == ServerConnectionState.CONNECTION_ACCEPTED,
-				onChange = { value -> onEvent(BTServerEvents.OnTextFieldValue(value)) },
-				onImeAction = { onEvent(BTServerEvents.OnSendEvents) },
-				modifier = Modifier
-					.windowInsetsPadding(WindowInsets.navigationBars)
-					.fillMaxWidth()
-			)
+			} else {
+				StartServerBox(
+					onStartServer = { onEvent(BTServerEvents.OnStartServer) },
+					modifier = Modifier.fillMaxSize()
+				)
+			}
 		}
 	}
 }
 
-private class BTServerRoutePreviewParams : CollectionPreviewParameterProvider<BTServerRouteState>(
-	listOf(
-		BTServerRouteState(
-			connectionMode = ServerConnectionState.CONNECTION_ACCEPTED,
+
+@PreviewLightDark
+@Composable
+private fun BTServerRoutePreview() = BlueToothTerminalAppTheme {
+	BTServerRoute(
+		messagesState = BTServerScreenState(
 			messages = persistentListOf(
 				BluetoothMessage(
 					message = "Hello",
@@ -134,17 +137,11 @@ private class BTServerRoutePreviewParams : CollectionPreviewParameterProvider<BT
 				)
 			)
 		),
-	)
-)
-
-@PreviewLightDark
-@Composable
-private fun BTServerRoutePreview(
-	@PreviewParameter(BTServerRoutePreviewParams::class)
-	state: BTServerRouteState
-) = BlueToothTerminalAppTheme {
-	BTServerRoute(
-		state = state,
+		deviceState = BTServerDeviceState(
+			serverState = ServerConnectionState.PEER_CONNECTION_ACCEPTED,
+			peerState = PeerConnectionState.PEER_CONNECTED,
+			device = PreviewFakes.FAKE_DEVICE_MODEL
+		),
 		btSettings = BTSettingsModel(),
 		onEvent = {},
 		navigation = {

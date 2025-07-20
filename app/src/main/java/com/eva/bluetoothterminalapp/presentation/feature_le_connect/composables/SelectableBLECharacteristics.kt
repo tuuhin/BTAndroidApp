@@ -11,13 +11,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -26,7 +27,7 @@ import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameter
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
-import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.toReadbleProperties
+import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.toReadableProperties
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
@@ -40,12 +41,6 @@ fun SelectableBLECharacteristics(
 	selectedBackGroundColor: Color = MaterialTheme.colorScheme.secondaryContainer,
 	shape: Shape = MaterialTheme.shapes.medium,
 ) {
-
-	val context = LocalContext.current
-
-	val probableName = remember(characteristic.probableName) {
-		characteristic.probableName ?: context.getString(R.string.ble_characteristic_name_unknown)
-	}
 
 	val containerColor by animateColorAsState(
 		targetValue = if (isSelected) selectedBackGroundColor else backgroundColor,
@@ -66,11 +61,22 @@ fun SelectableBLECharacteristics(
 			verticalArrangement = Arrangement.spacedBy(2.dp)
 		) {
 			Text(
-				text = probableName,
+				text = characteristic.probableName
+					?: stringResource(R.string.ble_characteristic_name_unknown),
 				style = MaterialTheme.typography.labelLarge,
 			)
 			Text(
-				text = "${characteristic.uuid}",
+				text = buildAnnotatedString {
+					append("ID: ")
+					withStyle(
+						SpanStyle(
+							fontFamily = FontFamily.Monospace,
+							fontWeight = FontWeight.Medium
+						)
+					) {
+						append("${characteristic.uuid}")
+					}
+				},
 				style = MaterialTheme.typography.labelMedium,
 				overflow = TextOverflow.Ellipsis,
 				maxLines = 1
@@ -78,12 +84,8 @@ fun SelectableBLECharacteristics(
 
 			Text(
 				text = buildAnnotatedString {
-					with(MaterialTheme.typography.labelMedium) {
-						withStyle(SpanStyle(color, fontSize, fontWeight, fontStyle)) {
-							append("Propeties: ")
-						}
-					}
-					append(characteristic.toReadbleProperties)
+					append("Properties: ")
+					append(characteristic.toReadableProperties)
 				},
 				style = MaterialTheme.typography.labelMedium,
 			)

@@ -25,7 +25,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.cancellable
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -53,9 +52,8 @@ class BLEClientGattCallback(
 		get() = _bleGattServices.value
 
 	val bleServicesFlowAsDomainModel = _bleGattServices
-		.map { services -> services.toDomainModelWithNames(scope = scope, reader = reader) }
+		.map { services -> services.toDomainModelWithNames(reader = reader) }
 		.cancellable()
-		.catch { err -> Log.d(GATT_LOGGER, "LOCAL MODEL CONVERTION :${err.message}") }
 		.flowOn(Dispatchers.IO)
 
 	private val _readCharacteristic = MutableStateFlow<BLECharacteristicsModel?>(null)
@@ -142,7 +140,7 @@ class BLEClientGattCallback(
 		scope.launch {
 			try {
 				// decode the received value and decide it
-				val domainModel = characteristic.toDomainModelWithNames(scope, reader)
+				val domainModel = characteristic.toDomainModelWithNames(reader)
 					.copy(byteArray = value)
 
 				_readCharacteristic.update { prev ->
@@ -167,7 +165,7 @@ class BLEClientGattCallback(
 		Log.d(GATT_LOGGER, "WRITTEN SUCCESSFULLY")
 		if (characteristic == null || !echoWrite) return
 		val isSuccess = gatt?.readCharacteristic(characteristic) ?: false
-		Log.d(GATT_LOGGER, "UPDATING THE CHARACTERISITC VALUE $isSuccess")
+		Log.d(GATT_LOGGER, "UPDATING THE CHARACTERISTIC VALUE $isSuccess")
 	}
 
 	@Deprecated(
@@ -195,22 +193,21 @@ class BLEClientGattCallback(
 
 		scope.launch {
 			try {
+				val characteristic = _readCharacteristic.value
+				if (characteristic == null || descriptor.characteristic.uuid != characteristic.uuid)
+					return@launch
+
 				// decode the received value and decide it
-				val domainModel = descriptor.toDomainModelWithName(scope, reader)
+				val domainModel = descriptor.toDomainModelWithName(reader)
 					.copy(byteArray = value)
 
+				val descriptors = characteristic.descriptors.map { desc ->
+					if (desc.uuid == domainModel.uuid) domainModel
+					else desc
+				}
 				// make sure characteristic is already read
 				_readCharacteristic.update { characteristic ->
-					if (characteristic == null)
-						return@update characteristic
-					else if (characteristic.uuid != descriptor.characteristic.uuid)
-						return@update characteristic
-					else characteristic.copy(
-						descriptors = characteristic.descriptors.map { desc ->
-							if (desc.uuid == domainModel.uuid) domainModel
-							else desc
-						}.toPersistentList(),
-					)
+					characteristic?.copy(descriptors = descriptors.toPersistentList())
 				}
 				// update the read value
 				Log.d(GATT_LOGGER, "VALUE ON DESC READ ${domainModel.valueHexString}")
@@ -255,14 +252,14 @@ class BLEClientGattCallback(
 	) {
 		scope.launch {
 			try {
-				// for the first time readchar will be null
+				// for the first time read char will be null
 				if (_readCharacteristic.value == null) {
 
-					val domainModel = characteristic.toDomainModelWithNames(scope, reader)
+					val domainModel = characteristic.toDomainModelWithNames(reader)
 						.copy(byteArray = value)
 					// update the model
 					_readCharacteristic.update { domainModel }
-					// read tehe gett desciptor then
+					// read the get descriptor then
 					val configDescriptor = characteristic
 						.getDescriptor(BTConstants.CLIENT_CONFIG_DESCRIPTOR_UUID)
 

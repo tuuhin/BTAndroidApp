@@ -10,13 +10,10 @@ class BluetoothStateReceiver(
 ) : BroadcastReceiver() {
 
 	override fun onReceive(context: Context?, intent: Intent?) {
-		if (intent == null) return
+		if (intent == null || intent.action != BluetoothAdapter.ACTION_STATE_CHANGED) return
 
 		val btState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)
+		isBtOn.invoke(btState == BluetoothAdapter.STATE_ON)
 
-		when {
-			intent.action == BluetoothAdapter.ACTION_STATE_CHANGED ->
-				isBtOn.invoke(btState == BluetoothAdapter.STATE_ON)
-		}
 	}
 }

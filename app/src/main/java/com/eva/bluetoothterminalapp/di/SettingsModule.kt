@@ -9,10 +9,9 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val settingsModule = module {
-
 	// low energy datastore
-	factoryOf(::BLESettingsDatastoreImpl) bind BLESettingsDataStore::class
+	factoryOf(::BLESettingsDatastoreImpl).bind<BLESettingsDataStore>()
 	// classic settings datastore
-	factoryOf(::BTSettingsDatastoreImpl) bind BTSettingsDataSore::class
+	factoryOf(::BTSettingsDatastoreImpl).bind<BTSettingsDataSore>()
 
 }

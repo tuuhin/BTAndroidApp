@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +26,6 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.presentation.composables.LocationPermissionCard
 import kotlinx.collections.immutable.ImmutableList
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BluetoothDevicesList(
 	showLocationPlaceholder: Boolean,
@@ -36,6 +34,7 @@ fun BluetoothDevicesList(
 	onSelectDevice: (BluetoothDeviceModel) -> Unit,
 	onLocationPermsAccept: (Boolean) -> Unit,
 	modifier: Modifier = Modifier,
+	isPairedDevicesReady: Boolean = true,
 	contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
 
@@ -61,15 +60,17 @@ fun BluetoothDevicesList(
 		contentPadding = contentPadding
 	) {
 
-		PairedDevicesHeader()
+		pairedDevicesHeader()
 
-		if (isPairedListEmpty) {
+		if (isPairedDevicesReady && isPairedListEmpty) {
 			item {
 				Text(
 					text = stringResource(id = R.string.paired_device_not_found),
-					modifier = Modifier.fillMaxWidth(),
 					textAlign = TextAlign.Center,
-					style = MaterialTheme.typography.bodyLarge
+					style = MaterialTheme.typography.bodyLarge,
+					modifier = Modifier
+						.fillMaxWidth()
+						.animateItem(),
 				)
 			}
 		}
@@ -84,11 +85,11 @@ fun BluetoothDevicesList(
 				onConnect = { onSelectDevice(device) },
 				modifier = Modifier
 					.fillMaxWidth()
-					.animateItemPlacement()
+					.animateItem()
 			)
 		}
 
-		AvailableDevicesHeader()
+		availableDevicesHeader()
 
 		if (showLocationPlaceholder) {
 			item {
@@ -96,7 +97,7 @@ fun BluetoothDevicesList(
 					onLocationAccess = onLocationPermsAccept,
 					modifier = Modifier
 						.fillMaxWidth()
-						.animateItemPlacement()
+						.animateItem()
 				)
 			}
 		}
@@ -111,15 +112,13 @@ fun BluetoothDevicesList(
 				onConnect = { onSelectDevice(device) },
 				modifier = Modifier
 					.fillMaxWidth()
-					.animateItemPlacement()
+					.animateItem()
 			)
 		}
 	}
 }
 
-
-@OptIn(ExperimentalFoundationApi::class)
-private fun LazyListScope.PairedDevicesHeader() = stickyHeader {
+private fun LazyListScope.pairedDevicesHeader() = stickyHeader {
 	Column(
 		modifier = Modifier
 			.background(MaterialTheme.colorScheme.surface)
@@ -133,15 +132,13 @@ private fun LazyListScope.PairedDevicesHeader() = stickyHeader {
 		)
 		Text(
 			text = stringResource(id = R.string.paired_device_desc),
-			style = MaterialTheme.typography.labelMedium,
+			style = MaterialTheme.typography.labelLarge,
 			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
 	}
 }
 
-
-@OptIn(ExperimentalFoundationApi::class)
-private fun LazyListScope.AvailableDevicesHeader() = stickyHeader {
+private fun LazyListScope.availableDevicesHeader() = stickyHeader {
 	Column(
 		modifier = Modifier
 			.background(MaterialTheme.colorScheme.surface)
@@ -155,7 +152,7 @@ private fun LazyListScope.AvailableDevicesHeader() = stickyHeader {
 		)
 		Text(
 			text = stringResource(id = R.string.available_scan_devices_desc),
-			style = MaterialTheme.typography.labelMedium,
+			style = MaterialTheme.typography.labelLarge,
 			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
 	}

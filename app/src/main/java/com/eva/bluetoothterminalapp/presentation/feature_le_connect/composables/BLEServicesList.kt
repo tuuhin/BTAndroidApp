@@ -1,11 +1,11 @@
 package com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,7 +22,6 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristic
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import kotlinx.collections.immutable.ImmutableList
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BLEServicesList(
 	services: ImmutableList<BLEServiceModel>,
@@ -49,6 +48,7 @@ fun BLEServicesList(
 				modifier = Modifier
 					.background(MaterialTheme.colorScheme.surface)
 					.fillMaxWidth()
+					.heightIn(min = 40.dp)
 			) {
 				Text(
 					text = stringResource(id = R.string.le_available_devices),
@@ -65,10 +65,10 @@ fun BLEServicesList(
 			BLEDeviceServiceCard(
 				bleService = service,
 				selectedCharacteristic = selectedCharacteristic,
-				onCharacteristicSelect = { onCharacteristicSelect(service, it) },
+				onCharacteristicSelect = { char -> onCharacteristicSelect(service, char) },
 				modifier = Modifier
 					.fillMaxWidth()
-					.animateItemPlacement()
+					.animateItem()
 			)
 		}
 	}

@@ -20,10 +20,10 @@ fun BLECompatibilityModeSelector(
 	modifier: Modifier = Modifier
 ) {
 	ListItem(
-		headlineContent = { Text(text = stringResource(id = R.string.ble_settings_compatibilty_mode_title)) },
+		headlineContent = { Text(text = stringResource(id = R.string.ble_settings_compatibility_mode_title)) },
 		supportingContent = {
-			if (isLegacyOnly) Text(text = stringResource(id = R.string.ble_settings_compatibilty_mode_legacy_only))
-			else Text(text = stringResource(id = R.string.ble_settings_compatibilty_mode_all))
+			if (isLegacyOnly) Text(text = stringResource(id = R.string.ble_settings_compatibility_mode_legacy_only))
+			else Text(text = stringResource(id = R.string.ble_settings_compatibility_mode_all))
 		},
 		trailingContent = {
 			Switch(
