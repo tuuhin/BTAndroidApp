@@ -29,18 +29,21 @@ android {
 	}
 
 	signingConfigs {
-
+		// find if there is a properties file
 		val keySecretFile = rootProject.file("keystore.properties")
-		if (keySecretFile.exists()) return@signingConfigs
+		if (!keySecretFile.exists()) return@signingConfigs
 
+		// load the properties
 		val properties = Properties()
+		keySecretFile.inputStream().use { properties.load(it) }
 
+		val userHome = System.getProperty("user.home")
 		val storeFileName = properties.getProperty("STORE_FILE_NAME")
 
-		val keyStorePath = System.getenv("user.home")
-		val keyStoreFolder = File(keyStorePath, "keystore")
-		val keyStoreFile = File(keyStoreFolder, storeFileName)
+		val keyStoreFolder = File(userHome, "keystore")
+		if (!keyStoreFolder.exists()) return@signingConfigs
 
+		val keyStoreFile = File(keyStoreFolder, storeFileName)
 		if (!keyStoreFile.exists()) return@signingConfigs
 
 		create("release") {

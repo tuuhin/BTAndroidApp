@@ -73,13 +73,8 @@ an [issue](https://github.com/tuuhin/BTAndroidApp/issues/new)
 
 ### :man_cook: Contributing
 
-Contributions are alaways welcomed from the community
-
-- Fork the repository.
-- Create your feature branch (git checkout -b feature/YourFeature).
-- Commit your changes (git commit -am 'Add some feature').
-- Push to the branch (git push origin feature/YourFeature).
-- Create a new Pull Request.
+We welcome contributions to the `BTAndroidApp` project! Please take a moment to review
+our [Contribution Guidelines](CONTRIBUTING.md) before submitting pull requests or issues.
 
 ## :end: Conclusiion
 
