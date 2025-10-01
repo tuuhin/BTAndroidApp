@@ -3,6 +3,7 @@ package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -25,7 +26,7 @@ fun DevicesScreenModeContainer(
 	hasPermission: Boolean,
 	onBTPermissionChanged: (Boolean) -> Unit,
 	modifier: Modifier = Modifier,
-	content: @Composable () -> Unit,
+	content: @Composable BoxScope.() -> Unit,
 ) {
 	val screenType by remember(hasPermission, isActive) {
 		derivedStateOf {

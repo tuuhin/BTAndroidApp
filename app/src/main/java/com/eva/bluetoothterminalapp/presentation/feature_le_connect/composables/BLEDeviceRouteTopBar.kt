@@ -14,6 +14,7 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarColors
@@ -58,7 +59,9 @@ fun BLEDeviceRouteTopBar(
 
 			Box(modifier = modifier) {
 				TooltipBox(
-					positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+					positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+						TooltipAnchorPosition.Below
+					),
 					tooltip = {
 						PlainTooltip(
 							modifier = Modifier.padding(4.dp),

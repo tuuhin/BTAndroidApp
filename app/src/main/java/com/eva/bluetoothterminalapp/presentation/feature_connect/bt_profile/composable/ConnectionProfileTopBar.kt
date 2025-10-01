@@ -25,7 +25,7 @@ fun ConnectionProfileTopBar(
 	modifier: Modifier = Modifier,
 	navigation: @Composable () -> Unit,
 	scrollBehavior: TopAppBarScrollBehavior? = null,
-	colors: TopAppBarColors = TopAppBarDefaults.mediumTopAppBarColors()
+	colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors()
 ) {
 	MediumTopAppBar(
 		title = { Text(text = stringResource(id = R.string.bl_connect_profile_title)) },

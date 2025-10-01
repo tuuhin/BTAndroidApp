@@ -145,14 +145,14 @@ fun BTDevicesRoute(
 	}
 }
 
-private class BTDeviceClassicalScreenStateParams
-	: CollectionPreviewParameterProvider<BTDevicesScreenState>(
-	listOf(
-		PreviewFakes.FAKE_DEVICE_STATE_WITH_PAIRED_AND_AVAILABLE_DEVICES,
-		PreviewFakes.FAKE_DEVICE_STATE_WITH_PAIRED_DEVICE,
-		PreviewFakes.FAKE_DEVICE_STATE_WITH_NO_DEVICE,
+private class BTDeviceClassicalScreenStateParams :
+	CollectionPreviewParameterProvider<BTDevicesScreenState>(
+		listOf(
+			PreviewFakes.FAKE_DEVICE_STATE_WITH_PAIRED_AND_AVAILABLE_DEVICES,
+			PreviewFakes.FAKE_DEVICE_STATE_WITH_PAIRED_DEVICE,
+			PreviewFakes.FAKE_DEVICE_STATE_WITH_NO_DEVICE,
+		)
 	)
-)
 
 @PreviewLightDark
 @Composable
