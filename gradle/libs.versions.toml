@@ -1,27 +1,28 @@
 [versions]
-agp = "8.11.1"
+agp = "8.13.0"
 compose_destination_animation_version = "1.11.9"
 compose_destination_core_version = "2.2.0"
 coreSplashscreen = "1.0.1"
 datastore = "1.1.7"
 graphicsShapes = "1.0.1"
-kotlin = "2.2.0"
-coreKtx = "1.16.0"
+kotlin = "2.2.20"
+coreKtx = "1.17.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.5.1"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
 kotlinxCollectionsImmutable = "0.4.0"
 kotlinxDatetime = "0.7.1"
 kotlinxSerializationJson = "1.9.0"
 ksp = "2.2.0"
-lifecycleRuntimeKtx = "2.9.2"
-activityCompose = "1.10.1"
-composeBom = "2025.07.00"
-koinBom = "4.1.0"
+lifecycleRuntimeKtx = "2.9.4"
+activityCompose = "1.11.0"
+composeBom = "2025.09.01"
+koinBom = "4.1.1"
 materialIconsExtended = "1.7.8"
-ksp_version = "2.2.0-2.0.2"
-protobufJavalite = "4.31.1"
-protobuf_version = "0.9.5"
+ksp_version = "2.2.20-2.0.2"
+protobufJavalite = "4.32.1"
+protobuf-protoc-gen-javalite = "3.0.0"
+protobuf_plugin_version = "0.9.5"
 
 [libraries]
 #core
@@ -59,21 +60,27 @@ koin-android-startup = { module = "io.insert-koin:koin-androidx-startup" }
 # test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version = "3.6.1" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version = "espressoCore" }
 #datetime
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 # protobuf and datastore
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufJavalite" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobufJavalite" }
+protobuf-protoc-compiler = { module = "com.google.protobuf:protoc", version.ref = "protobufJavalite" }
+protobuf-protoc-gen-javalite = { module = "com.google.protobuf:protoc-gen-javalite", version.ref = "protobuf-protoc-gen-javalite" }
 # kotlinx serialization
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google_devtools_ksp = { id = "com.google.devtools.ksp", version.ref = "ksp_version" }
-google_protobuf = { id = "com.google.protobuf", version.ref = "protobuf_version" }
+google_protobuf = { id = "com.google.protobuf", version.ref = "protobuf_plugin_version" }
 kotlinx_serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
+[bundles]
+compose = ["androidx-ui", "androidx-ui-graphics", "androidx-ui-tooling-preview", "androidx-material3", "androidx-material-icons-extended"]
+koin = ["koin-core", "koin-compose", "koin-android-startup", "koin-android"]
+kotlinx = ["kotlinx-collections-immutable", "kotlinx-datetime", "kotlinx-serialization-json"]

@@ -28,7 +28,7 @@ fun BTClientTopBar(
 	modifier: Modifier = Modifier,
 	navigation: @Composable () -> Unit = {},
 	scrollBehavior: TopAppBarScrollBehavior? = null,
-	colors: TopAppBarColors = TopAppBarDefaults.mediumTopAppBarColors(),
+	colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
 ) {
 	MediumTopAppBar(
 		title = { Text(text = stringResource(id = R.string.bt_client_route)) },
@@ -47,7 +47,7 @@ fun BTClientTopBar(
 }
 
 
-private class ClientConnectionStatePreviewParmas :
+private class ClientConnectionStatePreviewParams :
 	CollectionPreviewParameterProvider<ClientConnectionState>(
 		listOf(
 			ClientConnectionState.CONNECTION_CONNECTED,
@@ -60,7 +60,7 @@ private class ClientConnectionStatePreviewParmas :
 @PreviewLightDark
 @Composable
 private fun AnimatedConnectDisconnectButtonPreview(
-	@PreviewParameter(ClientConnectionStatePreviewParmas::class)
+	@PreviewParameter(ClientConnectionStatePreviewParams::class)
 	state: ClientConnectionState,
 ) = BlueToothTerminalAppTheme {
 	BTClientTopBar(

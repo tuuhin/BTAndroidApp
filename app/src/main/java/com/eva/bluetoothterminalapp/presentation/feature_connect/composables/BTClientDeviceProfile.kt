@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -101,7 +102,10 @@ fun BTClientDeviceProfile(
 						fontFamily = FontFamily.Monospace,
 					)
 					Spacer(modifier = Modifier.height(4.dp))
-					ClientConnectionStateChip(connectionState = connectionState)
+					ClientConnectionStateChip(
+						connectionState = connectionState,
+						elevation = AssistChipDefaults.elevatedAssistChipElevation()
+					)
 				}
 				BTDeviceIconLarge(device = device)
 			}

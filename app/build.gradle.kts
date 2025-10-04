@@ -19,8 +19,8 @@ android {
 		applicationId = "com.eva.bluetoothterminalapp"
 		minSdk = 29
 		targetSdk = 36
-		versionCode = 2
-		versionName = "1.1.0"
+		versionCode = 3
+		versionName = "1.1.1"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		vectorDrawables {
@@ -112,34 +112,22 @@ dependencies {
 	implementation(libs.androidx.activity.compose)
 	//	compose
 	implementation(platform(libs.androidx.compose.bom))
-	implementation(libs.androidx.ui)
-	implementation(libs.androidx.ui.graphics)
-	implementation(libs.androidx.ui.tooling.preview)
-	implementation(libs.androidx.material3)
+	implementation(libs.bundles.compose)
 	//lifecycle compose runtime
 	implementation(libs.androidx.lifecycle.runtime.compose)
 	//navigation
 	implementation(libs.compose.destination.animation)
 	implementation(libs.compose.destination.core)
 	ksp(libs.compose.destination.ksp)
-	//kotlin immutable
-	implementation(libs.kotlinx.collections.immutable)
-	//kotlinx datetime
-	implementation(libs.kotlinx.datetime)
+	//kotlinx
+	implementation(libs.bundles.kotlinx)
 	//splash api
 	implementation(libs.androidx.core.splashscreen)
 	// koin
 	implementation(platform(libs.koin.bom))
-	implementation(libs.koin.core)
-	implementation(libs.koin.android)
-	implementation(libs.koin.compose)
-	implementation(libs.koin.android.startup)
+	implementation(libs.bundles.koin)
 	// shapes
 	implementation(libs.androidx.graphics.shapes)
-	// kotlinx-serialization
-	implementation(libs.kotlinx.serialization.json)
-	//icons
-	implementation(libs.androidx.material.icons.extended)
 	//datastore
 	implementation(libs.androidx.datastore)
 	implementation(libs.protobuf.javalite)
@@ -157,11 +145,11 @@ dependencies {
 
 protobuf {
 	protoc {
-		artifact = "com.google.protobuf:protoc:4.26.1"
+		artifact = libs.protobuf.protoc.compiler.get().toString()
 	}
 	plugins {
 		create("java") {
-			artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0"
+			artifact = libs.protobuf.protoc.gen.javalite.get().toString()
 		}
 	}
 
