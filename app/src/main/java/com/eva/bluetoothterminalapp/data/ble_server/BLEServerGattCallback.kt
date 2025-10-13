@@ -10,8 +10,10 @@ import android.bluetooth.BluetoothProfile
 import android.os.Build
 import android.util.Log
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
+import com.eva.bluetoothterminalapp.data.samples.SampleUUIDReader
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
+import com.eva.bluetoothterminalapp.domain.device.BatteryReader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,6 +21,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
 private typealias SendResponse = (device: BluetoothDevice, requestId: Int, status: Int, offset: Int, value: ByteArray?) -> Unit
@@ -26,7 +29,10 @@ private typealias NotifyCharacteristicsChanged = (device: BluetoothDevice, chara
 
 private const val TAG = "BLE_SERVER_CALLBACK"
 
-class BLEServerGattCallback : BluetoothGattServerCallback() {
+class BLEServerGattCallback(
+	private val batteryReader: BatteryReader,
+	private val uuidReader: SampleUUIDReader,
+) : BluetoothGattServerCallback() {
 
 	private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -37,18 +43,27 @@ class BLEServerGattCallback : BluetoothGattServerCallback() {
 	val services = _services.asStateFlow()
 
 	// key : device address and value : BLEMessageModel
-	private val _echoValuesMap = ConcurrentHashMap<String, BLEMessageModel>()
-	private val _nusValuesMap = ConcurrentHashMap<String, BLEMessageModel>()
+	private val _echoValuesMap = ConcurrentHashMap<String, BLEMessageModel.EchoMessage>()
+	private val _nusValuesMap = ConcurrentHashMap<String, BLEMessageModel.NUSMessage>()
+	private val _batteryNotificationMap = ConcurrentHashMap<String, Boolean>()
 
 	private var _sendResponse: SendResponse? = null
 	private var _notifyCharacteristicsChanged: NotifyCharacteristicsChanged? = null
+	private var _onInformServiceAddedCallback: (() -> Unit)? = null
 
 	fun setOnSendResponse(callback: SendResponse) {
+		Log.d(TAG, "ON SEND RESPONSE CALLBACK SET!!")
 		_sendResponse = callback
 	}
 
 	fun setNotifyCharacteristicsChanged(callback: NotifyCharacteristicsChanged) {
+		Log.d(TAG, "ON NOTIFY CALLBACK SET!!")
 		_notifyCharacteristicsChanged = callback
+	}
+
+	fun setOnInformServiceAdded(onServiceAdded: () -> Unit = {}) {
+		Log.d(TAG, "ON SERVICE ADDED CALLBACK SET")
+		_onInformServiceAddedCallback = onServiceAdded
 	}
 
 	override fun onConnectionStateChange(device: BluetoothDevice?, status: Int, newState: Int) {
@@ -56,7 +71,10 @@ class BLEServerGattCallback : BluetoothGattServerCallback() {
 			Log.e(TAG, "CONNECTION WITH SOME ERROR: $status")
 			return
 		}
-		Log.d(TAG, "CLIENT ADDRESS:${device?.address} CONNECTION: $newState")
+		val message = if (newState == BluetoothProfile.STATE_CONNECTED) "CONNECTED"
+		else "DISCONNECTED"
+
+		Log.i(TAG, "CLIENT ADDRESS:${device?.address} $message")
 		val domainDevice = device?.toDomainModel() ?: return
 
 		when (newState) {
@@ -72,6 +90,8 @@ class BLEServerGattCallback : BluetoothGattServerCallback() {
 				}
 				// remove the device
 				_echoValuesMap.remove(device.address)
+				_nusValuesMap.remove(device.address)
+				_batteryNotificationMap.remove(device.address)
 			}
 
 			else -> {}
@@ -85,8 +105,20 @@ class BLEServerGattCallback : BluetoothGattServerCallback() {
 			return
 		}
 		if (service == null) return
-		val domainService = service.toDomainModel()
-		_services.update { previous -> (previous + domainService).distinctBy { it.serviceId } }
+
+		Log.i(TAG, "SERVICE :${service.uuid} ADDED")
+
+		scope.launch {
+			val domainService = service.toDomainModel()
+			val sampleUUID = uuidReader.findServiceNameForUUID(service.uuid)
+			domainService.probableName = sampleUUID?.name
+
+			_services.update { previous -> (previous + domainService).distinctBy { it.serviceId } }
+
+		}.invokeOnCompletion {
+			// inform new service is added
+			_onInformServiceAddedCallback?.invoke()
+		}
 	}
 
 	override fun onCharacteristicReadRequest(
@@ -95,32 +127,52 @@ class BLEServerGattCallback : BluetoothGattServerCallback() {
 		offset: Int,
 		characteristic: BluetoothGattCharacteristic?
 	) {
+		super.onCharacteristicReadRequest(device, requestId, offset, characteristic)
 		if (device == null || characteristic == null) return
-		Log.e(TAG, "READ REQUESTED FOR CHARACTERISTICS :${characteristic.uuid}")
+		Log.i(TAG, "READ REQUESTED FOR CHARACTERISTICS :${characteristic.uuid}")
+
 		val charset = Charsets.UTF_8
+		var isFailedResponse = false
 
 		when (characteristic.service.uuid) {
 			BLEServerUUID.DEVICE_INFO_SERVICE -> {
 				val value = when (characteristic.uuid) {
 					BLEServerUUID.MANUFACTURER_NAME -> Build.MANUFACTURER.toByteArray(charset)
 					BLEServerUUID.MODEL_NUMBER -> Build.MODEL.toByteArray(charset)
-					BLEServerUUID.SOFTWARE_REVISION -> byteArrayOf(Build.VERSION.SDK_INT.toByte())
+					BLEServerUUID.SOFTWARE_REVISION -> Build.VERSION.SDK_INT.toString()
+						.toByteArray(charset)
+
 					BLEServerUUID.HARDWARE_REVISION -> Build.HARDWARE.toByteArray(charset)
 					else -> null
 				}
-				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
+				val isSuccess = if (value == null) BluetoothGatt.GATT_FAILURE
+				else BluetoothGatt.GATT_SUCCESS
+				_sendResponse?.invoke(device, requestId, isSuccess, offset, value)
 			}
 
 			BLEServerUUID.ECHO_SERVICE -> {
-				val savedValue = _echoValuesMap[device.address]?.message ?: "null"
-				val value = savedValue.toByteArray(charset)
-				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
+				if (characteristic.uuid == BLEServerUUID.ECHO_CHARACTERISTIC) {
+					val savedValue = _echoValuesMap[device.address]?.message ?: "null"
+					val value = savedValue.toByteArray(charset)
+					_sendResponse
+						?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
+				}
 			}
 
-			else -> {
-				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
+			BLEServerUUID.BATTERY_SERVICE -> {
+				if (characteristic.uuid == BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC) {
+					val value = batteryReader.currentBatteryLevel.toString().toByteArray(charset)
+					_sendResponse
+						?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
+				} else isFailedResponse = true
 			}
+
+			else -> isFailedResponse = true
 		}
+
+		if (!isFailedResponse) return
+		_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
+
 	}
 
 	override fun onCharacteristicWriteRequest(
@@ -136,20 +188,20 @@ class BLEServerGattCallback : BluetoothGattServerCallback() {
 		Log.e(TAG, "WRITE REQUESTED FOR CHARACTERISTICS :${characteristic.uuid}")
 
 		if (value == null) {
-			Log.d(TAG, "WRITE REQUEST WITH EMPTY VALUE")
-			if (responseNeeded) {
-				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
-			}
+			Log.e(TAG, "WRITE REQUEST WITH EMPTY VALUE ,RESPONSE: $responseNeeded")
+			if (!responseNeeded) return
+			_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
 			return
 		}
 
 		val charset = Charsets.UTF_8
+		var isFailedResponse = false
 
 		when (characteristic.service.uuid) {
 			BLEServerUUID.ECHO_SERVICE -> {
 				if (characteristic.uuid == BLEServerUUID.ECHO_CHARACTERISTIC) {
 					val current = _echoValuesMap[device.address]
-					_echoValuesMap[device.address] = BLEMessageModel(
+					_echoValuesMap[device.address] = BLEMessageModel.EchoMessage(
 						message = value.toString(charset),
 						isNotifyEnabled = current?.isNotifyEnabled ?: false
 					)
@@ -162,27 +214,39 @@ class BLEServerGattCallback : BluetoothGattServerCallback() {
 					if (!responseNeeded) return
 					_sendResponse
 						?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
-				} else {
-					if (!responseNeeded) return
-					// empty value with failure
-					_sendResponse
-						?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
 				}
+				// invalid matching characteristics id
+				else isFailedResponse = true
 			}
 
 			BLEServerUUID.NORDIC_UART_SERVICE -> {
-				when (characteristic.uuid) {
-					BLEServerUUID.NUS_RX_CHARACTERISTIC -> {}
-					BLEServerUUID.NUS_TX_CHARACTERISTIC -> {}
+				if (characteristic.uuid == BLEServerUUID.NUS_RX_CHARACTERISTIC) {
+					val receivedMessage = value.toString(charset)
+					val current = _nusValuesMap[device.address]
+					_nusValuesMap[device.address] = BLEMessageModel.NUSMessage(
+						rxMessage = receivedMessage,
+						isNotifyEnabled = current?.isNotifyEnabled ?: false,
+					)
+					// notify value changed if enabled
+					if (_nusValuesMap[device.address]?.isNotifyEnabled == true) {
+						val transmitMessage =
+							_nusValuesMap[device.address]?.txMessage ?: "nothing"
+						val transmitValue = transmitMessage.toByteArray(charset)
+						_notifyCharacteristicsChanged
+							?.invoke(device, characteristic, false, transmitValue)
+					}
 				}
+				// rx should be only used to receive value, tx is for transmitting
+				else isFailedResponse = true
 			}
 
-			else -> {
-				if (!responseNeeded) return
-				// empty value with failure
-				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
-			}
+			else -> isFailedResponse = true
 		}
+		// if this is a failed response send response as failure
+		if (!isFailedResponse) return
+		if (!responseNeeded) return
+		// empty value with failure
+		_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
 	}
 
 	override fun onDescriptorReadRequest(
@@ -192,33 +256,48 @@ class BLEServerGattCallback : BluetoothGattServerCallback() {
 		descriptor: BluetoothGattDescriptor?
 	) {
 		if (device == null || descriptor == null) return
-		Log.d(
+		Log.i(
 			TAG,
 			"DESCRIPTOR READ REQUEST ${descriptor.uuid} CHARACTERISTIC : ${descriptor.characteristic.uuid}"
 		)
 
 		when (descriptor.characteristic.uuid) {
 			BLEServerUUID.ECHO_CHARACTERISTIC -> {
-				if (descriptor.uuid == BLEServerUUID.ECHO_DESCRIPTOR) {
-
-					val isNotifyEnabled = _echoValuesMap[device.address]?.isNotifyEnabled ?: false
-					val value = if (isNotifyEnabled)
-						BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+				val readValue = if (descriptor.uuid == BLEServerUUID.CCC_DESCRIPTOR) {
+					val isEnabled = _echoValuesMap[device.address]?.isNotifyEnabled ?: false
+					if (isEnabled) BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
 					else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
-
-					_sendResponse
-						?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
-				} else {
-					_sendResponse
-						?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
-				}
+				} else null
+				val status = if (readValue != null) BluetoothGatt.GATT_SUCCESS
+				else BluetoothGatt.GATT_FAILURE
+				_sendResponse?.invoke(device, requestId, status, offset, readValue)
 			}
 
-			else -> {
-				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
+			BLEServerUUID.NUS_TX_CHARACTERISTIC -> {
+				val readValue = if (descriptor.uuid == BLEServerUUID.CCC_DESCRIPTOR) {
+					val isEnabled = _nusValuesMap[device.address]?.isNotifyEnabled ?: false
+					if (isEnabled) BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+					else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
+				} else null
+				val status = if (readValue != null) BluetoothGatt.GATT_SUCCESS
+				else BluetoothGatt.GATT_FAILURE
+				_sendResponse?.invoke(device, requestId, status, offset, readValue)
 			}
+
+			BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC -> {
+				val readValue = if (descriptor.uuid == BLEServerUUID.CCC_DESCRIPTOR) {
+					val isEnabled = _batteryNotificationMap[device.address] ?: false
+					if (isEnabled) BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+					else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
+				} else null
+				val status = if (readValue != null) BluetoothGatt.GATT_SUCCESS
+				else BluetoothGatt.GATT_FAILURE
+				_sendResponse?.invoke(device, requestId, status, offset, readValue)
+			}
+
+			else -> _sendResponse
+				?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
 		}
-
 	}
 
 	override fun onDescriptorWriteRequest(
@@ -232,54 +311,49 @@ class BLEServerGattCallback : BluetoothGattServerCallback() {
 	) {
 		if (device == null || descriptor == null) return
 
-		Log.d(
+		Log.i(
 			TAG,
-			"DESCRIPTOR WRITE REQUEST ${descriptor.uuid} CHARACTERS : ${descriptor.characteristic.uuid}"
+			"WRITE REQUEST DESCRIPTOR ID ${descriptor.uuid} CHARACTERISTIC ID : ${descriptor.characteristic.uuid}"
 		)
 
-		if (value == null) {
-			Log.d(TAG, "WRITE REQUEST WITH EMPTY VALUE")
-			if (responseNeeded) {
-				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
-			}
-			return
-		}
-
-		when (descriptor.characteristic.uuid) {
-			BLEServerUUID.ECHO_CHARACTERISTIC -> {
-				if (descriptor.uuid == BLEServerUUID.ECHO_DESCRIPTOR) {
-					val isNotifyEnabled = when {
-						value.contentEquals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) -> true
-						value.contentEquals(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE) -> false
-						else -> {
-							Log.w(TAG, "INVALID DESCRIPTOR VALUE ")
-							if (!responseNeeded) return
-							_sendResponse?.invoke(
-								device, requestId, BluetoothGatt.GATT_FAILURE, offset, null
-							)
-							return
-						}
+		when (descriptor.uuid) {
+			BLEServerUUID.CCC_DESCRIPTOR -> {
+				val isNotifyEnabled = when {
+					value.contentEquals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) -> true
+					value.contentEquals(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE) -> false
+					else -> {
+						if (!responseNeeded) return
+						_sendResponse
+							?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
+						return
 					}
-					// find the device and update it
-					val currentMessage = _echoValuesMap.get(device.address)?.message ?: "null"
-					_echoValuesMap[device.address] = BLEMessageModel(
-						message = currentMessage,
-						isNotifyEnabled = isNotifyEnabled
-					)
-
-					if (!responseNeeded) return
-					_sendResponse
-						?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
-				} else {
-					// invalid descriptor uuid
-					if (!responseNeeded) return
-					_sendResponse
-						?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
 				}
+
+				when (descriptor.characteristic.uuid) {
+					BLEServerUUID.ECHO_CHARACTERISTIC -> {
+						val currentMessage = _echoValuesMap.get(device.address)?.message ?: "null"
+						_echoValuesMap[device.address] = BLEMessageModel.EchoMessage(
+							message = currentMessage,
+							isNotifyEnabled = isNotifyEnabled
+						)
+					}
+
+					BLEServerUUID.NUS_TX_CHARACTERISTIC -> {
+						val currentMessage = _nusValuesMap.get(device.address)?.message ?: ""
+						_nusValuesMap[device.address] = BLEMessageModel.NUSMessage(
+							rxMessage = currentMessage,
+							isNotifyEnabled = isNotifyEnabled
+						)
+					}
+
+					BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC ->
+						_batteryNotificationMap[device.address] = isNotifyEnabled
+				}
+				if (!responseNeeded) return
+				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, null)
 			}
 
 			else -> {
-				// no matching characteristics found
 				if (!responseNeeded) return
 				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
 			}
@@ -287,7 +361,9 @@ class BLEServerGattCallback : BluetoothGattServerCallback() {
 	}
 
 	fun onCleanUp() {
+		Log.i(TAG, "CLEARING OFF DEVICES MAP")
 		_echoValuesMap.clear()
+		_nusValuesMap.clear()
 		scope.cancel()
 	}
 }

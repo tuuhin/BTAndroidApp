@@ -1,10 +1,11 @@
 package com.eva.bluetoothterminalapp.data.ble_server
 
+import android.bluetooth.BluetoothGattService
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPermission
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEPropertyTypes
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEServicesTypes
 
-val bleDeviceInfoService = bleServiceOf(
+fun buildBleDeviceInfoService() = bleServiceOf(
 	uuid = BLEServerUUID.DEVICE_INFO_SERVICE,
 	serviceType = BLEServicesTypes.PRIMARY,
 ).apply {
@@ -23,7 +24,7 @@ val bleDeviceInfoService = bleServiceOf(
 	}
 }
 
-val echoService = bleServiceOf(
+fun buildEchoService() = bleServiceOf(
 	uuid = BLEServerUUID.ECHO_SERVICE,
 	serviceType = BLEServicesTypes.SECONDARY
 ).apply {
@@ -37,7 +38,7 @@ val echoService = bleServiceOf(
 		permissions = listOf(BLEPermission.PERMISSION_READ, BLEPermission.PERMISSION_WRITE)
 	).apply {
 		val descriptor = bleDescriptorOf(
-			uuid = BLEServerUUID.ECHO_DESCRIPTOR,
+			uuid = BLEServerUUID.CCC_DESCRIPTOR,
 			permissions = listOf(BLEPermission.PERMISSION_READ, BLEPermission.PERMISSION_WRITE)
 		)
 		addDescriptor(descriptor)
@@ -45,36 +46,28 @@ val echoService = bleServiceOf(
 	addCharacteristic(characteristic)
 }
 
-val nordicUARTService = bleServiceOf(
+fun buildNordicUARTService(): BluetoothGattService = bleServiceOf(
 	uuid = BLEServerUUID.NORDIC_UART_SERVICE,
 	serviceType = BLEServicesTypes.PRIMARY
 ).apply {
 	val rxCharacteristic = bleCharacteristicsOf(
-		uuid = BLEServerUUID.NUS_RX_CHARACTERISTIC, properties = listOf(
-			BLEPropertyTypes.PROPERTY_READ,
+		uuid = BLEServerUUID.NUS_RX_CHARACTERISTIC,
+		properties = listOf(
 			BLEPropertyTypes.PROPERTY_WRITE,
-			BLEPropertyTypes.PROPERTY_NOTIFY
+			BLEPropertyTypes.PROPERTY_WRITE_NO_RESPONSE
 		),
-		permissions = listOf(BLEPermission.PERMISSION_READ, BLEPermission.PERMISSION_WRITE)
-	).apply {
-		val descriptor = bleDescriptorOf(
-			uuid = BLEServerUUID.NUS_DESCRIPTOR,
-			permissions = listOf(BLEPermission.PERMISSION_READ, BLEPermission.PERMISSION_WRITE)
-		)
-		addDescriptor(descriptor)
-	}
+		permissions = listOf(BLEPermission.PERMISSION_WRITE)
+	)
 
 	val txCharacteristic = bleCharacteristicsOf(
 		uuid = BLEServerUUID.NUS_TX_CHARACTERISTIC,
 		properties = listOf(
-			BLEPropertyTypes.PROPERTY_READ,
-			BLEPropertyTypes.PROPERTY_WRITE,
 			BLEPropertyTypes.PROPERTY_NOTIFY
 		),
-		permissions = listOf(BLEPermission.PERMISSION_READ, BLEPermission.PERMISSION_WRITE)
+		permissions = listOf(BLEPermission.PERMISSION_READ)
 	).apply {
 		val descriptor = bleDescriptorOf(
-			uuid = BLEServerUUID.NUS_DESCRIPTOR,
+			uuid = BLEServerUUID.CCC_DESCRIPTOR,
 			permissions = listOf(BLEPermission.PERMISSION_READ, BLEPermission.PERMISSION_WRITE)
 		)
 		addDescriptor(descriptor)
@@ -82,4 +75,25 @@ val nordicUARTService = bleServiceOf(
 
 	addCharacteristic(rxCharacteristic)
 	addCharacteristic(txCharacteristic)
+}
+
+fun buildBatteryService() = bleServiceOf(
+	uuid = BLEServerUUID.BATTERY_SERVICE,
+	serviceType = BLEServicesTypes.PRIMARY
+).apply {
+	val batteryLevelCharacteristics = bleCharacteristicsOf(
+		uuid = BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC,
+		properties = listOf(
+			BLEPropertyTypes.PROPERTY_READ,
+			BLEPropertyTypes.PROPERTY_NOTIFY
+		),
+		permissions = listOf(BLEPermission.PERMISSION_READ)
+	).apply {
+		val descriptor = bleDescriptorOf(
+			uuid = BLEServerUUID.CCC_DESCRIPTOR,
+			permissions = listOf(BLEPermission.PERMISSION_READ, BLEPermission.PERMISSION_WRITE)
+		)
+		addDescriptor(descriptor)
+	}
+	addCharacteristic(batteryLevelCharacteristics)
 }

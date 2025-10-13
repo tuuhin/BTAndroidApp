@@ -1,8 +1,10 @@
 package com.eva.bluetoothterminalapp.di
 
+import com.eva.bluetoothterminalapp.data.ble_server.AndroidBLEServerConnector
 import com.eva.bluetoothterminalapp.data.bluetooth_le.AndroidBLEClientConnector
 import com.eva.bluetoothterminalapp.data.bluetooth_le.AndroidBluetoothLEScanner
 import com.eva.bluetoothterminalapp.data.samples.SampleUUIDReader
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.BLEServerConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEScanner
 import org.koin.core.module.dsl.factoryOf
@@ -16,4 +18,5 @@ val bluetoothLEModule = module {
 
 	factoryOf(::AndroidBluetoothLEScanner).bind<BluetoothLEScanner>()
 	factoryOf(::AndroidBLEClientConnector).bind<BluetoothLEClientConnector>()
+	factoryOf(::AndroidBLEServerConnector).bind<BLEServerConnector>()
 }

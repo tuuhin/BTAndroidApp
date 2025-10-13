@@ -3,6 +3,7 @@ package com.eva.bluetoothterminalapp.domain.bluetooth_le
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 interface BLEServerConnector {
 
@@ -10,7 +11,13 @@ interface BLEServerConnector {
 
 	val services: Flow<List<BLEServiceModel>>
 
-	suspend fun onStartServer()
+	val isServerRunning: StateFlow<Boolean>
 
-	suspend fun onStopServer()
+	val errorsFlow: Flow<Exception>
+
+	fun onStartServer(): Result<Boolean>
+
+	fun onStopServer()
+
+	fun cleanUp()
 }
