@@ -97,3 +97,27 @@ fun buildBatteryService() = bleServiceOf(
 	}
 	addCharacteristic(batteryLevelCharacteristics)
 }
+
+fun buildEnvironmentSensingService() = bleServiceOf(
+	uuid = BLEServerUUID.ENVIRONMENTAL_SENSING_SERVICE,
+	serviceType = BLEServicesTypes.PRIMARY
+).apply {
+	val illuminanceCharacteristics = bleCharacteristicsOf(
+		uuid = BLEServerUUID.ILLUMINANCE_CHARACTERISTIC,
+		properties = listOf(
+			BLEPropertyTypes.PROPERTY_NOTIFY,
+			BLEPropertyTypes.PROPERTY_READ
+		),
+		permissions = listOf(BLEPermission.PERMISSION_READ)
+	).apply {
+		val descriptor = bleDescriptorOf(
+			uuid = BLEServerUUID.CCC_DESCRIPTOR,
+			permissions = listOf(
+				BLEPermission.PERMISSION_READ,
+				BLEPermission.PERMISSION_WRITE
+			)
+		)
+		addDescriptor(descriptor)
+	}
+	addCharacteristic(illuminanceCharacteristics)
+}

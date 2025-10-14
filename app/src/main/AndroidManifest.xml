@@ -20,10 +20,13 @@
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-
   <uses-feature android:name="android.hardware.bluetooth" />
   <uses-feature
     android:name="android.hardware.bluetooth_le"
+    android:required="false" />
+
+  <uses-feature
+    android:name="android.hardware.sensor.light"
     android:required="false" />
 
   <application

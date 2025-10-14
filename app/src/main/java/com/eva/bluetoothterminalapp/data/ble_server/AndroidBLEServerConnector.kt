@@ -17,9 +17,11 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BLEServerConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import com.eva.bluetoothterminalapp.domain.device.BatteryReader
+import com.eva.bluetoothterminalapp.domain.device.LightSensorReader
 import com.eva.bluetoothterminalapp.domain.exceptions.BLEAdvertiseUnsupportedException
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothNotEnabled
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,16 +34,27 @@ private const val TAG = "BLE_SERVER"
 class AndroidBLEServerConnector(
 	private val context: Context,
 	private val batteryReader: BatteryReader,
+	private val lightSensorReader: LightSensorReader,
 	private val uuidReader: SampleUUIDReader,
 ) : BLEServerConnector {
 
 	private val _bluetoothManager by lazy { context.getSystemService<BluetoothManager>() }
-	private val _callback by lazy { BLEServerGattCallback(batteryReader, uuidReader) }
+	private val _callback by lazy {
+		BLEServerGattCallback(
+			context = context,
+			batteryReader = batteryReader,
+			lightSensorReader = lightSensorReader,
+			uuidReader = uuidReader
+		)
+	}
 
 	private var _bleServer: BluetoothGattServer? = null
 
 	private val _isServerRunning = MutableStateFlow(false)
-	private val _errorsFlow = MutableSharedFlow<Exception>()
+	private val _errorsFlow = MutableSharedFlow<Exception>(
+		extraBufferCapacity = 4,
+		onBufferOverflow = BufferOverflow.DROP_OLDEST
+	)
 
 	override val connectedDevices: Flow<List<BluetoothDeviceModel>>
 		get() = _callback.connectedDevices
@@ -90,23 +103,50 @@ class AndroidBLEServerConnector(
 		_isServerRunning.update { true }
 
 		val server = _bleServer ?: return Result.success(false)
+
+		// services queue
 		val bleServicesQueue = BLEServerServiceQueue(server)
-		// on response callback
+		_callback.setOnServiceAdded(bleServicesQueue::addNextService)
+
+		// on response callback for read and write
 		_callback.setOnSendResponse(server::sendResponse)
+		// on notify callback for notify and indicate
 		_callback.setNotifyCharacteristicsChanged { device, characteristics, confirm, byteArray ->
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-				server.notifyCharacteristicChanged(device, characteristics, confirm, byteArray) ==
-						BluetoothStatusCodes.SUCCESS
-			else server.notifyCharacteristicChanged(device, characteristics, confirm)
+			try {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+					// values are set independent
+					val status = server
+						.notifyCharacteristicChanged(device, characteristics, confirm, byteArray)
+					status == BluetoothStatusCodes.SUCCESS
+				} else {
+					// set the characteristic value then notify
+					characteristics.value = byteArray
+					server.notifyCharacteristicChanged(device, characteristics, confirm)
+				}
+			} catch (_: IllegalStateException) {
+				_errorsFlow.tryEmit(Exception("Characteristic value is blank"))
+				false
+			}
 		}
-		_callback.setOnInformServiceAdded(bleServicesQueue::addNextService)
+
+		// services
+		val batteryService = buildBatteryService()
+		val environmentService = buildEnvironmentSensingService()
 
 		val services = listOf(
 			buildBleDeviceInfoService(),
 			buildEchoService(),
 			buildNordicUARTService(),
-			buildBatteryService()
+			batteryService,
+			environmentService
 		)
+
+		// initiate broadcast
+		batteryService.characteristics.find { it.uuid == BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC }
+			?.let(_callback::broadcastBatteryInfo)
+		environmentService.characteristics.find { it.uuid == BLEServerUUID.ILLUMINANCE_CHARACTERISTIC }
+			?.let(_callback::broadcastIlluminanceInfo)
+
 		bleServicesQueue.addServices(
 			services = services,
 			onComplete = { Log.d(TAG, "SERVICES ADDED :COUNT ${server.services.size}") },
