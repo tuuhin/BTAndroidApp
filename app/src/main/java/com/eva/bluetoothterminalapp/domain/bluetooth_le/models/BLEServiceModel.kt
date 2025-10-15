@@ -27,6 +27,6 @@ data class BLEServiceModel(
 		}
 
 
-	val charisticsCount: Int
+	val characteristicsCount: Int
 		get() = _characteristic.size
 }

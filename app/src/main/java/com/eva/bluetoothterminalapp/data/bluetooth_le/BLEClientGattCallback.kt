@@ -16,7 +16,6 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
-import com.eva.bluetoothterminalapp.presentation.util.BTConstants
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,8 +23,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.cancellable
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,13 +45,11 @@ class BLEClientGattCallback(
 	val connectionState = _connectionState.asStateFlow()
 
 	private val _bleGattServices = MutableStateFlow<List<BluetoothGattService>>(emptyList())
+	val bleGattServices = _bleGattServices
+		.map { services -> services.toDomainModelWithNames(reader = reader) }
+
 	private val bleGattServicesValue: List<BluetoothGattService>
 		get() = _bleGattServices.value
-
-	val bleServicesFlowAsDomainModel = _bleGattServices
-		.map { services -> services.toDomainModelWithNames(reader = reader) }
-		.cancellable()
-		.flowOn(Dispatchers.IO)
 
 	private val _readCharacteristic = MutableStateFlow<BLECharacteristicsModel?>(null)
 	val readCharacteristics = _readCharacteristic.asStateFlow()
@@ -67,19 +62,19 @@ class BLEClientGattCallback(
 			return
 		}
 
-		Log.d(GATT_LOGGER, "CONNECTION STATE DISCOVERY")
-
-		val connectionState = when (newState) {
+		val newConnectionState = when (newState) {
 			BluetoothProfile.STATE_CONNECTED -> BLEConnectionState.CONNECTED
 			BluetoothProfile.STATE_DISCONNECTED -> BLEConnectionState.DISCONNECTED
 			BluetoothProfile.STATE_CONNECTING -> BLEConnectionState.CONNECTING
 			BluetoothProfile.STATE_DISCONNECTING -> BLEConnectionState.DISCONNECTING
-			else -> BLEConnectionState.FAILED
+			else -> null
 		}
 
-		_connectionState.update { connectionState }
+		Log.d(GATT_LOGGER, "NEW CONNECTION STATE :$newConnectionState")
 
-		if (connectionState != BLEConnectionState.CONNECTED) return
+		_connectionState.update { newConnectionState ?: BLEConnectionState.FAILED }
+
+		if (newConnectionState != BLEConnectionState.CONNECTED) return
 
 		// signal strength this can change
 		gatt?.readRemoteRssi()
@@ -91,7 +86,7 @@ class BLEClientGattCallback(
 	override fun onReadRemoteRssi(gatt: BluetoothGatt?, rssi: Int, status: Int) {
 
 		if (status != BluetoothGatt.GATT_SUCCESS) return
-		Log.d(GATT_LOGGER, "RSSI READ")
+		Log.d(GATT_LOGGER, "READING RSSI SUCCESSFUL")
 		// update rssi value
 		_deviceRssi.update { rssi }
 	}
@@ -99,7 +94,7 @@ class BLEClientGattCallback(
 	override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
 
 		if (status != BluetoothGatt.GATT_SUCCESS) return
-		Log.d(GATT_LOGGER, "SERVICES DISCOVERED ")
+		Log.d(GATT_LOGGER, "SERVICES DISCOVERED")
 
 		val services = gatt?.services ?: emptyList()
 
@@ -110,14 +105,11 @@ class BLEClientGattCallback(
 
 	override fun onServiceChanged(gatt: BluetoothGatt) {
 		// re-discover services
-		Log.d(GATT_LOGGER, "DEVICES CHANGED")
+		Log.d(GATT_LOGGER, "SERVICES CHANGED RE-DISCOVERING SERVICES")
 		gatt.discoverServices()
 	}
 
-	@Deprecated(
-		message = "Used natively in Android 12 and lower",
-		replaceWith = ReplaceWith("onCharacteristicChanged(gatt, characteristic, characteristic.value)")
-	)
+	@Deprecated("Deprecated in Java")
 	override fun onCharacteristicRead(
 		gatt: BluetoothGatt?,
 		characteristic: BluetoothGattCharacteristic?,
@@ -136,6 +128,8 @@ class BLEClientGattCallback(
 		status: Int
 	) {
 		if (status != BluetoothGatt.GATT_SUCCESS) return
+
+		Log.d(GATT_LOGGER, "READ CHARACTERISTICS :${characteristic.uuid}")
 
 		scope.launch {
 			try {
@@ -168,10 +162,7 @@ class BLEClientGattCallback(
 		Log.d(GATT_LOGGER, "UPDATING THE CHARACTERISTIC VALUE $isSuccess")
 	}
 
-	@Deprecated(
-		message = "Used natively in Android 12 and lower",
-		replaceWith = ReplaceWith("onDescriptorRead(gatt, descriptor, descriptor.value)")
-	)
+	@Deprecated("Deprecated in Java")
 	override fun onDescriptorRead(
 		gatt: BluetoothGatt?,
 		descriptor: BluetoothGattDescriptor?,
@@ -190,6 +181,11 @@ class BLEClientGattCallback(
 		value: ByteArray
 	) {
 		if (status != BluetoothGatt.GATT_SUCCESS) return
+
+		Log.d(
+			GATT_LOGGER,
+			"READING DESCRIPTOR :${descriptor.uuid} CHARACTERISTICS :${descriptor.characteristic.uuid}"
+		)
 
 		scope.launch {
 			try {
@@ -231,10 +227,7 @@ class BLEClientGattCallback(
 		Log.d(GATT_LOGGER, "UPDATED DESCRIPTOR VALUE $isSuccess")
 	}
 
-	@Deprecated(
-		message = "Used natively in Android 12 and lower",
-		replaceWith = ReplaceWith("onCharacteristicChanged(gatt, characteristic, value)")
-	)
+	@Deprecated("Deprecated in Java")
 	override fun onCharacteristicChanged(
 		gatt: BluetoothGatt?,
 		characteristic: BluetoothGattCharacteristic?
@@ -261,7 +254,7 @@ class BLEClientGattCallback(
 					_readCharacteristic.update { domainModel }
 					// read the get descriptor then
 					val configDescriptor = characteristic
-						.getDescriptor(BTConstants.CLIENT_CONFIG_DESCRIPTOR_UUID)
+						.getDescriptor(BLEClientUUID.CCC_DESCRIPTOR_UUID)
 
 					gatt.readDescriptor(configDescriptor)
 					// set the read value once
@@ -281,7 +274,7 @@ class BLEClientGattCallback(
 		}
 	}
 
-	fun cancelAwaitingTasks() = scope.cancel()
+	fun cleanUp() = scope.cancel()
 
 	fun findCharacteristicFromDomainModel(
 		service: BLEServiceModel,

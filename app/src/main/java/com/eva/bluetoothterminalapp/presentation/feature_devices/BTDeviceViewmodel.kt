@@ -8,6 +8,7 @@ import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevices
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -72,6 +73,8 @@ class BTDeviceViewmodel(
 	override val uiEvents: SharedFlow<UiEvents>
 		get() = _uiEvents.asSharedFlow()
 
+	private var _leScanJob: Job? = null
+
 
 	fun onEvents(event: BTDevicesScreenEvents) {
 		when (event) {
@@ -98,11 +101,18 @@ class BTDeviceViewmodel(
 	}
 
 
-	private fun startLEScan() = viewModelScope.launch {
-		bLEScanner.startDiscovery()
+	private fun startLEScan() {
+		_leScanJob?.cancel()
+		_leScanJob = viewModelScope.launch {
+			bLEScanner.startDiscovery()
+		}
 	}
 
-	private fun stopLEScan() = bLEScanner.stopDiscovery()
+	private fun stopLEScan() {
+		_leScanJob?.cancel()
+		_leScanJob = null
+		bLEScanner.stopDiscovery()
+	}
 
 	private fun checkLEScanFailedReasons() = viewModelScope.launch {
 		bLEScanner.scanErrorCode.onEach { error ->
