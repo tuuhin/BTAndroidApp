@@ -18,6 +18,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,6 +37,7 @@ import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLECha
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLEDeviceConfigEvent
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLEDeviceProfileState
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.SelectedCharacteristicState
+import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
 import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
@@ -55,7 +57,8 @@ fun BLEDeviceRoute(
 	onConfigEvent: (BLEDeviceConfigEvent) -> Unit = {},
 	navigation: @Composable () -> Unit = {},
 ) {
-	val scrollConnection = TopAppBarDefaults.pinnedScrollBehavior()
+	val snackBarHostState = LocalSnackBarProvider.current
+	val scrollConnection = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
 	Scaffold(
 		topBar = {
@@ -66,6 +69,7 @@ fun BLEDeviceRoute(
 				scrollConnection = scrollConnection,
 			)
 		},
+		snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
 		modifier = modifier
 			.nestedScroll(scrollConnection.nestedScrollConnection)
 			.sharedBoundsWrapper(
@@ -88,6 +92,7 @@ fun BLEDeviceRoute(
 				visible = profile.connectionState == BLEConnectionState.CONNECTED,
 				enter = slideInVertically(animationSpec = tween(easing = FastOutLinearInEasing)) { height -> height } + fadeIn(),
 				exit = slideOutVertically(animationSpec = tween(easing = FastOutLinearInEasing)) { height -> height } + fadeOut(),
+				modifier = Modifier.weight(1f)
 			) {
 				BLEServicesList(
 					services = profile.services,
