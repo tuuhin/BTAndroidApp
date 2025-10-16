@@ -16,7 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -86,10 +85,6 @@ fun BTAppNavigationDrawer(
 						contentDescription = "Server Icon"
 					)
 				},
-				colors = NavigationDrawerItemDefaults.colors(
-					unselectedTextColor = MaterialTheme.colorScheme.outline,
-					unselectedIconColor = MaterialTheme.colorScheme.outline
-				),
 				modifier = Modifier.sharedBoundsWrapper(SharedElementTransitionKeys.BLE_SERVER_ITEM_TO_SERVER)
 			)
 			HorizontalDivider(

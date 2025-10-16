@@ -85,14 +85,14 @@ fun BLEDeviceServiceCard(
 					withStyle(
 						SpanStyle(
 							fontFamily = FontFamily.Monospace,
-							fontWeight = FontWeight.Medium
+							fontWeight = FontWeight.Medium,
+							color = MaterialTheme.colorScheme.onSurfaceVariant,
 						)
 					) {
 						append("${bleService.serviceUUID}")
 					}
 				},
-				style = MaterialTheme.typography.bodyMedium,
-				color = MaterialTheme.colorScheme.secondary,
+				style = MaterialTheme.typography.bodySmall,
 				maxLines = 2,
 				overflow = TextOverflow.Clip
 			)

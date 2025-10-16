@@ -5,26 +5,22 @@ import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.Blue
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.BTServerViewModel
 import com.eva.bluetoothterminalapp.presentation.feature_devices.BTDeviceViewmodel
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.BLEDeviceViewModel
+import com.eva.bluetoothterminalapp.presentation.feature_le_server.BLEServerViewModel
 import com.eva.bluetoothterminalapp.presentation.feature_settings.AppSettingsViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val viewModelModule = module {
 
-	// devices viewmodel
+	//devices
 	viewModelOf(::BTDeviceViewmodel)
-
-	// client viewmodel
+	// bl classic
 	viewModelOf(::BTClientViewModel)
-
-	//server viewmodel
 	viewModelOf(::BTServerViewModel)
-
-	// btle viewmodel
-	viewModelOf(::BLEDeviceViewModel)
-
-	// profile viewmodel
 	viewModelOf(::BluetoothProfileViewModel)
-
+	//ble
+	viewModelOf(::BLEDeviceViewModel)
+	viewModelOf(::BLEServerViewModel)
+	//settings
 	viewModelOf(::AppSettingsViewModel)
 }

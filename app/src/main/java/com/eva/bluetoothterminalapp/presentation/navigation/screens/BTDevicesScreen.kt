@@ -29,6 +29,7 @@ import com.eva.bluetoothterminalapp.presentation.util.LocalSharedTransitionVisib
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.BleClientRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.BleServerRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.BtProfileDestination
 import com.ramcosta.composedestinations.generated.destinations.BtServerRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.InfoDestination
@@ -76,7 +77,10 @@ fun AnimatedVisibilityScope.BTDevicesScreen(
 					},
 					onNavigateToClassicServer = {
 						navigator.navigate(BtServerRouteDestination)
-					}
+					},
+					onNavigateToBLEServer = {
+						navigator.navigate(BleServerRouteDestination)
+					},
 				)
 			},
 		) {
