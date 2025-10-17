@@ -9,25 +9,27 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import kotlinx.collections.immutable.ImmutableList
 
@@ -36,6 +38,12 @@ fun BLEConnectedClients(
 	connectedClients: ImmutableList<BluetoothDeviceModel>,
 	modifier: Modifier = Modifier
 ) {
+	val isLocalInspectionMode = LocalInspectionMode.current
+	val bluetoothDeviceListKeys: ((Int, BluetoothDeviceModel) -> Any)? = remember {
+		if (isLocalInspectionMode) null
+		else { _, service -> service.address }
+	}
+
 	Column(
 		modifier = modifier,
 		verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -54,12 +62,12 @@ fun BLEConnectedClients(
 			) {
 				Text(
 					text = "Connected Clients",
-					style = MaterialTheme.typography.titleMedium,
+					style = MaterialTheme.typography.titleLarge,
 					color = MaterialTheme.colorScheme.onSurface
 				)
 				Text(
 					text = "List of connected clients",
-					style = MaterialTheme.typography.labelLarge,
+					style = MaterialTheme.typography.bodyMedium,
 					color = MaterialTheme.colorScheme.onSurfaceVariant
 				)
 			}
@@ -88,34 +96,37 @@ fun BLEConnectedClients(
 				}
 			}
 		}
-		LazyHorizontalGrid(
-			rows = GridCells.Fixed(2),
-			modifier = Modifier.fillMaxSize(),
-			contentPadding = PaddingValues(vertical = 2.dp),
-			verticalArrangement = Arrangement.spacedBy(12.dp),
+		LazyRow(
+			modifier = Modifier.fillMaxWidth(),
+			contentPadding = PaddingValues(vertical = 6.dp),
 			horizontalArrangement = Arrangement.spacedBy(12.dp)
 		) {
 			if (connectedClients.isNotEmpty()) {
 				itemsIndexed(
 					items = connectedClients,
-					key = { _, item -> item.address },
+					key = bluetoothDeviceListKeys,
 				) { _, device ->
 					ConnectedDeviceCard(
 						device = device,
+						containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
 						modifier = Modifier
 							.animateItem(),
 					)
 				}
 			} else {
-				item(span = { GridItemSpan(currentLineSpan = 2) }) {
-					Text(
-						text = "No Clients connected",
-						textAlign = TextAlign.Center,
+				item {
+					Box(
 						modifier = Modifier
 							.fillMaxWidth()
-							.padding(vertical = 12.dp)
-							.animateItem()
-					)
+							.heightIn(min = 40.dp)
+							.animateItem(),
+						contentAlignment = Alignment.Center
+					) {
+						Text(
+							text = stringResource(R.string.ble_server_no_clients),
+							textAlign = TextAlign.Center,
+						)
+					}
 				}
 			}
 		}

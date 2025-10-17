@@ -12,20 +12,23 @@ import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.data.samples.SampleUUIDReader
+import com.eva.bluetoothterminalapp.data.utils.hasBTAdvertisePermission
 import com.eva.bluetoothterminalapp.data.utils.hasBTConnectPermission
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BLEServerConnector
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEServerServices
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import com.eva.bluetoothterminalapp.domain.device.BatteryReader
 import com.eva.bluetoothterminalapp.domain.device.LightSensorReader
 import com.eva.bluetoothterminalapp.domain.exceptions.BLEAdvertiseUnsupportedException
+import com.eva.bluetoothterminalapp.domain.exceptions.BTAdvertisePermissionNotFound
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothNotEnabled
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
-import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 
 private const val TAG = "BLE_SERVER"
@@ -51,10 +54,7 @@ class AndroidBLEServerConnector(
 	private var _bleServer: BluetoothGattServer? = null
 
 	private val _isServerRunning = MutableStateFlow(false)
-	private val _errorsFlow = MutableSharedFlow<Exception>(
-		extraBufferCapacity = 4,
-		onBufferOverflow = BufferOverflow.DROP_OLDEST
-	)
+	private val _errorsChannel = Channel<Exception>(capacity = Channel.CONFLATED)
 
 	override val connectedDevices: Flow<List<BluetoothDeviceModel>>
 		get() = _callback.connectedDevices
@@ -66,11 +66,12 @@ class AndroidBLEServerConnector(
 		get() = _isServerRunning
 
 	override val errorsFlow: Flow<Exception>
-		get() = _errorsFlow
+		get() = _errorsChannel.receiveAsFlow()
 
 	private val _advertiseCallback = object : AdvertiseCallback() {
 		override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
 			super.onStartSuccess(settingsInEffect)
+			_isServerRunning.update { true }
 			Log.d(TAG, "ADVERTISEMENT STARTED!!")
 		}
 
@@ -84,13 +85,14 @@ class AndroidBLEServerConnector(
 				ADVERTISE_FAILED_FEATURE_UNSUPPORTED -> Exception("BLE not supported")
 				else -> Exception("Cannot start the advertisement")
 			}
-			_errorsFlow.tryEmit(exception)
+			_errorsChannel.trySend(exception)
 		}
 	}
 
 	@Suppress("DEPRECATION")
-	override fun onStartServer(): Result<Boolean> {
+	override fun onStartServer(options: Set<BLEServerServices>): Result<Boolean> {
 		if (!context.hasBTConnectPermission) return Result.failure(BluetoothPermissionNotProvided())
+		if (!context.hasBTAdvertisePermission) return Result.failure(BTAdvertisePermissionNotFound())
 		if (_bluetoothManager?.adapter?.isEnabled != true) return Result.failure(BluetoothNotEnabled())
 		if (_bluetoothManager?.adapter?.isMultipleAdvertisementSupported == false)
 			return Result.failure(BLEAdvertiseUnsupportedException())
@@ -100,7 +102,6 @@ class AndroidBLEServerConnector(
 
 		_bleServer = _bluetoothManager?.openGattServer(context, _callback)
 		Log.i(TAG, "GATT SERVER BEGUN!")
-		_isServerRunning.update { true }
 
 		val server = _bleServer ?: return Result.success(false)
 
@@ -119,33 +120,32 @@ class AndroidBLEServerConnector(
 						.notifyCharacteristicChanged(device, characteristics, confirm, byteArray)
 					status == BluetoothStatusCodes.SUCCESS
 				} else {
-					// set the characteristic value then notify
+					// set the characteristics value then notify
 					characteristics.value = byteArray
 					server.notifyCharacteristicChanged(device, characteristics, confirm)
 				}
 			} catch (_: IllegalStateException) {
-				_errorsFlow.tryEmit(Exception("Characteristic value is blank"))
+				_errorsChannel.trySend(Exception("Characteristics value is blank"))
 				false
 			}
 		}
 
+		// initiate broadcast for battery service
+		if (BLEServerServices.BATTERY_LEVEL_SERVICE in options) {
+			val batteryService = BLEServerServices.BATTERY_LEVEL_SERVICE.toBLEService
+			batteryService.characteristics.find { it.uuid == BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC }
+				?.let(_callback::broadcastBatteryInfo)
+		}
+
+		// initiate broadcast for environment service
+		if (BLEServerServices.ENVIRONMENT_SENSING_SERVICE in options) {
+			val environmentService = BLEServerServices.ENVIRONMENT_SENSING_SERVICE.toBLEService
+			environmentService.characteristics.find { it.uuid == BLEServerUUID.ILLUMINANCE_CHARACTERISTIC }
+				?.let(_callback::broadcastIlluminanceInfo)
+		}
+
 		// services
-		val batteryService = buildBatteryService()
-		val environmentService = buildEnvironmentSensingService()
-
-		val services = listOf(
-			buildBleDeviceInfoService(),
-			buildEchoService(),
-			buildNordicUARTService(),
-			batteryService,
-			environmentService
-		)
-
-		// initiate broadcast
-		batteryService.characteristics.find { it.uuid == BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC }
-			?.let(_callback::broadcastBatteryInfo)
-		environmentService.characteristics.find { it.uuid == BLEServerUUID.ILLUMINANCE_CHARACTERISTIC }
-			?.let(_callback::broadcastIlluminanceInfo)
+		val services = options.map { it.toBLEService }
 
 		bleServicesQueue.addServices(
 			services = services,
@@ -156,6 +156,7 @@ class AndroidBLEServerConnector(
 			.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
 			.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM)
 			.setConnectable(true)
+			.setTimeout(0)
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 			settingsBuilder.setDiscoverable(true)

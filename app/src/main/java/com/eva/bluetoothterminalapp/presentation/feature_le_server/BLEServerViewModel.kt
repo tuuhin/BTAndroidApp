@@ -2,16 +2,19 @@ package com.eva.bluetoothterminalapp.presentation.feature_le_server
 
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BLEServerConnector
+import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEServerServices
 import com.eva.bluetoothterminalapp.presentation.feature_le_server.state.BLEServerScreenEvents
+import com.eva.bluetoothterminalapp.presentation.feature_le_server.state.BLEServerScreenState
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -26,7 +29,26 @@ class BLEServerViewModel(
 ) : AppViewModel() {
 
 	private val _showServerRunningDialog = MutableStateFlow(false)
-	val showServerRunningDialog = _showServerRunningDialog.asStateFlow()
+	private val _showServicesSelector = MutableStateFlow(false)
+	private val _selectedServiceOptions = MutableStateFlow(BLEServerServices.entries.toSet())
+
+	val screenState = combine(
+		_showServerRunningDialog,
+		_showServicesSelector,
+		_selectedServiceOptions,
+		connector.isServerRunning
+	) { showServerRunning, showSelector, selected, isServerRunning ->
+		BLEServerScreenState(
+			showServerRunningDialog = showServerRunning,
+			showServiceSelector = showSelector,
+			isServerRunning = isServerRunning,
+			serverServices = selected.toImmutableSet()
+		)
+	}.stateIn(
+		scope = viewModelScope,
+		started = SharingStarted.WhileSubscribed(5_000L),
+		initialValue = BLEServerScreenState()
+	)
 
 	val connectedClients = connector.connectedDevices
 		.map { it.toImmutableList() }
@@ -36,9 +58,7 @@ class BLEServerViewModel(
 			initialValue = persistentListOf()
 		)
 
-	val isServerRunning = connector.isServerRunning
-
-	val serverServices = connector.services
+	val connectedServices = connector.services
 		.map { it.toImmutableList() }
 		.stateIn(
 			scope = viewModelScope,
@@ -55,13 +75,23 @@ class BLEServerViewModel(
 		when (event) {
 			BLEServerScreenEvents.OnStartServer -> onConnectToServer()
 			BLEServerScreenEvents.OnStopServer -> connector.onStopServer()
+			is BLEServerScreenEvents.UpdateServiceOptions -> onUpdatedSeverOptionSet(event.option)
 			BLEServerScreenEvents.OnCloseServerRunningDialog -> _showServerRunningDialog.update { false }
 			BLEServerScreenEvents.OnShowServerRunningDialog -> _showServerRunningDialog.update { true }
+			BLEServerScreenEvents.OnToggleServiceSelector -> _showServicesSelector.update { !it }
+		}
+	}
+
+	private fun onUpdatedSeverOptionSet(option: BLEServerServices) {
+		_selectedServiceOptions.update { previous ->
+			if (option in previous) previous.filter { it != option }.toSet()
+			else previous + option
 		}
 	}
 
 	private fun onConnectToServer() = viewModelScope.launch {
-		val result = connector.onStartServer()
+		val selectedOptions = _selectedServiceOptions.value
+		val result = connector.onStartServer(selectedOptions)
 		result.fold(
 			onSuccess = { _uiEvent.emit(UiEvents.ShowToast("Server Started")) },
 			onFailure = { err ->

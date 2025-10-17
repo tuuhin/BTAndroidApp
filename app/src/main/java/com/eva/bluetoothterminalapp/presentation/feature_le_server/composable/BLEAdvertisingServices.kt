@@ -2,6 +2,7 @@ package com.eva.bluetoothterminalapp.presentation.feature_le_server.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,10 +14,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLEDeviceServiceCard
 import kotlinx.collections.immutable.ImmutableList
@@ -26,6 +32,12 @@ fun BLEAdvertisingServices(
 	services: ImmutableList<BLEServiceModel>,
 	modifier: Modifier = Modifier
 ) {
+	val isLocalInspectionMode = LocalInspectionMode.current
+	val servicesListKeys: ((Int, BLEServiceModel) -> Any)? = remember {
+		if (isLocalInspectionMode) null
+		else { _, service -> service.serviceId }
+	}
+
 	Column(
 		modifier = modifier,
 		verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -69,15 +81,33 @@ fun BLEAdvertisingServices(
 			modifier = Modifier.clip(MaterialTheme.shapes.medium),
 			verticalArrangement = Arrangement.spacedBy(12.dp),
 		) {
-			itemsIndexed(
-				items = services,
-				key = { _, item -> item.serviceId },
-			) { _, service ->
-				BLEDeviceServiceCard(
-					bleService = service,
-					shape = MaterialTheme.shapes.medium,
-					modifier = Modifier.animateItem()
-				)
+			if (services.isNotEmpty()) {
+				itemsIndexed(
+					items = services,
+					key = servicesListKeys,
+				) { _, service ->
+					BLEDeviceServiceCard(
+						bleService = service,
+						shape = MaterialTheme.shapes.medium,
+						containerColor = MaterialTheme.colorScheme.surfaceContainer,
+						modifier = Modifier.animateItem()
+					)
+				}
+			} else {
+				item {
+					Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.heightIn(min = 40.dp)
+							.animateItem(),
+						contentAlignment = Alignment.Center
+					) {
+						Text(
+							text = stringResource(R.string.ble_server_no_services),
+							textAlign = TextAlign.Center,
+						)
+					}
+				}
 			}
 		}
 	}

@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.data.utils.hasBTAdvertisePermission
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
@@ -26,6 +28,7 @@ fun BLEServerScreenContent(
 	connectedClients: ImmutableList<BluetoothDeviceModel>,
 	services: ImmutableList<BLEServiceModel>,
 	onStartServer: () -> Unit,
+	onConfigureServices: () -> Unit,
 	modifier: Modifier = Modifier,
 	isServerRunning: Boolean = false,
 	contentPadding: PaddingValues = PaddingValues.Zero
@@ -55,21 +58,21 @@ fun BLEServerScreenContent(
 			Column(
 				modifier = Modifier
 					.fillMaxSize()
-					.padding(contentPadding)
+					.padding(contentPadding),
+				verticalArrangement = Arrangement.spacedBy(6.dp)
 			) {
 				BLEConnectedClients(
 					connectedClients = connectedClients,
-					modifier = Modifier.weight(1.2f)
 				)
 				BLEAdvertisingServices(
 					services = services,
-					modifier = Modifier.weight(.8f)
+					modifier = Modifier.weight(1f)
 				)
 			}
 		} else {
 			StartBLEServer(
 				onStartServer = { if (canAdvertise) onStartServer() else showDialog = true },
-				onConfigureServices = {},
+				onConfigureServices = onConfigureServices,
 				modifier = Modifier
 					.fillMaxSize()
 					.padding(contentPadding)

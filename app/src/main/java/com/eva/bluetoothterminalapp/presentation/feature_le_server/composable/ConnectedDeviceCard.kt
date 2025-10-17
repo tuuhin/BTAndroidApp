@@ -14,10 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.presentation.feature_devices.composables.BTDeviceIcon
 
@@ -37,7 +39,7 @@ fun ConnectedDeviceCard(
 		Column(
 			verticalArrangement = Arrangement.Center,
 			horizontalAlignment = Alignment.CenterHorizontally,
-			modifier = Modifier.padding(all = 10.dp)
+			modifier = Modifier.padding(all = dimensionResource(R.dimen.ble_server_device_card_padding))
 		) {
 			BTDeviceIcon(
 				device = device,

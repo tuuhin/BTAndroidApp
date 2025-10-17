@@ -14,6 +14,7 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.feature_le_server.BLEServerRoute
 import com.eva.bluetoothterminalapp.presentation.feature_le_server.BLEServerViewModel
+import com.eva.bluetoothterminalapp.presentation.feature_le_server.state.BLEServerScreenEvents
 import com.eva.bluetoothterminalapp.presentation.navigation.UIEventsSideEffect
 import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
 import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
@@ -34,9 +35,8 @@ fun AnimatedVisibilityScope.BLEServerScreen(
 
 	val viewModel = koinViewModel<BLEServerViewModel>()
 	val connectedClients by viewModel.connectedClients.collectAsStateWithLifecycle()
-	val services by viewModel.serverServices.collectAsStateWithLifecycle()
-	val isServerRunning by viewModel.isServerRunning.collectAsStateWithLifecycle()
-	val showServerRunningDialog by viewModel.showServerRunningDialog.collectAsStateWithLifecycle()
+	val services by viewModel.connectedServices.collectAsStateWithLifecycle()
+	val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
 	UIEventsSideEffect(
 		events = { viewModel.uiEvents },
@@ -46,12 +46,18 @@ fun AnimatedVisibilityScope.BLEServerScreen(
 	CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
 		BLEServerRoute(
 			connectedClients = connectedClients,
-			serverServices = services,
-			isServerRunning = isServerRunning,
-			showConnectionCloseDialog = showServerRunningDialog,
+			connectedServices = services,
+			isServerRunning = screenState.isServerRunning,
+			showConnectionCloseDialog = screenState.showServerRunningDialog,
+			showServiceOptionSelector = screenState.showServiceSelector,
+			serverServicesOptions = screenState.serverServices,
 			onEvent = viewModel::onEvent,
 			navigation = {
-				val onBack = dropUnlessResumed { navigator.popBackStack() }
+				val onBack = dropUnlessResumed {
+					if (screenState.isServerRunning)
+						viewModel.onEvent(BLEServerScreenEvents.OnShowServerRunningDialog)
+					else navigator.popBackStack()
+				}
 				IconButton(onClick = onBack) {
 					Icon(
 						imageVector = Icons.AutoMirrored.Default.ArrowBack,

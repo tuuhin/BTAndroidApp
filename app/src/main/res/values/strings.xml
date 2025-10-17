@@ -199,6 +199,18 @@
   <string name="dialog_action_allow">Allow</string>
   <string name="ble_advertise_permission_missing">Advertising permission missing</string>
   <string name="ble_advertise_permission_missing_text">BLE server needs bluetooth advertising permission to advertise its packets for clients to connect</string>
-  <string name="ble_server_start_text">Select among the avaiable services and start the server</string>
+  <string name="ble_server_start_text">Select among the available services and start the server</string>
   <string name="ble_server_set_services">Configure Services</string>
+  <string name="ble_server_no_clients">No connected clients</string>
+  <string name="ble_server_service_option_echo">Echo Service</string>
+  <string name="ble_server_service_option_environment">Environment Sensing</string>
+  <string name="ble_server_service_option_battery">Battery</string>
+  <string name="ble_server_service_option_nus">Nordic UART Service</string>
+  <string name="ble_server_service_option_echo_text">Echo messages from and to the client with same address</string>
+  <string name="ble_server_service_option_nus_text">Emulates a serial port over BLE for sending data between a device and client</string>
+  <string name="ble_server_service_option_battery_text">Reads device battery</string>
+  <string name="ble_server_service_option_environment_text">Read environmental data like ambient light</string>
+  <string name="ble_server_service_option_device">Device Info Service</string>
+  <string name="ble_server_service_option_device_text">Provides characteristics to read device specific data</string>
+  <string name="ble_server_no_services">No services are attach to run with the server</string>
 </resources>
