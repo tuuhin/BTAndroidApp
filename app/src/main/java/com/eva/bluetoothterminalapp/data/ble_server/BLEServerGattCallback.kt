@@ -1,37 +1,38 @@
 package com.eva.bluetoothterminalapp.data.ble_server
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattServerCallback
 import android.bluetooth.BluetoothGattService
-import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import androidx.core.content.getSystemService
 import com.eva.bluetoothterminalapp.data.mapper.toDomainModel
+import com.eva.bluetoothterminalapp.data.mapper.toDomainModelWithNames
 import com.eva.bluetoothterminalapp.data.samples.SampleUUIDReader
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import com.eva.bluetoothterminalapp.domain.device.BatteryReader
 import com.eva.bluetoothterminalapp.domain.device.LightSensorReader
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -49,7 +50,6 @@ class BLEServerGattCallback(
 	private val uuidReader: SampleUUIDReader,
 ) : BluetoothGattServerCallback() {
 
-	private val _btManager by lazy { context.getSystemService<BluetoothManager>() }
 	private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
 	private val _connectedDevices = MutableStateFlow<List<BluetoothDeviceModel>>(emptyList())
@@ -63,16 +63,14 @@ class BLEServerGattCallback(
 	private val _nusValuesMap = ConcurrentHashMap<String, BLEMessageModel.NUSMessage>()
 
 	// notifications : latest one and the notification map
-	private val _latestNotification = MutableSharedFlow<BLENotificationModel>(
-		replay = 0,
-		extraBufferCapacity = 32,
-		onBufferOverflow = BufferOverflow.DROP_OLDEST
-	)
-	private val _notificationsMap = ConcurrentHashMap<String, BLENotificationModel>()
+	private val _notificationHandler by lazy { BLEServerNotificationManager(context) }
 
 	private var _sendResponse: SendResponse? = null
 	private var _notifyCharacteristicsChanged: NotifyCharacteristicsChanged? = null
 	private var _onServiceAdded: (() -> Unit)? = null
+
+	private var _batteryLevelJob: Job? = null
+	private var _illuminationSensorJob: Job? = null
 
 	fun setOnSendResponse(callback: SendResponse) {
 		_sendResponse = callback
@@ -86,72 +84,39 @@ class BLEServerGattCallback(
 		_onServiceAdded = onServiceAdded
 	}
 
-	fun broadcastBatteryInfo(characteristics: BluetoothGattCharacteristic) {
+	fun broadcastBatteryInfo(service: BluetoothGattService) {
+		val characteristic = service.getCharacteristic(BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC)
+			?: return
 
-		val batteryLevelFlow = batteryReader.batteryLevelFlow()
-		val batteryNotification = _latestNotification
-			.filterIsInstance<BLENotificationModel.BLEBatteryNotification>()
+		Log.d(TAG, "BROADCAST BATTERY INFO READY")
 
-		combine(batteryLevelFlow, batteryNotification) { level, _ -> level }
-			.onEach { level ->
-				val clients = _notificationsMap.mapNotNull { (address, notification) ->
-					if (!notification.isEnabled) return@mapNotNull null
-					if (!BluetoothAdapter.checkBluetoothAddress(address)) return@mapNotNull null
-					_btManager?.adapter?.getRemoteDevice(address)
-				}
-
-				if (clients.isEmpty()) {
-					Log.d(TAG, "NO NOTIFICATION ENABLED CLIENT ")
-					return@onEach
-				}
-
-				Log.i(TAG, "BATTERY LEVEL :$level")
-				Log.d(TAG, "BROADCASTING BATTERY LEVEL DATA TO :${clients.size} CLIENTS")
-
-				val value = "$level".toByteArray(Charsets.UTF_8)
-
-				clients.forEach { device ->
-					_notifyCharacteristicsChanged?.invoke(device, characteristics, false, value)
-				}
-
+		_batteryLevelJob?.cancel()
+		_batteryLevelJob = onBroadcastToSubscribers(
+			devicesFlow = _notificationHandler.batteryNotificationDevices,
+			notificationsFlow = batteryReader.batteryLevelFlow(),
+			onNotify = { client, level ->
+				val bytes = "$level".toByteArray(Charsets.UTF_8)
+				_notifyCharacteristicsChanged?.invoke(client, characteristic, false, bytes)
 			}
-			.flowOn(Dispatchers.IO)
-			.catch { err -> Log.e(TAG, "ISSUES IN SENDING BATTERY NOTIFICATION", err) }
-			.launchIn(scope)
+		)
 	}
 
-	// TODO: Fix this function call only to read light sensor readings if at-least a device present
-	fun broadcastIlluminanceInfo(characteristics: BluetoothGattCharacteristic) {
-		val lightReadings = lightSensorReader.readValuesFlow()
-		val lightNotifications = _latestNotification
-			.filterIsInstance<BLENotificationModel.BLEIlluminanceNotification>()
+	fun broadcastIlluminanceInfo(service: BluetoothGattService) {
+		val characteristic = service.getCharacteristic(BLEServerUUID.ILLUMINANCE_CHARACTERISTIC)
+			?: return
 
-		combine(lightReadings, lightNotifications) { illuminance, _ -> illuminance }
-			.onEach { illuminance ->
-				val clients = _notificationsMap.mapNotNull { (address, notification) ->
-					if (!notification.isEnabled) return@mapNotNull null
-					if (!BluetoothAdapter.checkBluetoothAddress(address)) return@mapNotNull null
-					_btManager?.adapter?.getRemoteDevice(address)
-				}
+		Log.d(TAG, "BROADCAST ILLUMINATION INFO READY")
 
-				if (clients.isEmpty()) {
-					Log.d(TAG, "NO ILLUMINANCE NOTIFICATION ENABLED CLIENT ")
-					return@onEach
-				}
-
-				Log.i(TAG, "ILLUMINANCE :$illuminance")
-				Log.d(TAG, "BROADCASTING ILLUMINANCE DATA TO :${clients.size} CLIENTS")
-
+		_illuminationSensorJob?.cancel()
+		_illuminationSensorJob = onBroadcastToSubscribers(
+			devicesFlow = _notificationHandler.illuminationNotificationDevices,
+			notificationsFlow = lightSensorReader.readValuesFlow(),
+			onNotify = { client, illuminance ->
 				val illuminanceValue = (illuminance * 100).toInt() / 100f
-				val value = "$illuminanceValue".toByteArray(charset = Charsets.UTF_8)
-
-				clients.forEach { device ->
-					_notifyCharacteristicsChanged?.invoke(device, characteristics, false, value)
-				}
+				val bytes = "$illuminanceValue".toByteArray(Charsets.UTF_8)
+				_notifyCharacteristicsChanged?.invoke(client, characteristic, false, bytes)
 			}
-			.flowOn(Dispatchers.IO)
-			.catch { err -> Log.e(TAG, "ISSUES IN ILLUMINANCE NOTIFICATION", err) }
-			.launchIn(scope)
+		)
 	}
 
 
@@ -180,7 +145,7 @@ class BLEServerGattCallback(
 				// remove the device
 				_echoValuesMap.remove(device.address)
 				_nusValuesMap.remove(device.address)
-				_notificationsMap.remove(device.address)
+				_notificationHandler.onClear()
 			}
 
 			else -> {}
@@ -199,8 +164,12 @@ class BLEServerGattCallback(
 
 		scope.launch {
 			val domainService = service.toDomainModel()
-			val sampleUUID = uuidReader.findServiceNameForUUID(service.uuid)
-			domainService.probableName = sampleUUID?.name
+			val serviceName = async { uuidReader.findServiceNameForUUID(service.uuid) }
+			val characteristicDeferred = service.characteristics.map { characteristic ->
+				async { characteristic.toDomainModelWithNames(uuidReader) }
+			}
+			domainService.probableName = serviceName.await()?.name
+			domainService.characteristic = characteristicDeferred.awaitAll().toPersistentList()
 
 			_services.update { previous -> (previous + domainService).distinctBy { it.serviceId } }
 
@@ -258,11 +227,13 @@ class BLEServerGattCallback(
 
 			BLEServerUUID.ENVIRONMENTAL_SENSING_SERVICE -> {
 				if (characteristic.uuid == BLEServerUUID.ILLUMINANCE_CHARACTERISTIC) {
-					scope.launch {
-						val value = lightSensorReader.readCurrentValue().toString()
-							.toByteArray(charset)
-						_sendResponse
-							?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
+					scope.launch(Dispatchers.IO) {
+						var status = BluetoothGatt.GATT_FAILURE
+						val value = lightSensorReader.readCurrentValue()?.let { value ->
+							status = BluetoothGatt.GATT_SUCCESS
+							"$value".toByteArray(Charsets.UTF_8)
+						}
+						_sendResponse?.invoke(device, requestId, status, offset, value)
 					}
 				} else isFailedResponse = true
 			}
@@ -384,7 +355,13 @@ class BLEServerGattCallback(
 
 			BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC, BLEServerUUID.ILLUMINANCE_CHARACTERISTIC -> {
 				val readValue = if (descriptor.uuid == BLEServerUUID.CCC_DESCRIPTOR) {
-					val isEnabled = _notificationsMap[device.address]?.isEnabled ?: false
+					val type = when (descriptor.characteristic.uuid) {
+						BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC -> BLENotificationTypes.BATTERY
+						BLEServerUUID.ILLUMINANCE_CHARACTERISTIC -> BLENotificationTypes.ILLUMINANCE
+						// this will never be called so not handing it here
+						else -> return
+					}
+					val isEnabled = _notificationHandler.isNotificationEnabled(device.address, type)
 					if (isEnabled) BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
 					else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
 				} else null
@@ -416,8 +393,18 @@ class BLEServerGattCallback(
 
 		when (descriptor.uuid) {
 			BLEServerUUID.CCC_DESCRIPTOR -> {
+				// FOR CCC value cannot be null
+				if (value == null) {
+					Log.e(TAG, "INVALID VALUE , VALUE CANNOT BE NULL FOR DESCRIPTOR")
+					if (!responseNeeded) return
+					_sendResponse
+						?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
+					return
+				}
+
 				val isNotifyEnabled = when {
 					value.contentEquals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) -> true
+					value.contentEquals(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE) -> true
 					value.contentEquals(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE) -> false
 					else -> {
 						if (!responseNeeded) return
@@ -447,24 +434,36 @@ class BLEServerGattCallback(
 					}
 
 					BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC -> {
-						val newState =
-							BLENotificationModel.BLEBatteryNotification(isEnabled = isNotifyEnabled)
-						_notificationsMap[device.address] = newState
-						_latestNotification.tryEmit(newState)
+						_notificationHandler.onUpdateNotification(
+							device.address,
+							BLENotificationTypes.BATTERY,
+							isNotifyEnabled
+						)
 					}
 
 					BLEServerUUID.ILLUMINANCE_CHARACTERISTIC -> {
-						val newState =
-							BLENotificationModel.BLEIlluminanceNotification(isEnabled = isNotifyEnabled)
-						_notificationsMap[device.address] = newState
-						_latestNotification.tryEmit(newState)
+						_notificationHandler.onUpdateNotification(
+							device.address,
+							BLENotificationTypes.ILLUMINANCE,
+							isNotifyEnabled
+						)
+					}
+
+					else -> {
+						Log.w(TAG, "INVALID CHARACTERISTICS FOR CCC DESCRIPTOR")
+						// not matching characteristic id
+						if (!responseNeeded) return
+						_sendResponse
+							?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
+						return
 					}
 				}
 				if (!responseNeeded) return
-				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, null)
+				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value)
 			}
 
 			else -> {
+				// not matching descriptor id
 				if (!responseNeeded) return
 				_sendResponse?.invoke(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null)
 			}
@@ -476,5 +475,22 @@ class BLEServerGattCallback(
 		_echoValuesMap.clear()
 		_nusValuesMap.clear()
 		scope.cancel()
+	}
+
+	@OptIn(ExperimentalCoroutinesApi::class)
+	private fun <T> onBroadcastToSubscribers(
+		devicesFlow: Flow<List<BluetoothDevice>>,
+		notificationsFlow: Flow<T>,
+		onNotify: suspend (device: BluetoothDevice, bytes: T) -> Unit,
+		onCancel: () -> Unit = {},
+	): Job {
+		return devicesFlow.onEach { clients ->
+			if (clients.isEmpty()) onCancel()
+		}.flatMapLatest { clients ->
+			if (clients.isEmpty()) emptyFlow()
+			else notificationsFlow.map { notificationValue -> clients to notificationValue }
+		}.onEach { (clients, bytes) ->
+			for (client in clients) onNotify(client, bytes)
+		}.launchIn(scope)
 	}
 }

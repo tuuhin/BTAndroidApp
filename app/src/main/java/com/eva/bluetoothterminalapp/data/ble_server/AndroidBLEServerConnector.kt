@@ -130,27 +130,23 @@ class AndroidBLEServerConnector(
 			}
 		}
 
-		// initiate broadcast for battery service
-		if (BLEServerServices.BATTERY_LEVEL_SERVICE in options) {
-			val batteryService = BLEServerServices.BATTERY_LEVEL_SERVICE.toBLEService
-			batteryService.characteristics.find { it.uuid == BLEServerUUID.BATTERY_LEVEL_CHARACTERISTIC }
-				?.let(_callback::broadcastBatteryInfo)
-		}
-
-		// initiate broadcast for environment service
-		if (BLEServerServices.ENVIRONMENT_SENSING_SERVICE in options) {
-			val environmentService = BLEServerServices.ENVIRONMENT_SENSING_SERVICE.toBLEService
-			environmentService.characteristics.find { it.uuid == BLEServerUUID.ILLUMINANCE_CHARACTERISTIC }
-				?.let(_callback::broadcastIlluminanceInfo)
-		}
-
-		// services
+		// list of services to be added
 		val services = options.map { it.toBLEService }
 
 		bleServicesQueue.addServices(
 			services = services,
-			onComplete = { Log.d(TAG, "SERVICES ADDED :COUNT ${server.services.size}") },
+			onComplete = {
+				Log.d(TAG, "SERVICES ADDED :COUNT ${server.services.size}")
+
+				// registering the notification services when all done
+				// the serves need to match the registered services so don't create new objects
+				services.find { it.uuid == BLEServerUUID.BATTERY_SERVICE }
+					?.let(_callback::broadcastBatteryInfo)
+				services.find { it.uuid == BLEServerUUID.ENVIRONMENTAL_SENSING_SERVICE }
+					?.let(_callback::broadcastIlluminanceInfo)
+			},
 		)
+
 		// advertisement settings
 		val settingsBuilder = AdvertiseSettings.Builder()
 			.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
