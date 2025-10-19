@@ -71,7 +71,8 @@ fun SelectableBLECharacteristics(
 					withStyle(
 						SpanStyle(
 							fontFamily = FontFamily.Monospace,
-							fontWeight = FontWeight.Medium
+							fontWeight = FontWeight.Medium,
+							color = MaterialTheme.colorScheme.onSurfaceVariant,
 						)
 					) {
 						append("${characteristic.uuid}")

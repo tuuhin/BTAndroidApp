@@ -68,7 +68,7 @@
   <string name="ble_connection_disconnecting">Disconnecting</string>
   <string name="ble_connection_disconnected">Disconnected</string>
   <string name="ble_connection_failed">Failed</string>
-  <string name="ble_property_broadcast">BroadCast</string>
+  <string name="ble_property_broadcast">Broadcast</string>
   <string name="ble_property_read">Read</string>
   <string name="ble_property_write_no_resp">Write (No Response)</string>
   <string name="ble_property_write">Write</string>
@@ -77,9 +77,8 @@
   <string name="ble_property_signed_write">Write (Signed)</string>
   <string name="ble_property_extended">Extended Props</string>
   <string name="ble_characteristic_name_unknown">Unknown Characteristic</string>
-  <string name="ble_device_info_title">Device</string>
   <string name="le_characteristics_not_present">No characteristics found with this service</string>
-  <string name="ble_device_profile">BLE Device Profile</string>
+  <string name="ble_client_screen_title">BLE Device</string>
   <string name="back_arrow">Arrow back</string>
   <string name="menu_option_more">Menu Option More</string>
   <string name="ble_descriptor_unknown">Unknown Descriptor</string>
@@ -90,8 +89,7 @@
   <string name="ble_characteristic_not_selected_desc">Select a characteristic in order to continue</string>
   <string name="write_characteristic_dialog_title">Write Characteristic</string>
   <string name="write_characteristic_dialog_desc">Enter text value in utf-8 to write to.</string>
-  <string name="device_rssi_value">Current Device RSSI value</string>
-  <string name="bluetooth_device_mac_address">MAC : %s</string>
+  <string name="bluetooth_device_mac_address_title">MAC : </string>
   <string name="ble_disable_notification">Notification are disabled</string>
   <string name="ble_enable_indication">Indications are enabled</string>
   <string name="ble_enable_notification">Notifications are enabled</string>
@@ -175,7 +173,6 @@
   <!--  Settings auto scroll-->
   <string name="bt_classic_settings_auto_scroll_title">Auto Scroll To End</string>
   <string name="bt_classic_settings_auto_scroll_desc">Auto Scroll to the End of terminal</string>
-  <string name="dialog_action_start">Start</string>
   <string name="bt_server_close_connection_dialog_title">Stop Server</string>
   <string name="bt_server_close_connection_dialog_text">A running server must be stopped before leaving</string>
   <string name="bt_server_start_connection_text">Start Server</string>
@@ -191,10 +188,37 @@
   <string name="ble_device_profile_action_refresh_services">Refresh Services</string>
   <string name="drawer_option_servers">Servers</string>
   <string name="drawer_option_others">Others</string>
-  <string name="drawer_option_classic_server">Classic Server</string>
   <string name="drawer_option_ble_server">BLE Server</string>
   <string name="bt_server_start_connection_extra_info">Make use the other device is discoverable, otherwise the other peer cannot be connected\n</string>
   <string name="connection_server_stopped">Stopped</string>
   <string name="connected_device_not_found">Not ready</string>
   <string name="ble_settings_charset">Charset</string>
+  <string name="stop_ble_server">Stop</string>
+  <string name="ble_server_title">BLE Server</string>
+  <string name="dialog_action_allow">Allow</string>
+  <string name="ble_advertise_permission_missing">Advertising permission missing</string>
+  <string name="ble_advertise_permission_missing_text">BLE server needs bluetooth advertising permission to advertise its packets for clients to connect</string>
+  <string name="ble_server_start_text">Select among the available services and start the server</string>
+  <string name="ble_server_set_services">Configure Services</string>
+  <string name="ble_server_no_clients">No connected clients</string>
+  <string name="ble_server_service_option_echo">Echo Service</string>
+  <string name="ble_server_service_option_environment">Environment Sensing</string>
+  <string name="ble_server_service_option_battery">Battery</string>
+  <string name="ble_server_service_option_nus">Nordic UART Service</string>
+  <string name="ble_server_service_option_echo_text">Echo messages from and to the client with same address</string>
+  <string name="ble_server_service_option_nus_text">Emulates a serial port over BLE for sending data between a device and client</string>
+  <string name="ble_server_service_option_battery_text">Reads device battery</string>
+  <string name="ble_server_service_option_environment_text">Read environmental data like ambient light</string>
+  <string name="ble_server_service_option_device">Device Info Service</string>
+  <string name="ble_server_service_option_device_text">Provides characteristics to read device specific data</string>
+  <string name="ble_server_no_services">No services are attach to run with the server</string>
+  <string name="ble_server_services_selector_title">Select Services</string>
+  <string name="ble_server_services_selector_text">Select among the services options that the server should run</string>
+  <string name="ble_server_connected_clients_title">Connected Clients</string>
+  <string name="ble_server_connected_clients_text">List of connected clients</string>
+  <string name="ble_server_serving_services">Services</string>
+  <string name="ble_server_serving_services_text">List of services the server is currently advertising</string>
+  <string name="ble_device_connecting">Connecting to device</string>
+  <string name="ble_device_no_service_found">No Services found, make sure device is connected</string>
+  <string name="ble_characteristics_title">Characteristics</string>
 </resources>

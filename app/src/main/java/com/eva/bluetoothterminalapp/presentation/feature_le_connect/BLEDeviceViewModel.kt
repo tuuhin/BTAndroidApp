@@ -124,7 +124,7 @@ class BLEDeviceViewModel(
 			BLEDeviceConfigEvent.OnReadRssiStrength -> onRefreshRSSI()
 			BLEDeviceConfigEvent.OnReDiscoverServices -> onRefreshServices()
 			BLEDeviceConfigEvent.OnDisconnectEvent -> bleConnector.disconnect()
-			BLEDeviceConfigEvent.OnReconnectEvent -> bleConnector.reconnect()
+			BLEDeviceConfigEvent.OnReconnectEvent -> onClientReconnect()
 		}
 	}
 
@@ -137,6 +137,12 @@ class BLEDeviceViewModel(
 				_uiEvents.emit(UiEvents.NavigateBack)
 			}
 		}
+	}
+
+	private fun onClientReconnect() = viewModelScope.launch {
+		val result = bleConnector.reconnect()
+		val message = if (result.isSuccess) "Reconnecting" else "Failed"
+		_uiEvents.emit(UiEvents.ShowToast(message))
 	}
 
 	private fun stopIndications() = onIndicateOrNotifyBLECharacteristic(false)

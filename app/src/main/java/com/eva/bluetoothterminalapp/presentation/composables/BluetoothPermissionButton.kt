@@ -2,6 +2,7 @@ package com.eva.bluetoothterminalapp.presentation.composables
 
 import android.Manifest
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Spacer
@@ -21,8 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.core.content.PermissionChecker
+import com.eva.bluetoothterminalapp.data.utils.hasBTAdvertisePermission
+import com.eva.bluetoothterminalapp.data.utils.hasBTConnectPermission
+import com.eva.bluetoothterminalapp.data.utils.hasBTScanPermission
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
@@ -34,32 +36,31 @@ fun BluetoothPermissionButton(
 
 	val context = LocalContext.current
 
-	var hasScanPermission by remember {
-		mutableStateOf(
-			ContextCompat.checkSelfPermission(
-				context,
-				Manifest.permission.BLUETOOTH_SCAN
-			) == PermissionChecker.PERMISSION_GRANTED
-		)
-	}
-
-	var hasConnectPermission by remember {
-		mutableStateOf(
-			ContextCompat.checkSelfPermission(
-				context,
-				Manifest.permission.BLUETOOTH_SCAN
-			) == PermissionChecker.PERMISSION_GRANTED
-		)
-	}
+	var hasScanPermission by remember { mutableStateOf(context.hasBTScanPermission) }
+	var hasConnectPermission by remember { mutableStateOf(context.hasBTConnectPermission) }
+	var hasAdvertisePermission by remember { mutableStateOf(context.hasBTAdvertisePermission) }
 
 	val permissionLauncher = rememberLauncherForActivityResult(
 		contract = ActivityResultContracts.RequestMultiplePermissions()
 	) { perms ->
-		hasScanPermission = perms.getOrDefault(Manifest.permission.BLUETOOTH_SCAN, false)
-		hasConnectPermission = perms.getOrDefault(Manifest.permission.BLUETOOTH_CONNECT, false)
+		if (perms.containsKey(Manifest.permission.BLUETOOTH_SCAN)) {
+			hasScanPermission = perms.getOrDefault(Manifest.permission.BLUETOOTH_SCAN, false)
+		}
+		if (perms.containsKey(Manifest.permission.BLUETOOTH_CONNECT)) {
+			hasConnectPermission = perms.getOrDefault(Manifest.permission.BLUETOOTH_CONNECT, false)
+		}
+		if (perms.containsKey(Manifest.permission.BLUETOOTH_ADVERTISE)) {
+			hasAdvertisePermission =
+				perms.getOrDefault(Manifest.permission.BLUETOOTH_ADVERTISE, false)
+		}
 
-		val hasBothPermission = hasScanPermission && hasConnectPermission
-		onResults(hasBothPermission)
+		Log.d(
+			"PERMISSIONS",
+			"SCAN: $hasScanPermission CONNECT:$hasConnectPermission ADVERTISE: $hasAdvertisePermission"
+		)
+
+		val hasAllPermissions = hasScanPermission && hasConnectPermission && hasAdvertisePermission
+		onResults(hasAllPermissions)
 	}
 
 	Button(
@@ -67,7 +68,8 @@ fun BluetoothPermissionButton(
 			permissionLauncher.launch(
 				arrayOf(
 					Manifest.permission.BLUETOOTH_SCAN,
-					Manifest.permission.BLUETOOTH_CONNECT
+					Manifest.permission.BLUETOOTH_CONNECT,
+					Manifest.permission.BLUETOOTH_ADVERTISE,
 				)
 			)
 		},

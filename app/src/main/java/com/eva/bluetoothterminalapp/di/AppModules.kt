@@ -8,6 +8,7 @@ val appModule = module {
 		bluetoothLEModule,
 		bluetoothClassicModule,
 		viewModelModule,
-		settingsModule
+		settingsModule,
+		deviceModule
 	)
 }

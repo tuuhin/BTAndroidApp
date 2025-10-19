@@ -2,9 +2,9 @@ package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -38,7 +38,7 @@ fun BTDeviceIcon(
 	contentColor: Color = MaterialTheme.colorScheme.primaryContainer,
 	borderColor: Color = MaterialTheme.colorScheme.primaryFixed,
 	showBorder: Boolean = false,
-	innerIconSize: DpSize = DpSize(32.dp, 32.dp),
+	innerIconSize: DpSize = DpSize(28.dp, 28.dp),
 ) {
 
 	val pillShape = remember {
@@ -60,14 +60,14 @@ fun BTDeviceIcon(
 					RoundedPolygonShape(pillShape)
 				) else Modifier
 			)
-			.defaultMinSize(
+			.sizeIn(
 				minWidth = dimensionResource(id = R.dimen.min_device_image_size),
 				minHeight = dimensionResource(id = R.dimen.min_device_image_size),
 			)
 	) {
 		Box(
 			contentAlignment = Alignment.Center,
-			modifier = Modifier.padding(8.dp)
+			modifier = Modifier.padding(12.dp)
 		) {
 			Icon(
 				imageVector = device.imageVector,

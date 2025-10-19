@@ -26,3 +26,11 @@ val Context.hasBTConnectPermission: Boolean
 		) == PermissionChecker.PERMISSION_GRANTED
 	} else true
 
+val Context.hasBTAdvertisePermission: Boolean
+	get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+		ContextCompat.checkSelfPermission(
+			this,
+			Manifest.permission.BLUETOOTH_ADVERTISE
+		) == PermissionChecker.PERMISSION_GRANTED
+	} else true
+

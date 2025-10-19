@@ -1,158 +1,290 @@
 [
   {
-    "name": "Generic Access",
-    "code": "0x1800"
+    "code": "0x1800",
+    "name": "GAP"
   },
   {
-    "name": "Generic Attribute",
-    "code": "0x1801"
+    "code": "0x1801",
+    "name": "GATT"
   },
   {
-    "name": "Immediate Alert",
-    "code": "0x1802"
+    "code": "0x1802",
+    "name": "Immediate Alert"
   },
   {
-    "name": "Link Loss",
-    "code": "0x1803"
+    "code": "0x1803",
+    "name": "Link Loss"
   },
   {
-    "name": "Tx Power",
-    "code": "0x1804"
+    "code": "0x1804",
+    "name": "Tx Power"
   },
   {
-    "name": "Current Time Service",
-    "code": "0x1805"
+    "code": "0x1805",
+    "name": "Current Time"
   },
   {
-    "name": "Reference Time Update Service",
-    "code": "0x1806"
+    "code": "0x1806",
+    "name": "Reference Time Update"
   },
   {
-    "name": "Next DST Change Service",
-    "code": "0x1807"
+    "code": "0x1807",
+    "name": "Next DST Change"
   },
   {
-    "name": "Glucose",
-    "code": "0x1808"
+    "code": "0x1808",
+    "name": "Glucose"
   },
   {
-    "name": "Health Thermometer",
-    "code": "0x1809"
+    "code": "0x1809",
+    "name": "Health Thermometer"
   },
   {
-    "name": "Device Information",
-    "code": "0x180A"
+    "code": "0x180A",
+    "name": "Device Information"
   },
   {
-    "name": "Heart Rate",
-    "code": "0x180D"
+    "code": "0x180D",
+    "name": "Heart Rate"
   },
   {
-    "name": "Phone Alert Status Service",
-    "code": "0x180E"
+    "code": "0x180E",
+    "name": "Phone Alert Status"
   },
   {
-    "name": "Battery Service",
-    "code": "0x180F"
+    "code": "0x180F",
+    "name": "Battery"
   },
   {
-    "name": "Blood Pressure",
-    "code": "0x1810"
+    "code": "0x1810",
+    "name": "Blood Pressure"
   },
   {
-    "name": "Alert Notification Service",
-    "code": "0x1811"
+    "code": "0x1811",
+    "name": "Alert Notification"
   },
   {
-    "name": "Human Interface Device",
-    "code": "0x1812"
+    "code": "0x1812",
+    "name": "Human Interface Device"
   },
   {
-    "name": "Scan Parameters",
-    "code": "0x1813"
+    "code": "0x1813",
+    "name": "Scan Parameters"
   },
   {
-    "name": "Running Speed and Cadence",
-    "code": "0x1814"
+    "code": "0x1814",
+    "name": "Running Speed and Cadence"
   },
   {
-    "name": "Automation IO",
-    "code": "0x1815"
+    "code": "0x1815",
+    "name": "Automation IO"
   },
   {
-    "name": "Cycling Speed and Cadence",
-    "code": "0x1816"
+    "code": "0x1816",
+    "name": "Cycling Speed and Cadence"
   },
   {
-    "name": "Cycling Power",
-    "code": "0x1818"
+    "code": "0x1818",
+    "name": "Cycling Power"
   },
   {
-    "name": "Location and Navigation",
-    "code": "0x1819"
+    "code": "0x1819",
+    "name": "Location and Navigation"
   },
   {
-    "name": "Environmental Sensing",
-    "code": "0x181A"
+    "code": "0x181A",
+    "name": "Environmental Sensing"
   },
   {
-    "name": "Body Composition",
-    "code": "0x181B"
+    "code": "0x181B",
+    "name": "Body Composition"
   },
   {
-    "name": "User Data",
-    "code": "0x181C"
+    "code": "0x181C",
+    "name": "User Data"
   },
   {
-    "name": "Weight Scale",
-    "code": "0x181D"
+    "code": "0x181D",
+    "name": "Weight Scale"
   },
   {
-    "name": "Bond Management Service",
-    "code": "0x181E"
+    "code": "0x181E",
+    "name": "Bond Management"
   },
   {
-    "name": "Continuous Glucose Monitoring",
-    "code": "0x181F"
+    "code": "0x181F",
+    "name": "Continuous Glucose Monitoring"
   },
   {
-    "name": "Internet Protocol Support Service",
-    "code": "0x1820"
+    "code": "0x1820",
+    "name": "Internet Protocol Support"
   },
   {
-    "name": "Indoor Positioning",
-    "code": "0x1821"
+    "code": "0x1821",
+    "name": "Indoor Positioning"
   },
   {
-    "name": "Pulse Oximeter Service",
-    "code": "0x1822"
+    "code": "0x1822",
+    "name": "Pulse Oximeter"
   },
   {
-    "name": "HTTP Proxy",
-    "code": "0x1823"
+    "code": "0x1823",
+    "name": "HTTP Proxy"
   },
   {
-    "name": "Transport Discovery",
-    "code": "0x1824"
+    "code": "0x1824",
+    "name": "Transport Discovery"
   },
   {
-    "name": "Object Transfer Service",
-    "code": "0x1825"
+    "code": "0x1825",
+    "name": "Object Transfer"
   },
   {
-    "name": "Fitness Machine",
-    "code": "0x1826"
+    "code": "0x1826",
+    "name": "Fitness Machine"
   },
   {
-    "name": "Mesh Provisioning Service",
-    "code": "0x1827"
+    "code": "0x1827",
+    "name": "Mesh Provisioning"
   },
   {
-    "name": "Mesh Proxy Service",
-    "code": "0x1828"
+    "code": "0x1828",
+    "name": "Mesh Proxy"
   },
   {
-    "name": "Reconnection Configuration",
-    "code": "0x1829"
+    "code": "0x1829",
+    "name": "Reconnection Configuration"
+  },
+  {
+    "code": "0x183A",
+    "name": "Insulin Delivery"
+  },
+  {
+    "code": "0x183B",
+    "name": "Binary Sensor"
+  },
+  {
+    "code": "0x183C",
+    "name": "Emergency Configuration"
+  },
+  {
+    "code": "0x183D",
+    "name": "Authorization Control"
+  },
+  {
+    "code": "0x183E",
+    "name": "Physical Activity Monitor"
+  },
+  {
+    "code": "0x183F",
+    "name": "Elapsed Time"
+  },
+  {
+    "code": "0x1840",
+    "name": "Generic Health Sensor"
+  },
+  {
+    "code": "0x1843",
+    "name": "Audio Input Control"
+  },
+  {
+    "code": "0x1844",
+    "name": "Volume Control"
+  },
+  {
+    "code": "0x1845",
+    "name": "Volume Offset Control"
+  },
+  {
+    "code": "0x1846",
+    "name": "Coordinated Set Identification"
+  },
+  {
+    "code": "0x1847",
+    "name": "Device Time"
+  },
+  {
+    "code": "0x1848",
+    "name": "Media Control"
+  },
+  {
+    "code": "0x1849",
+    "name": "Generic Media Control"
+  },
+  {
+    "code": "0x184A",
+    "name": "Constant Tone Extension"
+  },
+  {
+    "code": "0x184B",
+    "name": "Telephone Bearer"
+  },
+  {
+    "code": "0x184C",
+    "name": "Generic Telephone Bearer"
+  },
+  {
+    "code": "0x184D",
+    "name": "Microphone Control"
+  },
+  {
+    "code": "0x184E",
+    "name": "Audio Stream Control"
+  },
+  {
+    "code": "0x184F",
+    "name": "Broadcast Audio Scan"
+  },
+  {
+    "code": "0x1850",
+    "name": "Published Audio Capabilities"
+  },
+  {
+    "code": "0x1851",
+    "name": "Basic Audio Announcement"
+  },
+  {
+    "code": "0x1852",
+    "name": "Broadcast Audio Announcement"
+  },
+  {
+    "code": "0x1853",
+    "name": "Common Audio"
+  },
+  {
+    "code": "0x1854",
+    "name": "Hearing Access"
+  },
+  {
+    "code": "0x1855",
+    "name": "Telephony and Media Audio"
+  },
+  {
+    "code": "0x1856",
+    "name": "Public Broadcast Announcement"
+  },
+  {
+    "code": "0x1857",
+    "name": "Electronic Shelf Label"
+  },
+  {
+    "code": "0x1858",
+    "name": "Gaming Audio"
+  },
+  {
+    "code": "0x1859",
+    "name": "Mesh Proxy Solicitation"
+  },
+  {
+    "code": "0x185A",
+    "name": "Industrial Measurement Device"
+  },
+  {
+    "code": "0x185B",
+    "name": "Ranging"
+  },
+  {
+    "code": "0x185C",
+    "name": "HID ISO"
   }
 ]

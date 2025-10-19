@@ -82,6 +82,7 @@ fun BluetoothDevicesList(
 		) { _, device ->
 			BluetoothDeviceCard(
 				device = device,
+				isPaired = true,
 				onConnect = { onSelectDevice(device) },
 				modifier = Modifier
 					.fillMaxWidth()
@@ -109,6 +110,7 @@ fun BluetoothDevicesList(
 		) { _, device ->
 			BluetoothDeviceCard(
 				device = device,
+				isPaired = false,
 				onConnect = { onSelectDevice(device) },
 				modifier = Modifier
 					.fillMaxWidth()

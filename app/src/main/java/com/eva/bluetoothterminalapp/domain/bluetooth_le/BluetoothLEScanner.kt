@@ -4,8 +4,6 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.ScanError
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Bluetooth Low Energy Scanner
@@ -35,9 +33,8 @@ interface BluetoothLEScanner {
 
 	/**
 	 * Start the scan for device discovery
-	 * @param duration Determines the duration for which the scan should run
 	 */
-	suspend fun startDiscovery(duration: Duration = 8.seconds)
+	suspend fun startDiscovery()
 
 	/**
 	 * Stops the running discovery

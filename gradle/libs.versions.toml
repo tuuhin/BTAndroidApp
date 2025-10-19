@@ -1,7 +1,7 @@
 [versions]
 agp = "8.13.0"
 compose_destination_animation_version = "1.11.9"
-compose_destination_core_version = "2.2.0"
+compose_destination_core_version = "2.3.0"
 coreSplashscreen = "1.0.1"
 datastore = "1.1.7"
 graphicsShapes = "1.0.1"
@@ -13,14 +13,13 @@ espressoCore = "3.7.0"
 kotlinxCollectionsImmutable = "0.4.0"
 kotlinxDatetime = "0.7.1"
 kotlinxSerializationJson = "1.9.0"
-ksp = "2.2.0"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
-composeBom = "2025.09.01"
+composeBom = "2025.10.00"
 koinBom = "4.1.1"
 materialIconsExtended = "1.7.8"
 ksp_version = "2.2.20-2.0.2"
-protobufJavalite = "4.32.1"
+protobufJavalite = "4.33.0"
 protobuf-protoc-gen-javalite = "3.0.0"
 protobuf_plugin_version = "0.9.5"
 
@@ -50,7 +49,7 @@ kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collec
 #navigation
 compose_destination_animation = { module = "io.github.raamcosta.compose-destinations:animations-core", version.ref = "compose_destination_animation_version" }
 compose_destination_core = { module = "io.github.raamcosta.compose-destinations:core", version.ref = "compose_destination_core_version" }
-compose_destination_ksp = { module = "io.github.raamcosta.compose-destinations:ksp", version.ref = "ksp" }
+compose_destination_ksp = { module = "io.github.raamcosta.compose-destinations:ksp", version.ref = "compose_destination_core_version" }
 #koin
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koinBom" }
 koin-core = { module = "io.insert-koin:koin-core" }

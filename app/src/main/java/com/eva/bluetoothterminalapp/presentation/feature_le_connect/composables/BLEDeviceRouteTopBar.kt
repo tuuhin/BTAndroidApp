@@ -49,7 +49,7 @@ fun BLEDeviceRouteTopBar(
 	var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
 
 	MediumTopAppBar(
-		title = { Text(text = stringResource(id = R.string.ble_device_profile)) },
+		title = { Text(text = stringResource(id = R.string.ble_client_screen_title)) },
 		actions = {
 			ConnectReconnectButton(
 				connectionState = connectionState,

@@ -16,6 +16,9 @@ object Routes {
 	// ble client terminal route
 	const val BLE_CLIENT_ROUTE = "ble_client_route"
 
+	//ble server route
+	const val BLE_SERVER_ROUTE = "ble_server_route"
+
 	//settings route
 	const val SETTINGS_ROUTE = "settings"
 

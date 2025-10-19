@@ -1,4 +1,4 @@
 package com.eva.bluetoothterminalapp.domain.exceptions
 
-class BLEServiceAndCharacteristicMatchNotFoundException :
+class InvalidBLEConfigurationException :
 	Exception("Invalid Service or characteristic for the connected device")
