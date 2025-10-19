@@ -194,7 +194,6 @@
   <string name="connected_device_not_found">Not ready</string>
   <string name="ble_settings_charset">Charset</string>
   <string name="stop_ble_server">Stop</string>
-  <string name="start_ble_server">Start</string>
   <string name="ble_server_title">BLE Server</string>
   <string name="dialog_action_allow">Allow</string>
   <string name="ble_advertise_permission_missing">Advertising permission missing</string>

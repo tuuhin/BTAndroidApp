@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="surface">#FFFDFBFF</color>
-  <color name="primary_container">#FFD7E3FF</color>
+  <color name="surface">#FFFFF8F0</color>
+  <color name="primary_container">#FFFEE086</color>
   <!--  app-icon background-->
   <color name="ic_launcher_background">#EDF7FF</color>
 </resources>
