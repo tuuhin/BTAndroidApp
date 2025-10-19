@@ -42,7 +42,7 @@ fun StartBLEServer(
 		Spacer(modifier = Modifier.height(12.dp))
 		Text(
 			text = stringResource(id = R.string.bt_server_start_connection_text),
-			style = MaterialTheme.typography.titleMedium,
+			style = MaterialTheme.typography.headlineSmall,
 			color = MaterialTheme.colorScheme.primary
 		)
 		Text(

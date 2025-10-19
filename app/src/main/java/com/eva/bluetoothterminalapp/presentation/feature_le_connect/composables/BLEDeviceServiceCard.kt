@@ -123,7 +123,7 @@ fun BLEDeviceServiceCard(
 							verticalAlignment = Alignment.CenterVertically
 						) {
 							Text(
-								text = "Characteristics",
+								text = stringResource(R.string.ble_characteristics_title),
 								style = MaterialTheme.typography.labelLarge,
 								fontWeight = FontWeight.SemiBold,
 								color = MaterialTheme.colorScheme.tertiary

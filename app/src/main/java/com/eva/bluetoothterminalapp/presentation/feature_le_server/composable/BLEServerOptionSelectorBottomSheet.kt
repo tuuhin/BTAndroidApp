@@ -3,9 +3,13 @@ package com.eva.bluetoothterminalapp.presentation.feature_le_server.composable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -16,8 +20,13 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
@@ -68,15 +77,16 @@ private fun BLEServerServicesSelectorContent(
 		verticalArrangement = Arrangement.spacedBy(8.dp)
 	) {
 		Text(
-			text = "Select Services",
-			style = MaterialTheme.typography.headlineSmall,
+			text = stringResource(R.string.ble_server_services_selector_title),
+			style = MaterialTheme.typography.headlineMedium,
 			color = MaterialTheme.colorScheme.onSurface
 		)
 		Text(
-			text = "Select among the services options that the server should run",
-			style = MaterialTheme.typography.labelLarge,
+			text = stringResource(R.string.ble_server_services_selector_text),
+			style = MaterialTheme.typography.bodyMedium,
 			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
+		Spacer(modifier = Modifier.height(4.dp))
 		BLEServerServices.entries.forEach { entry ->
 			val isSelected = entry in selectedList
 			val containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
@@ -87,22 +97,35 @@ private fun BLEServerServicesSelectorContent(
 					color = containerColor,
 					onClick = { onSelectUnSelectOption(entry) },
 					contentColor = contentColorFor(containerColor),
-					shape = MaterialTheme.shapes.large
+					shape = MaterialTheme.shapes.large,
+					modifier = Modifier.semantics {
+						role = Role.Checkbox
+					}
 				) {
-					Column(
+					Row(
 						modifier = Modifier
 							.fillMaxWidth()
 							.padding(horizontal = 12.dp, vertical = 6.dp),
-						verticalArrangement = Arrangement.spacedBy(2.dp)
+						horizontalArrangement = Arrangement.spacedBy(12.dp),
+						verticalAlignment = Alignment.CenterVertically,
 					) {
-						Text(
-							text = entry.titleText,
-							style = MaterialTheme.typography.titleMedium
+						Checkbox(
+							checked = isSelected,
+							onCheckedChange = { onSelectUnSelectOption(entry) },
 						)
-						Text(
-							text = entry.descText,
-							style = MaterialTheme.typography.bodyMedium
-						)
+						Column(
+							verticalArrangement = Arrangement.spacedBy(2.dp),
+							modifier = Modifier.weight(1f)
+						) {
+							Text(
+								text = entry.titleText,
+								style = MaterialTheme.typography.titleSmall
+							)
+							Text(
+								text = entry.descText,
+								style = MaterialTheme.typography.bodySmall
+							)
+						}
 					}
 				}
 			}

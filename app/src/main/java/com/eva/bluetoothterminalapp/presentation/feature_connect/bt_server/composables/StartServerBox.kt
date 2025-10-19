@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,26 +41,30 @@ fun StartServerBox(
 		Icon(
 			painter = painterResource(R.drawable.ic_connect_variant),
 			contentDescription = stringResource(id = R.string.bt_server_start_connection_text),
-			tint = MaterialTheme.colorScheme.secondary,
-			modifier = Modifier.size(128.dp),
+			tint = MaterialTheme.colorScheme.tertiary,
+			modifier = Modifier.size(200.dp),
 		)
 		Spacer(modifier = Modifier.height(12.dp))
 		Text(
 			text = stringResource(id = R.string.bt_server_start_connection_text),
-			style = MaterialTheme.typography.titleMedium,
+			style = MaterialTheme.typography.headlineSmall,
 			color = MaterialTheme.colorScheme.primary
 		)
 		Text(
 			text = stringResource(id = R.string.bt_server_start_connection_desc),
-			style = MaterialTheme.typography.labelLarge,
+			style = MaterialTheme.typography.bodyMedium,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
+			modifier = Modifier.fillMaxWidth(.75f),
 			textAlign = TextAlign.Center
 		)
-
-		Button(
+		Spacer(modifier = Modifier.height(12.dp))
+		FilledTonalButton(
 			onClick = onStartServer,
 			shape = MaterialTheme.shapes.medium,
-			modifier = Modifier.fillMaxWidth(.85f)
+			colors = ButtonDefaults.filledTonalButtonColors(
+				containerColor = MaterialTheme.colorScheme.primaryContainer,
+				contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+			)
 		) {
 			Text(
 				text = stringResource(id = R.string.bt_server_start_connection_text),
@@ -70,7 +75,8 @@ fun StartServerBox(
 		Text(
 			text = stringResource(R.string.bt_server_start_connection_extra_info),
 			style = MaterialTheme.typography.labelMedium,
-			color = MaterialTheme.colorScheme.tertiary,
+			color = MaterialTheme.colorScheme.onSurfaceVariant,
+			modifier = Modifier.fillMaxWidth(.75f),
 			textAlign = TextAlign.Center
 		)
 	}

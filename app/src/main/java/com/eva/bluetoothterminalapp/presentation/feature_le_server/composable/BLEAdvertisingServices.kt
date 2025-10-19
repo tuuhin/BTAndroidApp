@@ -55,12 +55,12 @@ fun BLEAdvertisingServices(
 				modifier = Modifier.weight(1f)
 			) {
 				Text(
-					text = "Services",
+					text = stringResource(R.string.ble_server_serving_services),
 					style = MaterialTheme.typography.titleMedium,
 					color = MaterialTheme.colorScheme.onSurface
 				)
 				Text(
-					text = "List of services the server is advertising",
+					text = stringResource(R.string.ble_server_serving_services_text),
 					style = MaterialTheme.typography.labelLarge,
 					color = MaterialTheme.colorScheme.onSurfaceVariant
 				)

@@ -1,15 +1,15 @@
 package com.eva.bluetoothterminalapp.presentation.composables
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,12 +37,14 @@ import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 @Composable
 fun BTAppNavigationDrawer(
 	modifier: Modifier = Modifier,
-	drawerShape: Shape = DrawerDefaults.shape,
-	drawerContainerColor: Color = DrawerDefaults.modalContainerColor,
 	onNavigateToClassicServer: () -> Unit = {},
 	onNavigateToFeedBackRoute: () -> Unit = {},
 	onNavigateToSettingsRoute: () -> Unit = {},
 	onNavigateToBLEServer: () -> Unit = {},
+	drawerShape: Shape = DrawerDefaults.shape,
+	drawerContainerColor: Color = DrawerDefaults.modalContainerColor,
+	scrollState: ScrollState = rememberScrollState(),
+	contentPadding: PaddingValues = PaddingValues(all = 4.dp),
 ) {
 	ModalDrawerSheet(
 		drawerShape = drawerShape,
@@ -52,16 +53,21 @@ fun BTAppNavigationDrawer(
 		modifier = modifier,
 	) {
 		Column(
-			modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+			modifier = Modifier
+				.padding(contentPadding)
+				.verticalScroll(scrollState),
 			verticalArrangement = Arrangement.spacedBy(2.dp)
 		) {
 			AppIconWithTitle()
-			HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+			HorizontalDivider(
+				color = MaterialTheme.colorScheme.outlineVariant,
+				modifier = Modifier.padding(vertical = 4.dp)
+			)
 			Text(
 				text = stringResource(R.string.drawer_option_servers),
-				style = MaterialTheme.typography.bodyMedium,
+				style = MaterialTheme.typography.titleMedium,
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
-				modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+				modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
 			)
 			NavigationDrawerItem(
 				label = { Text(text = stringResource(R.string.bt_server_route)) },
@@ -70,7 +76,7 @@ fun BTAppNavigationDrawer(
 				icon = {
 					Icon(
 						painter = painterResource(R.drawable.ic_server),
-						contentDescription = "Server Icon"
+						contentDescription = null
 					)
 				},
 				modifier = Modifier.sharedBoundsWrapper(SharedElementTransitionKeys.CLASSIC_SERVER_ITEM_TO_SERVER)
@@ -81,21 +87,21 @@ fun BTAppNavigationDrawer(
 				onClick = onNavigateToBLEServer,
 				icon = {
 					Icon(
-						painter = painterResource(R.drawable.ic_server),
-						contentDescription = "Server Icon"
+						painter = painterResource(R.drawable.ic_server_2),
+						contentDescription = null
 					)
 				},
 				modifier = Modifier.sharedBoundsWrapper(SharedElementTransitionKeys.BLE_SERVER_ITEM_TO_SERVER)
 			)
 			HorizontalDivider(
 				color = MaterialTheme.colorScheme.outlineVariant,
-				modifier = Modifier.padding(vertical = 2.dp)
+				modifier = Modifier.padding(vertical = 4.dp)
 			)
 			Text(
 				text = stringResource(R.string.drawer_option_others),
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
-				style = MaterialTheme.typography.bodyMedium,
-				modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+				style = MaterialTheme.typography.titleMedium,
+				modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
 			)
 			NavigationDrawerItem(
 				label = { Text(text = stringResource(id = R.string.settings_route_title)) },
@@ -103,7 +109,7 @@ fun BTAppNavigationDrawer(
 				onClick = onNavigateToSettingsRoute,
 				icon = {
 					Icon(
-						imageVector = Icons.Default.Settings,
+						painter = painterResource(R.drawable.ic_app_settings),
 						contentDescription = stringResource(id = R.string.settings_route_title)
 					)
 				},
@@ -115,30 +121,31 @@ fun BTAppNavigationDrawer(
 				onClick = onNavigateToFeedBackRoute,
 				icon = {
 					Icon(
-						imageVector = Icons.Outlined.Info,
+						painter = painterResource(R.drawable.ic_info),
 						contentDescription = stringResource(id = R.string.about_route_title)
 					)
 				},
 				modifier = Modifier.sharedBoundsWrapper(SharedElementTransitionKeys.ABOUT_ITEM_TO_ABOUT_SCREEN)
 			)
-			HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 		}
 	}
 }
 
 @Composable
-fun AppIconWithTitle(modifier: Modifier = Modifier) {
+private fun AppIconWithTitle(modifier: Modifier = Modifier) {
 	Row(
 		verticalAlignment = Alignment.CenterVertically,
-		horizontalArrangement = Arrangement.spacedBy(2.dp),
+		horizontalArrangement = Arrangement.spacedBy(6.dp),
 		modifier = modifier,
 	) {
-		Image(
+
+		Icon(
 			painter = painterResource(id = R.drawable.ic_launcher_foreground),
 			contentDescription = stringResource(id = R.string.app_name),
-			modifier = Modifier.size(56.dp),
-			colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+			modifier = Modifier.size(48.dp),
+			tint = MaterialTheme.colorScheme.primary
 		)
+
 		Text(
 			text = stringResource(id = R.string.app_name),
 			style = MaterialTheme.typography.titleMedium,

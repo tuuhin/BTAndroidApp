@@ -78,7 +78,7 @@
   <string name="ble_property_extended">Extended Props</string>
   <string name="ble_characteristic_name_unknown">Unknown Characteristic</string>
   <string name="le_characteristics_not_present">No characteristics found with this service</string>
-  <string name="ble_device_profile">BLE Device Profile</string>
+  <string name="ble_client_screen_title">BLE Device</string>
   <string name="back_arrow">Arrow back</string>
   <string name="menu_option_more">Menu Option More</string>
   <string name="ble_descriptor_unknown">Unknown Descriptor</string>
@@ -213,4 +213,13 @@
   <string name="ble_server_service_option_device">Device Info Service</string>
   <string name="ble_server_service_option_device_text">Provides characteristics to read device specific data</string>
   <string name="ble_server_no_services">No services are attach to run with the server</string>
+  <string name="ble_server_services_selector_title">Select Services</string>
+  <string name="ble_server_services_selector_text">Select among the services options that the server should run</string>
+  <string name="ble_server_connected_clients_title">Connected Clients</string>
+  <string name="ble_server_connected_clients_text">List of connected clients</string>
+  <string name="ble_server_serving_services">Services</string>
+  <string name="ble_server_serving_services_text">List of services the server is currently advertising</string>
+  <string name="ble_device_connecting">Connecting to device</string>
+  <string name="ble_device_no_service_found">No Services found, make sure device is connected</string>
+  <string name="ble_characteristics_title">Characteristics</string>
 </resources>

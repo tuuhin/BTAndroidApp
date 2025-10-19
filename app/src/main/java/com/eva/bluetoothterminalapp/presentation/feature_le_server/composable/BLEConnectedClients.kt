@@ -61,12 +61,12 @@ fun BLEConnectedClients(
 				modifier = Modifier.weight(1f)
 			) {
 				Text(
-					text = "Connected Clients",
+					text = stringResource(R.string.ble_server_connected_clients_title),
 					style = MaterialTheme.typography.titleLarge,
 					color = MaterialTheme.colorScheme.onSurface
 				)
 				Text(
-					text = "List of connected clients",
+					text = stringResource(R.string.ble_server_connected_clients_text),
 					style = MaterialTheme.typography.bodyMedium,
 					color = MaterialTheme.colorScheme.onSurfaceVariant
 				)
@@ -118,7 +118,7 @@ fun BLEConnectedClients(
 					Box(
 						modifier = Modifier
 							.fillMaxWidth()
-							.heightIn(min = 40.dp)
+							.heightIn(min = 120.dp)
 							.animateItem(),
 						contentAlignment = Alignment.Center
 					) {
