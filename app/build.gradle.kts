@@ -19,8 +19,8 @@ android {
 		applicationId = "com.eva.bluetoothterminalapp"
 		minSdk = 29
 		targetSdk = 36
-		versionCode = 3
-		versionName = "1.1.1"
+		versionCode = 4
+		versionName = "1.2.0"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		vectorDrawables {
@@ -57,6 +57,7 @@ android {
 	buildTypes {
 
 		debug {
+			resValue("string", "app_name", "BluetoothTerminalApp (Debug)")
 			applicationIdSuffix = ".debug"
 			isMinifyEnabled = false
 			isShrinkResources = false
@@ -66,9 +67,7 @@ android {
 			isMinifyEnabled = true
 			isShrinkResources = true
 			multiDexEnabled = true
-			signingConfigs.findByName("release")?.let { config ->
-				signingConfig = config
-			}
+			signingConfig = signingConfigs.findByName("release")
 
 			proguardFiles(
 				getDefaultProguardFile("proguard-android-optimize.txt"),

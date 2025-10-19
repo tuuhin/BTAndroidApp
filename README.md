@@ -27,6 +27,7 @@ peers running the same app
 - **Scan for Devices:** Scan for devices supporting bluetooth low energy
 - **Services and Charateristics:** Display available services and characteristics for the connected
   device. Allow users to read ,write or observe values to the characteristics .
+- **Server** A BLE Server with battery and enviromental sensing (illuminanace) and various services
 - **Settings:** You can customize scan settings for the app to discover your device.
 
 ## :camera_flash: Screenshots
@@ -64,7 +65,7 @@ its functionalities
    Open the project in android studio
 
 3. **Build and Run**
-   Build and run on android device with api _29_ and above
+   Build and run on android device with API _29_ (Android 10) and above
 
 ### :curly_loop: Feedback and Support
 
