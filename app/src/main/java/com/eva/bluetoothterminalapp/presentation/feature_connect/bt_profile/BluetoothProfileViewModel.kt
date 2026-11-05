@@ -1,14 +1,11 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileScreenState
-import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothDeviceArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
-import com.ramcosta.composedestinations.generated.navArgs
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,12 +20,13 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
 class BluetoothProfileViewModel(
+	@InjectedParam private val address: String,
 	private val clientConnector: BluetoothClientConnector,
-	private val savedStateHandle: SavedStateHandle,
 ) : AppViewModel() {
 
 	private val _profile = MutableStateFlow(BTProfileScreenState())
@@ -44,8 +42,6 @@ class BluetoothProfileViewModel(
 	override val uiEvents: SharedFlow<UiEvents>
 		get() = _uiEvents.asSharedFlow()
 
-	private val device: BluetoothDeviceArgs?
-		get() = savedStateHandle.navArgs()
 
 
 	fun onEvent(event: BTProfileEvents) {
@@ -56,7 +52,6 @@ class BluetoothProfileViewModel(
 	}
 
 	private fun loadDeviceUUIDs() = viewModelScope.launch {
-		val address = device?.address ?: return@launch
 		val result = clientConnector.loadDeviceFeatureUUID(address)
 		result.fold(
 			onSuccess = { ids ->
@@ -77,7 +72,6 @@ class BluetoothProfileViewModel(
 
 		val isDiscovering = _profile.value.isDiscovering
 		if (isDiscovering) return
-		val address = device?.address ?: return
 
 		_profile.update { it.copy(isDiscovering = true) }
 		clientConnector.refreshDeviceFeatureUUID(address = address)

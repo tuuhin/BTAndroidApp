@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.di
 
-import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.KoinApplication
 import org.koin.core.annotation.Module
 
@@ -10,9 +9,10 @@ import org.koin.core.annotation.Module
 		DeviceModule::class,
 		BLEModule::class,
 		SettingsModule::class,
-		BTClassicModule::class]
+		PresentationModule::class,
+		BTClassicModule::class
+	]
 )
-@ComponentScan("com.eva.bluetoothterminalapp")
 class AppModule
 
 

@@ -3,7 +3,6 @@ import java.util.Properties
 
 plugins {
 	alias(libs.plugins.android.application)
-	alias(libs.plugins.google.devtools.ksp)
 	alias(libs.plugins.kotlinx.serialization)
 	alias(libs.plugins.google.protobuf)
 	alias(libs.plugins.compose.compiler)
@@ -79,9 +78,12 @@ dependencies {
 	implementation(libs.bundles.compose)
 	//lifecycle compose runtime
 	implementation(libs.androidx.lifecycle.runtime.compose)
-	//navigation
-	implementation(libs.compose.destination.core)
-	ksp(libs.compose.destination.ksp)
+	//navigation and adaptive layout
+	implementation(libs.bundles.navigation3)
+	implementation(libs.androidx.lifecycle.navigation3)
+	implementation(libs.androidx.adaptive.navigation3)
+	implementation(libs.androidx.material3.adaptive.navigation.suite)
+	implementation(libs.androidx.window)
 	//kotlinx
 	implementation(libs.bundles.kotlinx)
 	//splash api
