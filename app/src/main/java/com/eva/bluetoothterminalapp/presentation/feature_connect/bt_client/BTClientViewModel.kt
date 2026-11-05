@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
@@ -36,10 +35,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import kotlin.uuid.toJavaUuid
 
-private const val LOGGER = "BLUETOOTH_CLIENT_VIEW_MODEL"
-
+@KoinViewModel
 class BTClientViewModel(
 	private val connector: BluetoothClientConnector,
 	private val bTSettings: BTSettingsDataSore,
@@ -193,8 +192,7 @@ class BTClientViewModel(
 			// otherwise only the incomming flow
 			else connector.readIncomingData
 		}
-		.catch { err ->
-			Log.e(LOGGER, "SOME_ERROR_OCCURRED", err)
+		.catch { _ ->
 			_uiEvents.emit(
 				UiEvents.ShowSnackBarWithActions(
 					message = "Unable to read incoming data",
@@ -205,7 +203,7 @@ class BTClientViewModel(
 		}
 		.onEach { message ->
 			_messagesState.update { state ->
-				val updatedMessages = state.messages.add(message)
+				val updatedMessages = state.messages.adding(message)
 				state.copy(messages = updatedMessages)
 			}
 		}.launchIn(viewModelScope)
@@ -230,9 +228,6 @@ class BTClientViewModel(
 		if (_connectAsClientJob?.isActive == true) {
 			closeConnection()
 		}
-		// log viewmodel is cleared
-		Log.d(LOGGER, "CLEAN UP IN CLIENT")
-		super.onCleared()
 	}
 
 }

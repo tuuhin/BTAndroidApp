@@ -1,17 +1,21 @@
 package com.eva.bluetoothterminalapp.di
 
+import android.content.Context
 import com.eva.bluetoothterminalapp.data.datastore.BLESettingsDatastoreImpl
 import com.eva.bluetoothterminalapp.data.datastore.BTSettingsDatastoreImpl
 import com.eva.bluetoothterminalapp.domain.settings.repository.BLESettingsDataStore
 import com.eva.bluetoothterminalapp.domain.settings.repository.BTSettingsDataSore
-import org.koin.core.module.dsl.factoryOf
-import org.koin.dsl.bind
-import org.koin.dsl.module
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Module
 
-val settingsModule = module {
-	// low energy datastore
-	factoryOf(::BLESettingsDatastoreImpl).bind<BLESettingsDataStore>()
-	// classic settings datastore
-	factoryOf(::BTSettingsDatastoreImpl).bind<BTSettingsDataSore>()
+@Module
+class SettingsModule {
 
+	@Factory
+	fun providesBLESettingsDataStore(context: Context): BLESettingsDataStore =
+		BLESettingsDatastoreImpl(context)
+
+	@Factory
+	fun providesBTSettingsDatastore(context: Context): BTSettingsDataSore =
+		BTSettingsDatastoreImpl(context)
 }

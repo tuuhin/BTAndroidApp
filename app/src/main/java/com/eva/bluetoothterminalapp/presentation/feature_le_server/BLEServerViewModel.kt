@@ -23,7 +23,9 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 
+@KoinViewModel
 class BLEServerViewModel(
 	private val connector: BLEServerConnector
 ) : AppViewModel() {
@@ -108,6 +110,5 @@ class BLEServerViewModel(
 
 	override fun onCleared() {
 		connector.cleanUp()
-		super.onCleared()
 	}
 }

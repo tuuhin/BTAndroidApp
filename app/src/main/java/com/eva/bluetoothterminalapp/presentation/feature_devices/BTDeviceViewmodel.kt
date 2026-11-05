@@ -22,7 +22,9 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 
+@KoinViewModel
 class BTDeviceViewmodel(
 	private val bluetoothScanner: BluetoothScanner,
 	private val bLEScanner: BluetoothLEScanner,
@@ -172,6 +174,5 @@ class BTDeviceViewmodel(
 		// release resources when done
 		bLEScanner.clearResources()
 		bluetoothScanner.releaseResources()
-		super.onCleared()
 	}
 }
