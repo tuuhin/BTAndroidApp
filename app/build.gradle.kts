@@ -1,12 +1,12 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.android.build.api.dsl.ApkSigningConfig
 import java.util.Properties
 
 plugins {
 	alias(libs.plugins.android.application)
-	alias(libs.plugins.google.devtools.ksp)
 	alias(libs.plugins.kotlinx.serialization)
 	alias(libs.plugins.google.protobuf)
 	alias(libs.plugins.compose.compiler)
+	alias(libs.plugins.koin.compiler)
 }
 
 android {
@@ -28,47 +28,19 @@ android {
 
 	signingConfigs {
 		// find if there is a properties file
-		val keySecretFile = rootProject.file("keystore.properties")
-		if (!keySecretFile.exists()) return@signingConfigs
-
-		// load the properties
-		val properties = Properties()
-		keySecretFile.inputStream().use { properties.load(it) }
-
-		val userHome = System.getProperty("user.home")
-		val storeFileName = properties.getProperty("STORE_FILE_NAME")
-
-		val keyStoreFolder = File(userHome, "keystore")
-		if (!keyStoreFolder.exists()) return@signingConfigs
-
-		val keyStoreFile = File(keyStoreFolder, storeFileName)
-		if (!keyStoreFile.exists()) return@signingConfigs
-
-		create("release") {
-			storeFile = keyStoreFile
-			keyAlias = properties.getProperty("KEY_ALIAS")
-			keyPassword = properties.getProperty("KEY_PASSWORD")
-			storePassword = properties.getProperty("STORE_PASSWORD")
-		}
+		createReleaseConfig()
 	}
 
 	buildTypes {
-
 		debug {
 			applicationIdSuffix = ".debug"
-			isMinifyEnabled = false
 		}
-
 		release {
-			isMinifyEnabled = true
-			isShrinkResources = true
-			multiDexEnabled = true
+			optimization {
+				enable = true
+			}
+			// using the release config if not configured unsigned apk
 			signingConfig = signingConfigs.findByName("release")
-
-			proguardFiles(
-				getDefaultProguardFile("proguard-android-optimize.txt"),
-				"proguard-rules.pro"
-			)
 		}
 	}
 	compileOptions {
@@ -85,12 +57,8 @@ android {
 	}
 }
 
-kotlin {
-	compilerOptions {
-		jvmTarget = JvmTarget.JVM_17
-		optIn.add("kotlin.time.ExperimentalTime")
-		optIn.add("kotlin.uuid.ExperimentalUuidApi")
-	}
+koinCompiler {
+	userLogs = true
 }
 
 composeCompiler {
@@ -110,9 +78,12 @@ dependencies {
 	implementation(libs.bundles.compose)
 	//lifecycle compose runtime
 	implementation(libs.androidx.lifecycle.runtime.compose)
-	//navigation
-	implementation(libs.compose.destination.core)
-	ksp(libs.compose.destination.ksp)
+	//navigation and adaptive layout
+	implementation(libs.bundles.navigation3)
+	implementation(libs.androidx.lifecycle.navigation3)
+	implementation(libs.androidx.adaptive.navigation3)
+	implementation(libs.androidx.material3.adaptive.navigation.suite)
+	implementation(libs.androidx.window)
 	//kotlinx
 	implementation(libs.bundles.kotlinx)
 	//splash api
@@ -141,11 +112,6 @@ protobuf {
 	protoc {
 		artifact = libs.protobuf.protoc.compiler.get().toString()
 	}
-	plugins {
-		create("java") {
-			artifact = libs.protobuf.protoc.gen.javalite.get().toString()
-		}
-	}
 
 	generateProtoTasks {
 		all().forEach { task ->
@@ -158,5 +124,47 @@ protobuf {
 				}
 			}
 		}
+	}
+}
+
+fun NamedDomainObjectContainer<out ApkSigningConfig>.createReleaseConfig() {
+	val keySecretFile = project.file("keystore.properties")
+
+	var storeFileName: String? = null
+	var keyAlias: String? = null
+	var keyPassword: String? = null
+	var storePassword: String? = null
+
+	// first check if keystore exists in the root project
+	if (keySecretFile.exists()) {
+		val properties = Properties()
+		keySecretFile.inputStream().use { properties.load(it) }
+		storeFileName = properties.getProperty("STORE_FILE_NAME")
+		keyAlias = properties.getProperty("KEY_ALIAS")
+		keyPassword = properties.getProperty("KEY_PASSWORD")
+		storePassword = properties.getProperty("STORE_PASSWORD")
+	}
+
+	// if not found fallback to env
+	if (storeFileName.isNullOrBlank()) storeFileName = System.getenv("STORE_FILE_NAME")
+	if (keyAlias.isNullOrBlank()) keyAlias = System.getenv("KEY_ALIAS")
+	if (keyPassword.isNullOrBlank()) keyPassword = System.getenv("KEY_PASSWORD")
+	if (storePassword.isNullOrBlank()) storePassword = System.getenv("STORE_PASSWORD")
+
+	// finally search for the jks file
+	val jksFile = storeFileName?.takeIf { it.isNotBlank() }?.let(project::file)
+
+	val propertiesOk =
+		!keyAlias.isNullOrBlank() && !keyPassword.isNullOrBlank() && !storePassword.isNullOrBlank()
+	val isJskFileOk = jksFile?.exists() == true
+
+	if (!propertiesOk || !isJskFileOk) return
+
+	// Create the release config
+	create("release") {
+		storeFile = jksFile
+		this.keyAlias = keyAlias
+		this.keyPassword = keyPassword
+		this.storePassword = storePassword
 	}
 }

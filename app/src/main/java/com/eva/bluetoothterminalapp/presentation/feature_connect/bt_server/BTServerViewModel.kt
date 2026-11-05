@@ -32,14 +32,16 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 
+@KoinViewModel
 class BTServerViewModel(
 	private val serverConnector: BluetoothServerConnector,
 	private val bTSettings: BTSettingsDataSore,
 ) : AppViewModel() {
 
 	private val _serverState = MutableStateFlow(BTServerScreenState())
-	val serverState = _serverState.onStart { readIncommingOrOutGoingData() }
+	val serverState = _serverState.onStart { readIncomingOrOutGoingData() }
 		.stateIn(
 			scope = viewModelScope,
 			started = SharingStarted.WhileSubscribed(8_000L),
@@ -109,7 +111,7 @@ class BTServerViewModel(
 		startServer()
 		// clear the messages
 		_serverState.update { state ->
-			val messages = state.messages.clear()
+			val messages = state.messages.cleared()
 			state.copy(messages = messages)
 		}
 	}
@@ -172,16 +174,16 @@ class BTServerViewModel(
 	}
 
 	@OptIn(ExperimentalCoroutinesApi::class)
-	private fun readIncommingOrOutGoingData() = bTSettings.settingsFlow
+	private fun readIncomingOrOutGoingData() = bTSettings.settingsFlow
 		.map { settings -> settings.localEchoEnabled }
 		.distinctUntilChanged()
 		.flatMapConcat { enabled ->
 			// if local echo enabled then check both flows
 			if (enabled) merge(serverConnector.readIncomingData, _localEcho)
-			// otherwise only the incomming flow
+			// otherwise only the incoming flow
 			else serverConnector.readIncomingData
 		}
-		.catch { err ->
+		.catch { _ ->
 			_uiEvents.emit(
 				UiEvents.ShowSnackBarWithActions(
 					message = "Unable to read incoming data",
@@ -192,7 +194,7 @@ class BTServerViewModel(
 		}
 		.onEach { message ->
 			_serverState.update { state ->
-				val updatedMessages = state.messages.add(message)
+				val updatedMessages = state.messages.adding(message)
 				state.copy(messages = updatedMessages)
 			}
 		}.launchIn(viewModelScope)
@@ -207,7 +209,6 @@ class BTServerViewModel(
 	override fun onCleared() {
 		// stop server and clear resources
 		stopServerAndClearResources()
-		super.onCleared()
 	}
 
 }

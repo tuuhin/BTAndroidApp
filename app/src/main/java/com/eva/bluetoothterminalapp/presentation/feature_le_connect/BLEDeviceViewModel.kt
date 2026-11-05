@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_le_connect
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
@@ -13,10 +12,8 @@ import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.Charac
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.CloseConnectionEvents
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.SelectedCharacteristicState
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.WriteCharacteristicEvent
-import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothDeviceArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
-import com.ramcosta.composedestinations.generated.navArgs
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,10 +30,13 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 
+@KoinViewModel
 class BLEDeviceViewModel(
+	@InjectedParam private val address: String,
 	private val bleConnector: BluetoothLEClientConnector,
-	private val savedStateHandle: SavedStateHandle,
 ) : AppViewModel() {
 
 	private val _selectedCharacteristic = MutableStateFlow(SelectedCharacteristicState())
@@ -93,8 +93,6 @@ class BLEDeviceViewModel(
 	override val uiEvents: SharedFlow<UiEvents>
 		get() = _uiEvents.asSharedFlow()
 
-	private val navArgs: BluetoothDeviceArgs
-		get() = savedStateHandle.navArgs()
 
 	private val isNotifyOrIndicationRunning: Boolean
 		get() = bleConnector.isNotifyOrIndicationRunning.value
@@ -188,7 +186,6 @@ class BLEDeviceViewModel(
 	}
 
 	private fun initiateConnection() {
-		val address = navArgs.address
 		// being connection
 		viewModelScope.launch {
 			bleConnector.connect(address)
