@@ -1,10 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_settings
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
@@ -20,6 +16,7 @@ import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameter
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.settings.models.BLESettingsModel
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.feature_settings.composables.BLESettingsContent
 import com.eva.bluetoothterminalapp.presentation.feature_settings.composables.BTSettingsContent
 import com.eva.bluetoothterminalapp.presentation.feature_settings.composables.BTSettingsTabs
@@ -31,10 +28,6 @@ import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKey
 import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(
-	ExperimentalMaterial3Api::class,
-	ExperimentalSharedTransitionApi::class
-)
 @Composable
 fun AppSettingsRoute(
 	bleSettings: BLESettingsModel,
@@ -101,7 +94,7 @@ private fun AppSettingsRoutePreview(
 		onBLEEvent = {},
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Default.ArrowBack,
+				imageVector = AppIconVectors.backArrow,
 				contentDescription = stringResource(id = R.string.back_arrow)
 			)
 		},

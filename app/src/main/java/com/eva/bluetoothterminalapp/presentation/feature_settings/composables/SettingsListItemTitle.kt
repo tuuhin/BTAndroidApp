@@ -24,9 +24,9 @@ fun LazyListScope.bTListItemTitle(
 			.fillMaxWidth()
 			.background(MaterialTheme.colorScheme.surface),
 	) {
-		CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+		CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.secondary) {
 			ProvideTextStyle(
-				value = MaterialTheme.typography.titleMedium,
+				value = MaterialTheme.typography.titleMediumEmphasized,
 			) {
 				Box(
 					modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
