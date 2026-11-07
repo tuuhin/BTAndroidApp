@@ -1,7 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -70,7 +69,7 @@ fun BLECharacteristicsCard(
 			contentColor = contentColorFor(backgroundColor = containerColor)
 		),
 		shape = shape,
-		modifier = modifier.animateContentSize(),
+		modifier = modifier,
 	) {
 		Column(
 			modifier = Modifier.padding(18.dp),

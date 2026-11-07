@@ -1,7 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_settings.composables
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -85,10 +83,7 @@ fun BTSettingsTabs(
 			flingBehavior = PagerDefaults.flingBehavior(
 				state = pagerState,
 				snapPositionalThreshold = .4f,
-				snapAnimationSpec = spring(
-					dampingRatio = Spring.DampingRatioLowBouncy,
-					stiffness = Spring.StiffnessVeryLow
-				)
+				snapAnimationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
 			),
 			pageSpacing = dimensionResource(id = R.dimen.page_spacing),
 			modifier = Modifier.fillMaxSize(),

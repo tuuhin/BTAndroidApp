@@ -1,10 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -85,8 +81,12 @@ fun BTDevicesTabsLayout(
 	) {
 		AnimatedVisibility(
 			visible = isScanning,
-			enter = slideInHorizontally() + fadeIn(tween(easing = FastOutSlowInEasing)),
-			exit = slideOutHorizontally() + fadeOut(tween(easing = FastOutSlowInEasing)),
+			enter = slideInHorizontally(
+				animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()
+			) + fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()),
+			exit = slideOutHorizontally(
+				animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
+			) + fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
 			label = "Indication that scan is running"
 		) {
 			LinearWavyProgressIndicator(
@@ -121,10 +121,7 @@ fun BTDevicesTabsLayout(
 			flingBehavior = PagerDefaults.flingBehavior(
 				state = pagerState,
 				snapPositionalThreshold = .4f,
-				snapAnimationSpec = spring(
-					dampingRatio = Spring.DampingRatioLowBouncy,
-					stiffness = Spring.StiffnessVeryLow
-				)
+				snapAnimationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
 			),
 		) { idx ->
 			Box(modifier = Modifier.padding(contentPadding)) {

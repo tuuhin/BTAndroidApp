@@ -1,9 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.navigation
 
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.core.EaseOutCubic
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -40,8 +37,10 @@ fun AppNavigation(
 	val snackBarHostState = remember { SnackbarHostState() }
 	val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
-	val spatialEffect = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
-	val fastSpatialFloatEffect = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+	val defaultSpatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+	val defaultEffectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+	val fastSpatialSpec = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+	val fastEffectsSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
 
 	val koin = getKoin()
 	val destinations = remember(koin) { koin.getAll<NavDestinationBuilder>() }
@@ -66,33 +65,33 @@ fun AppNavigation(
 				),
 				transitionSpec = {
 					scaleIn(
-						animationSpec = tween(durationMillis = 120, easing = FastOutLinearInEasing),
+						animationSpec = defaultSpatialSpec,
 						initialScale = 0.9f,
-					) + fadeIn(animationSpec = spatialEffect) togetherWith
+					) + fadeIn(animationSpec = defaultEffectsSpec) togetherWith
 							scaleOut(
-								animationSpec = tween(durationMillis = 120, easing = EaseOutCubic),
+								animationSpec = fastSpatialSpec,
 								targetScale = 1.1f,
-							) + fadeOut(fastSpatialFloatEffect)
+							) + fadeOut(fastEffectsSpec)
 				},
 				popTransitionSpec = {
 					scaleIn(
-						animationSpec = tween(durationMillis = 120, easing = FastOutLinearInEasing),
+						animationSpec = defaultSpatialSpec,
 						initialScale = 1.1f,
-					) + fadeIn(animationSpec = spatialEffect) togetherWith
+					) + fadeIn(animationSpec = defaultEffectsSpec) togetherWith
 							scaleOut(
-								animationSpec = tween(durationMillis = 120, easing = EaseOutCubic),
+								animationSpec = fastSpatialSpec,
 								targetScale = 0.9f,
-							) + fadeOut(fastSpatialFloatEffect)
+							) + fadeOut(fastEffectsSpec)
 				},
 				predictivePopTransitionSpec = {
 					scaleIn(
-						animationSpec = tween(durationMillis = 120, easing = FastOutLinearInEasing),
+						animationSpec = defaultSpatialSpec,
 						initialScale = 1.1f,
-					) + fadeIn(animationSpec = spatialEffect) togetherWith
+					) + fadeIn(animationSpec = defaultEffectsSpec) togetherWith
 							scaleOut(
-								animationSpec = tween(durationMillis = 120, easing = EaseOutCubic),
+								animationSpec = fastSpatialSpec,
 								targetScale = 0.9f,
-							) + fadeOut(fastSpatialFloatEffect)
+							) + fadeOut(fastEffectsSpec)
 				},
 				contentAlignment = Alignment.Center,
 				entryProvider = entryProvider {

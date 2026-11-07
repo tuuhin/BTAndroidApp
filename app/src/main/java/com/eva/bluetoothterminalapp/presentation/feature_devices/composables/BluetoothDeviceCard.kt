@@ -1,7 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -65,7 +64,7 @@ fun BluetoothDeviceCard(
 	val cardContainerColor by animateColorAsState(
 		targetValue = if (isExpanded) selectedColor else containerColor,
 		label = "Card container color",
-		animationSpec = tween(durationMillis = 200)
+		animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
 	)
 
 	Surface(

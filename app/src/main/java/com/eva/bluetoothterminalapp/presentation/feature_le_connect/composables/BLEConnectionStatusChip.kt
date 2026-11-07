@@ -2,8 +2,6 @@ package com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -33,6 +31,7 @@ fun BLEConnectionStatusChip(
 ) {
 	val animatedColor by animateColorAsState(
 		targetValue = state.color,
+		animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
 		label = "Chip color animation"
 	)
 
@@ -42,7 +41,7 @@ fun BLEConnectionStatusChip(
 			Crossfade(
 				targetState = state,
 				label = "Current device connection state",
-				animationSpec = tween(durationMillis = 300, easing = LinearEasing),
+				animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
 				modifier = Modifier.padding(4.dp)
 			) { state ->
 				Text(

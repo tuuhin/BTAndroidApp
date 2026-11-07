@@ -38,7 +38,6 @@ fun BLEServerTopAppBar(
 				) {
 					FilledTonalButton(
 						onClick = onStopServer,
-						enabled = !transition.isRunning,
 						contentPadding = ButtonDefaults.contentPaddingFor(
 							ButtonDefaults.ExtraSmallContainerHeight,
 							hasStartIcon = true

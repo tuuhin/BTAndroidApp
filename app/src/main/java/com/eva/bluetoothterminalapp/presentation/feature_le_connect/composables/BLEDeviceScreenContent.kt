@@ -2,16 +2,8 @@ package com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -81,16 +73,14 @@ fun BLEDeviceScreenContent(
 					rssi = profile.signalStrength,
 					modifier = Modifier.animateEnterExit(
 						enter = slideInVertically(
-							animationSpec = tween(durationMillis = 200, easing = EaseIn)
-						) { height -> height } + scaleIn(
-							initialScale = .75f,
-							animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)
+							animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()
+						) { height -> height } + fadeIn(
+							animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
 						),
 						exit = slideOutVertically(
-							animationSpec = tween(durationMillis = 200, easing = EaseOut)
-						) { height -> -height } + scaleOut(
-							targetScale = .75f,
-							animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)
+							animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
+						) { height -> -height } + fadeOut(
+							animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
 						),
 					)
 				)
@@ -129,8 +119,12 @@ fun BLEDeviceScreenContent(
 				}
 				AnimatedVisibility(
 					visible = profile.connectionState == BLEConnectionState.CONNECTED,
-					enter = slideInVertically(animationSpec = tween(easing = FastOutLinearInEasing)) { height -> height } + fadeIn(),
-					exit = slideOutVertically(animationSpec = tween(easing = FastOutLinearInEasing)) { height -> height } + fadeOut(),
+					enter = slideInVertically(
+						animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()
+					) { height -> height } + fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()),
+					exit = slideOutVertically(
+						animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
+					) { height -> height } + fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
 					modifier = Modifier.weight(1f)
 				) {
 					BLEServicesList(

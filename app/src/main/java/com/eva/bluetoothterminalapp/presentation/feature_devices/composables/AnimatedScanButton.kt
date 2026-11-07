@@ -66,8 +66,7 @@ fun AnimatedScanButton(
 			ScanButtonState.STOP_SCAN -> {
 				TextButton(
 					onClick = stopScan,
-					colors = colors,
-					enabled = !transition.isRunning
+					colors = colors
 				) {
 					Text(
 						text = stringResource(id = R.string.stop_bluetooth_scan),
@@ -79,8 +78,7 @@ fun AnimatedScanButton(
 			ScanButtonState.START_SCAN -> {
 				TextButton(
 					onClick = startScan,
-					colors = colors,
-					enabled = !transition.isRunning
+					colors = colors
 				) {
 					Text(
 						text = stringResource(id = R.string.start_bluetooth_scan),
