@@ -27,10 +27,12 @@ class SPPConnectionService : LifecycleService() {
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 		super.onStartCommand(intent, flags, startId)
 
-		// show foreground with notification
-		startForeground(NOTIFICATION_ID, buildNotification("Preparing Bluetooth connection"))
-
 		val address = intent?.getStringExtra(SPPConnectionConstants.EXTRA_DEVICE_ADDRESS)
+
+		// show foreground with notification
+		val message = if (address != null) "Preparing connection to $address"
+		else "Preparing connection"
+		startForeground(NOTIFICATION_ID, buildNotification(message))
 
 		// check spp uuid
 		val uuid = runCatching {
@@ -92,6 +94,11 @@ class SPPConnectionService : LifecycleService() {
 			}
 		} catch (e: Exception) {
 			Log.e(TAG, "Something went south stoping service", e)
+
+			// detach the foreground notification so it stays
+			_notificationManager?.notify(NOTIFICATION_ID, buildNotification("Failed to connect"))
+			stopForeground(STOP_FOREGROUND_DETACH)
+
 			stopSelf(startId)
 			return START_NOT_STICKY
 		}
@@ -115,7 +122,7 @@ class SPPConnectionService : LifecycleService() {
 
 	private fun buildNotification(message: String): Notification =
 		NotificationCompat.Builder(this, NotificationConstants.BT_CONNECTION_NOTIFICATION_ID)
-			.setSmallIcon(R.drawable.ic_launcher_foreground)
+			.setSmallIcon(R.drawable.ic_bluetooth_settings)
 			.setContentTitle(getString(R.string.app_name))
 			.setContentText(message)
 			.setOngoing(true)

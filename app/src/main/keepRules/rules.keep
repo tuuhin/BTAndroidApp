@@ -1,0 +1,5 @@
+-keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
+
+# Keep internal Protobuf classes that rely on reflection
+-keep class com.google.protobuf.** { *; }
+-dontwarn com.google.protobuf.**
