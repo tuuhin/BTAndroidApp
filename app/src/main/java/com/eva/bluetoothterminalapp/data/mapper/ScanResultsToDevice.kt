@@ -7,5 +7,5 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDevice
 fun ScanResult.toDomainModel(): BluetoothLEDeviceModel = BluetoothLEDeviceModel(
 	deviceModel = device.toDomainModel(),
 	deviceName = scanRecord?.deviceName ?: BluetoothDeviceModel.UNNAMED_DEVICE_NAME,
-	rssi = rssi,
+	rssi = { rssi },
 )

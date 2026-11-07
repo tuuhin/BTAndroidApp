@@ -1,12 +1,15 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.composable
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -14,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -62,7 +66,7 @@ fun ConnectionProfileList(
 	) {
 		stickyHeader {
 			ListItem(
-				headlineContent = { Text(text = stringResource(id = R.string.bl_connect_profile_server_uuid_text)) },
+				content = { Text(text = stringResource(id = R.string.bl_connect_profile_server_uuid_text)) },
 				supportingContent = { Text(text = stringResource(id = R.string.bl_connect_profile_server_uuid_desc)) },
 			)
 		}
@@ -78,43 +82,54 @@ fun ConnectionProfileList(
 		}
 		stickyHeader {
 			ListItem(
-				headlineContent = { Text(text = stringResource(id = R.string.bl_connect_profile_device_uuid_text)) },
+				content = { Text(text = stringResource(id = R.string.bl_connect_profile_device_uuid_text)) },
 				supportingContent = { Text(text = stringResource(R.string.bl_connect_profile_device_uuid_desc)) },
 			)
 		}
 
 		if (isDiscovering) {
 			item {
-				Text(
-					text = stringResource(id = R.string.bl_connect_profile_device_uuid_fetching),
-					style = MaterialTheme.typography.bodyMedium,
-					color = MaterialTheme.colorScheme.tertiary,
-					textAlign = TextAlign.Center,
+				Box(
 					modifier = Modifier
 						.fillMaxWidth()
+						.height(80.dp)
 						.animateItem(),
-				)
+					contentAlignment = Alignment.Center
+				) {
+					Text(
+						text = stringResource(id = R.string.bl_connect_profile_device_uuid_fetching),
+						style = MaterialTheme.typography.bodyMediumEmphasized,
+						color = MaterialTheme.colorScheme.secondary,
+						textAlign = TextAlign.Center,
+					)
+				}
 			}
 		} else if (isNoUuidFound) {
 			item {
-				Text(
-					text = stringResource(id = R.string.bl_connect_profile_device_uuids_not_found),
-					style = MaterialTheme.typography.bodyMedium,
-					color = MaterialTheme.colorScheme.secondary,
-					textAlign = TextAlign.Center,
+				Box(
 					modifier = Modifier
 						.fillMaxWidth()
+						.height(80.dp)
 						.animateItem(),
-				)
+					contentAlignment = Alignment.Center
+				) {
+					Text(
+						text = stringResource(id = R.string.bl_connect_profile_device_uuids_not_found),
+						style = MaterialTheme.typography.bodyMediumEmphasized,
+						color = MaterialTheme.colorScheme.secondary,
+						textAlign = TextAlign.Center,
+					)
+				}
 			}
 		} else itemsIndexed(
 			items = available,
 			key = uuidsKey,
 			contentType = uuidContentType
-		) { _, uuid ->
+		) { idx, uuid ->
 			SelectableUUIDCard(
 				uuid = uuid,
 				isSelected = selected == uuid,
+				shape = ListItemDefaults.segmentedShapes(idx, available.size),
 				onSelect = { onUUIDSelect(uuid) },
 				modifier = Modifier.fillMaxWidth(),
 			)

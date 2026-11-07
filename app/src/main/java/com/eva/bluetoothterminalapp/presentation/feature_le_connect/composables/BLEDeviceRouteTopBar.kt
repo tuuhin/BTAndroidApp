@@ -2,13 +2,13 @@ package com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.MenuDefaults
@@ -20,11 +20,13 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -32,6 +34,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLEDeviceConfigEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,10 +48,10 @@ fun BLEDeviceRouteTopBar(
 	colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors()
 ) {
 
-	var isMenuExpanded by remember { mutableStateOf(false) }
+	var isMenuExpanded by rememberSaveable { mutableStateOf(false) }
 	var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
 
-	var showRequestMTUDialog by remember { mutableStateOf(false) }
+	var showRequestMTUDialog by rememberSaveable { mutableStateOf(false) }
 
 	BLEDeviceRequestMTUDialog(
 		showDialog = showRequestMTUDialog,
@@ -86,9 +89,22 @@ fun BLEDeviceRouteTopBar(
 					},
 					state = rememberTooltipState()
 				) {
-					IconButton(onClick = { isMenuExpanded = true }) {
+					FilledIconButton(
+						onClick = { isMenuExpanded = true },
+						colors = IconButtonDefaults.iconButtonColors(
+							containerColor = MaterialTheme.colorScheme.secondary,
+							contentColor = MaterialTheme.colorScheme.onSecondary,
+						),
+						modifier = Modifier
+							.minimumInteractiveComponentSize()
+							.size(IconButtonDefaults.smallContainerSize(IconButtonDefaults.IconButtonWidthOption.Narrow)),
+						shapes = IconButtonDefaults.shapes(
+							shape = IconButtonDefaults.smallRoundShape,
+							pressedShape = IconButtonDefaults.smallPressedShape,
+						),
+					) {
 						Icon(
-							imageVector = Icons.Default.MoreVert,
+							imageVector = AppIconVectors.moreVert,
 							contentDescription = stringResource(id = R.string.menu_option_more),
 						)
 					}
@@ -97,7 +113,7 @@ fun BLEDeviceRouteTopBar(
 					expanded = isMenuExpanded,
 					offset = menuOffset,
 					onDismissRequest = { isMenuExpanded = false },
-					shape = MaterialTheme.shapes.medium,
+					shape = MaterialTheme.shapes.large,
 					tonalElevation = 2.dp
 				) {
 					DropdownMenuItem(

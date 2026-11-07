@@ -25,10 +25,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -63,7 +66,7 @@ fun BLEDeviceScreenContent(
 	AnimatedContent(
 		targetState = profile.device != null,
 		contentAlignment = Alignment.Center,
-		modifier = modifier
+		modifier = modifier.fillMaxSize()
 	) { isReady ->
 		if (isReady && profile.device != null) {
 			Column(
@@ -92,7 +95,8 @@ fun BLEDeviceScreenContent(
 					)
 				)
 				AnimatedVisibility(
-					visible = isConnectedOrConnecting
+					visible = isConnectedOrConnecting,
+					modifier = Modifier.padding(vertical = 4.dp)
 				) {
 					Row(
 						horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -105,18 +109,20 @@ fun BLEDeviceScreenContent(
 						Text(
 							text = stringResource(id = R.string.le_available_devices),
 							style = MaterialTheme.typography.titleLarge,
-							modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
+							modifier = Modifier
+								.padding(horizontal = 4.dp, vertical = 6.dp)
+								.weight(1f)
 						)
 						Surface(
 							color = MaterialTheme.colorScheme.primaryContainer,
 							contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-							shape = MaterialTheme.shapes.small,
+							shape = MaterialShapes.Sunny.toShape(),
 						) {
 							Text(
 								text = "$servicesCount",
 								style = MaterialTheme.typography.bodyMedium,
 								fontWeight = FontWeight.SemiBold,
-								modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+								modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
 							)
 						}
 					}
@@ -142,11 +148,11 @@ fun BLEDeviceScreenContent(
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center
 		) {
-			CircularProgressIndicator()
+			LoadingIndicator(modifier = Modifier.size(36.dp))
 			Spacer(modifier = Modifier.height(12.dp))
 			Text(
 				text = stringResource(R.string.ble_device_connecting),
-				style = MaterialTheme.typography.titleLarge,
+				style = MaterialTheme.typography.titleLargeEmphasized,
 				color = MaterialTheme.colorScheme.onSurface
 			)
 		}

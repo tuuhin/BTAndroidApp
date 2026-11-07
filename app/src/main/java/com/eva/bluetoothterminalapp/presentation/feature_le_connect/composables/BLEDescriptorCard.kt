@@ -63,12 +63,12 @@ fun BLEDescriptorCard(
 		modifier = modifier,
 	) {
 		Column(
-			modifier = Modifier.padding(12.dp),
+			modifier = Modifier.padding(18.dp),
 			verticalArrangement = Arrangement.spacedBy(2.dp)
 		) {
 			Text(
 				text = descriptor.probableName ?: stringResource(R.string.ble_descriptor_unknown),
-				style = MaterialTheme.typography.bodyMedium,
+				style = MaterialTheme.typography.bodyMediumEmphasized,
 				fontWeight = FontWeight.Medium,
 				color = titleColor,
 			)
@@ -84,7 +84,7 @@ fun BLEDescriptorCard(
 						append("${descriptor.uuid}")
 					}
 				},
-				style = MaterialTheme.typography.labelMedium,
+				style = MaterialTheme.typography.labelMediumEmphasized,
 				color = titleColor
 			)
 			HorizontalDivider(
@@ -108,15 +108,21 @@ fun BLEDescriptorCard(
 				enter = slideInVertically { height -> height } + fadeIn(),
 				exit = slideOutVertically { height -> -height } + fadeOut()
 			) {
-				Text(
-					text = buildAnnotatedString {
-						append(stringResource(R.string.ble_readable_value))
-						append(" :")
-						append(descriptor.textValue)
-					},
-					style = MaterialTheme.typography.labelMedium,
-					color = valuesColor,
-				)
+				Column {
+					Text(
+						text = buildAnnotatedString {
+							append(stringResource(R.string.ble_readable_value))
+							append(" :")
+							append(descriptor.textValue)
+						},
+						style = MaterialTheme.typography.labelMediumEmphasized,
+						color = valuesColor,
+					)
+					HorizontalDivider(
+						modifier = Modifier.padding(vertical = 2.dp),
+						color = MaterialTheme.colorScheme.outlineVariant
+					)
+				}
 			}
 			SuggestionChip(
 				onClick = onRead,

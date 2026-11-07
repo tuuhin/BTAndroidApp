@@ -92,7 +92,6 @@ dependencies {
 	implementation(platform(libs.koin.bom))
 	implementation(libs.bundles.koin)
 	// shapes
-	implementation(libs.androidx.graphics.shapes)
 	//datastore
 	implementation(libs.androidx.datastore)
 	implementation(libs.protobuf.javalite)
@@ -106,6 +105,12 @@ dependencies {
 	//debug
 	debugImplementation(libs.androidx.ui.tooling)
 	debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+kotlin {
+	compilerOptions {
+		optIn.add("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+	}
 }
 
 protobuf {

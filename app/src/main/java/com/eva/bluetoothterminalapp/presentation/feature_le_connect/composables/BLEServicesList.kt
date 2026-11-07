@@ -71,6 +71,7 @@ fun BLEServicesList(
 			) {
 				Text(
 					text = stringResource(R.string.ble_device_no_service_found),
+					style = MaterialTheme.typography.bodyMediumEmphasized,
 					textAlign = TextAlign.Center,
 				)
 			}

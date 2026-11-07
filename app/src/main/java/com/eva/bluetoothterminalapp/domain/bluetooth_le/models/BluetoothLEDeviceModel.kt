@@ -13,5 +13,5 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 data class BluetoothLEDeviceModel(
 	val deviceModel: BluetoothDeviceModel,
 	val deviceName: String,
-	val rssi: Int = 0,
+	val rssi: () -> Int = { 0 },
 )

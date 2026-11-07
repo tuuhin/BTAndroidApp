@@ -39,7 +39,7 @@ fun SelectableBLECharacteristics(
 	modifier: Modifier = Modifier,
 	backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
 	selectedBackGroundColor: Color = MaterialTheme.colorScheme.secondaryContainer,
-	shape: Shape = MaterialTheme.shapes.medium,
+	shape: Shape = MaterialTheme.shapes.large,
 ) {
 
 	val containerColor by animateColorAsState(
@@ -57,13 +57,13 @@ fun SelectableBLECharacteristics(
 		modifier = modifier
 	) {
 		Column(
-			modifier = Modifier.padding(all = 12.dp),
+			modifier = Modifier.padding(all = 16.dp),
 			verticalArrangement = Arrangement.spacedBy(2.dp)
 		) {
 			Text(
 				text = characteristic.probableName
 					?: stringResource(R.string.ble_characteristic_name_unknown),
-				style = MaterialTheme.typography.labelLarge,
+				style = MaterialTheme.typography.labelLargeEmphasized,
 			)
 			Text(
 				text = buildAnnotatedString {
@@ -78,7 +78,7 @@ fun SelectableBLECharacteristics(
 						append("${characteristic.uuid}")
 					}
 				},
-				style = MaterialTheme.typography.labelMedium,
+				style = MaterialTheme.typography.bodySmallEmphasized,
 				overflow = TextOverflow.Ellipsis,
 				maxLines = 1
 			)
@@ -88,7 +88,8 @@ fun SelectableBLECharacteristics(
 					append("Properties: ")
 					append(characteristic.toReadableProperties)
 				},
-				style = MaterialTheme.typography.labelMedium,
+				style = MaterialTheme.typography.bodyMediumEmphasized,
+				fontWeight = FontWeight.SemiBold,
 			)
 		}
 

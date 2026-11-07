@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Rule
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLECharacteristicsModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEDescriptorModel
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
+import com.eva.bluetoothterminalapp.presentation.composables.SheetTitleBar
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.BLECharacteristicEvent
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
@@ -37,6 +37,7 @@ import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 @Composable
 fun BLEReadWriteSheetContent(
 	characteristic: BLECharacteristicsModel?,
+	onDismissSheet: () -> Unit,
 	onRead: () -> Unit,
 	onWrite: () -> Unit,
 	onIndicate: () -> Unit,
@@ -59,7 +60,7 @@ fun BLEReadWriteSheetContent(
 			verticalArrangement = Arrangement.spacedBy(4.dp)
 		) {
 			Icon(
-				imageVector = Icons.AutoMirrored.Outlined.Rule,
+				imageVector = AppIconVectors.rule,
 				contentDescription = stringResource(id = R.string.ble_characteristic_not_selected_title),
 				modifier = Modifier.size(32.dp),
 				tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -83,9 +84,9 @@ fun BLEReadWriteSheetContent(
 		modifier = modifier,
 		verticalArrangement = Arrangement.spacedBy(4.dp)
 	) {
-		Text(
-			text = stringResource(id = R.string.ble_selected_characteristic),
-			style = MaterialTheme.typography.titleLarge
+		SheetTitleBar(
+			title = stringResource(id = R.string.ble_selected_characteristic),
+			onDismissSheet = onDismissSheet,
 		)
 		Spacer(modifier = Modifier.height(12.dp))
 		BLECharacteristicsCard(
@@ -123,11 +124,13 @@ fun BLEReadWriteSheetContent(
 @Composable
 fun BLEReadWriteContentSheet(
 	characteristic: BLECharacteristicsModel?,
+	onDismissSheet: () -> Unit,
 	onEvent: (BLECharacteristicEvent) -> Unit,
 	modifier: Modifier = Modifier
 ) {
 	BLEReadWriteSheetContent(
 		characteristic = characteristic,
+		onDismissSheet = onDismissSheet,
 		onRead = { onEvent(BLECharacteristicEvent.ReadCharacteristic) },
 		onWrite = { onEvent(BLECharacteristicEvent.WriteCharacteristic) },
 		onIndicate = { onEvent(BLECharacteristicEvent.OnIndicateCharacteristic) },
@@ -163,6 +166,7 @@ private fun BLEReadWriteSheetContentPreview(
 	) {
 		BLEReadWriteSheetContent(
 			characteristic = characteristic,
+			onDismissSheet = {},
 			onRead = {},
 			onWrite = {},
 			onIndicate = {},

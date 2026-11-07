@@ -8,7 +8,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -39,7 +38,6 @@ import com.eva.bluetoothterminalapp.presentation.feature_le_connect.util.toReada
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BLECharacteristicsCard(
 	characteristic: BLECharacteristicsModel,
@@ -75,7 +73,7 @@ fun BLECharacteristicsCard(
 		modifier = modifier.animateContentSize(),
 	) {
 		Column(
-			modifier = Modifier.padding(12.dp),
+			modifier = Modifier.padding(18.dp),
 			verticalArrangement = Arrangement.spacedBy(2.dp)
 		) {
 			Text(
@@ -134,16 +132,21 @@ fun BLECharacteristicsCard(
 				enter = slideInVertically { height -> height } + fadeIn(),
 				exit = slideOutVertically { height -> -height } + fadeOut()
 			) {
-				Text(
-					text = buildAnnotatedString {
-						append(stringResource(R.string.ble_readable_value))
-						append(" :")
-						append(characteristic.valueAsString ?: "None")
-					},
-					style = MaterialTheme.typography.labelLarge,
-					color = valuesColor,
-				)
-
+				Column {
+					Text(
+						text = buildAnnotatedString {
+							append(stringResource(R.string.ble_readable_value))
+							append(" :")
+							append(characteristic.valueAsString ?: "None")
+						},
+						style = MaterialTheme.typography.labelLarge,
+						color = valuesColor,
+					)
+					HorizontalDivider(
+						modifier = Modifier.padding(vertical = 2.dp),
+						color = MaterialTheme.colorScheme.outlineVariant
+					)
+				}
 			}
 			BLECharacteristicsActions(
 				characteristic = characteristic,

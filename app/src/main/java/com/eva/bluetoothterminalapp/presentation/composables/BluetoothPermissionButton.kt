@@ -7,8 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -16,7 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,9 +34,9 @@ fun BluetoothPermissionButton(
 
 	val context = LocalContext.current
 
-	var hasScanPermission by remember { mutableStateOf(context.hasBTScanPermission) }
-	var hasConnectPermission by remember { mutableStateOf(context.hasBTConnectPermission) }
-	var hasAdvertisePermission by remember { mutableStateOf(context.hasBTAdvertisePermission) }
+	var hasScanPermission by rememberSaveable { mutableStateOf(context.hasBTScanPermission) }
+	var hasConnectPermission by rememberSaveable { mutableStateOf(context.hasBTConnectPermission) }
+	var hasAdvertisePermission by rememberSaveable { mutableStateOf(context.hasBTAdvertisePermission) }
 
 	val permissionLauncher = rememberLauncherForActivityResult(
 		contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -76,7 +74,7 @@ fun BluetoothPermissionButton(
 		modifier = modifier,
 		shape = MaterialTheme.shapes.medium
 	) {
-		Icon(imageVector = Icons.Default.Bluetooth, contentDescription = null)
+		Icon(imageVector = AppIconVectors.bluetooth, contentDescription = null)
 		Spacer(modifier = Modifier.width(2.dp))
 		Text(text = "Allow Permissions")
 	}

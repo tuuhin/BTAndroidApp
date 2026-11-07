@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,15 +34,15 @@ fun BLEServerScreenContent(
 	contentPadding: PaddingValues = PaddingValues.Zero
 ) {
 	val context = LocalContext.current
-	var canAdvertise by remember { mutableStateOf(context.hasBTAdvertisePermission) }
-	var showDialog by remember { mutableStateOf(false) }
+	var canAdvertise by rememberSaveable { mutableStateOf(context.hasBTAdvertisePermission) }
+	var showDialog by rememberSaveable { mutableStateOf(false) }
+
+	val launcher = rememberLauncherForActivityResult(
+		contract = ActivityResultContracts.RequestPermission(),
+		onResult = { result -> canAdvertise = result },
+	)
 
 	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-		val launcher = rememberLauncherForActivityResult(
-			contract = ActivityResultContracts.RequestPermission(),
-			onResult = { result -> canAdvertise = result },
-		)
-
 		AdvertisePermissionDialog(
 			showDialog = showDialog && !canAdvertise,
 			onConfirm = { launcher.launch(Manifest.permission.BLUETOOTH_ADVERTISE) },
@@ -59,7 +59,7 @@ fun BLEServerScreenContent(
 				modifier = Modifier
 					.fillMaxSize()
 					.padding(contentPadding),
-				verticalArrangement = Arrangement.spacedBy(6.dp)
+				verticalArrangement = Arrangement.spacedBy(12.dp)
 			) {
 				BLEConnectedClients(
 					connectedClients = connectedClients,

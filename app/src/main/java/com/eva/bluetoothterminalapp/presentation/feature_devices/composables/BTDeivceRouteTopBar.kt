@@ -1,10 +1,9 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
-import android.app.Activity
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.launch
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
@@ -15,13 +14,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.contracts.StartBluetoothDiscovery
 import com.eva.bluetoothterminalapp.presentation.util.BluetoothTypes
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BTDeviceRouteTopBar(
 	canShowScanOption: Boolean,
@@ -34,20 +32,14 @@ fun BTDeviceRouteTopBar(
 	stopClassicScan: () -> Unit = {},
 	startBLEScan: () -> Unit = {},
 	stopBLEScan: () -> Unit = {},
+	onStartDiscoveryResponse: (Int) -> Unit = {},
 	colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
 	scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-	val context = LocalContext.current
 
 	val launcher = rememberLauncherForActivityResult(
 		contract = StartBluetoothDiscovery(),
-		onResult = { result ->
-			val message = when (result) {
-				Activity.RESULT_CANCELED -> context.getString(R.string.device_discoverable_denied)
-				else -> context.getString(R.string.device_discoverable_success, result)
-			}
-			Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-		},
+		onResult = onStartDiscoveryResponse,
 	)
 
 	val showScanOption = remember(canShowScanOption, currentTab) {
@@ -68,6 +60,7 @@ fun BTDeviceRouteTopBar(
 				startScan = startScan,
 				stopScan = stopScan
 			)
+			Spacer(modifier = Modifier.width(2.dp))
 			BTDevicesTopBarMenu(
 				isBTEnabled = canShowScanOption,
 				onStartDiscovery = launcher::launch

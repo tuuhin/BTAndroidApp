@@ -19,10 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -93,12 +95,15 @@ fun BTClientDeviceProfile(
 				) {
 					Text(
 						text = device.name,
-						style = MaterialTheme.typography.titleLarge,
+						style = MaterialTheme.typography.titleLargeEmphasized,
+						color = MaterialTheme.colorScheme.primary,
 						fontWeight = FontWeight.SemiBold
 					)
 					Text(
 						text = device.address,
-						style = MaterialTheme.typography.labelLarge,
+						style = MaterialTheme.typography.labelLargeEmphasized,
+						color = MaterialTheme.colorScheme.onSurfaceVariant,
+						fontWeight = FontWeight.Bold,
 						fontFamily = FontFamily.Monospace,
 					)
 					Spacer(modifier = Modifier.height(4.dp))
@@ -107,7 +112,7 @@ fun BTClientDeviceProfile(
 						elevation = AssistChipDefaults.elevatedAssistChipElevation()
 					)
 				}
-				BTDeviceIconLarge(device = device)
+				BTDeviceIconLarge(device = device, shape = MaterialShapes.Ghostish.toShape())
 			}
 		}
 	}

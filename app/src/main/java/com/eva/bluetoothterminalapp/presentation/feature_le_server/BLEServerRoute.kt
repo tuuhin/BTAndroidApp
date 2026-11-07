@@ -1,31 +1,23 @@
 package com.eva.bluetoothterminalapp.presentation.feature_le_server
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
@@ -33,9 +25,11 @@ import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEServerServices
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.CloseConnectionDialog
 import com.eva.bluetoothterminalapp.presentation.feature_le_server.composable.BLEServerOptionSelectorBottomSheet
 import com.eva.bluetoothterminalapp.presentation.feature_le_server.composable.BLEServerScreenContent
+import com.eva.bluetoothterminalapp.presentation.feature_le_server.composable.BLEServerTopAppBar
 import com.eva.bluetoothterminalapp.presentation.feature_le_server.state.BLEServerScreenEvents
 import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
@@ -63,7 +57,10 @@ fun BLEServerRoute(
 	val layoutDirection = LocalLayoutDirection.current
 
 	val scrollConnection = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-	val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+	val sheetState = rememberBottomSheetState(
+		initialValue = SheetValue.Hidden,
+		setOf(SheetValue.Hidden, SheetValue.Expanded),
+	)
 
 	val scope = rememberCoroutineScope()
 
@@ -93,24 +90,11 @@ fun BLEServerRoute(
 
 	Scaffold(
 		topBar = {
-			MediumTopAppBar(
-				title = { Text(text = stringResource(R.string.ble_server_title)) },
-				actions = {
-					AnimatedVisibility(
-						visible = isServerRunning,
-						enter = slideInVertically(),
-						exit = slideOutVertically()
-					) {
-						TextButton(
-							onClick = { onEvent(BLEServerScreenEvents.OnStopServer) },
-							enabled = !transition.isRunning
-						) {
-							Text(stringResource(R.string.stop_ble_server))
-						}
-					}
-				},
-				navigationIcon = navigation,
-				scrollBehavior = scrollConnection
+			BLEServerTopAppBar(
+				onStopServer = { onEvent(BLEServerScreenEvents.OnStopServer) },
+				isServerRunning = isServerRunning,
+				scrollBehavior = scrollConnection,
+				navigation = navigation,
 			)
 		},
 		snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
@@ -138,7 +122,7 @@ fun BLEServerRoute(
 	}
 }
 
-class IsServerRunningPreviewParams :
+private class IsServerRunningPreviewParams :
 	CollectionPreviewParameterProvider<Boolean>(listOf(true, false))
 
 @PreviewLightDark
@@ -158,7 +142,7 @@ private fun BLEServerRoutePreview(
 		onEvent = {},
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Default.ArrowBack,
+				imageVector = AppIconVectors.backArrow,
 				contentDescription = "Back",
 			)
 		},

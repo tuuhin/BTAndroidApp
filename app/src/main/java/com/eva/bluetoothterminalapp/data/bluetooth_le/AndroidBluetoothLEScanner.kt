@@ -98,11 +98,11 @@ class AndroidBluetoothLEScanner(
 			// if the address already present, only update if RSSI changed to avoid redundant StateFlow notifications
 			val existingDevice = currentList.getOrNull(index) ?: return
 			// if the rssi didn't change skip this
-			if (existingDevice.rssi == result.rssi) return
+			if (existingDevice.rssi() == result.rssi) return
 			// otherwise update the rssi
 			_devices.update { devices ->
 				devices.mapIndexed { idx, device ->
-					if (idx == index) device.copy(rssi = result.rssi)
+					if (idx == index) device.copy(rssi = { result.rssi })
 					else device
 				}
 			}

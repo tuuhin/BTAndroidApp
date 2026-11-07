@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProvideTextStyle
@@ -34,7 +33,6 @@ import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.Charac
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.WriteCharacteristicEvent
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WriteCharacteristicsDialog(
 	showDialog: Boolean,

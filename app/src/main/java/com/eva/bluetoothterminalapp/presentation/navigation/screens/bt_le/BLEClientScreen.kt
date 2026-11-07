@@ -1,8 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.navigation.screens.bt_le
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,6 +15,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.enums.BLEConnectionState
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.BLEDeviceRoute
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.BLEDeviceViewModel
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables.BLECharacteristicSheet
@@ -93,7 +92,7 @@ class BLEClientScreen : NavDestinationBuilder {
 					}
 					IconButton(onClick = onBack) {
 						Icon(
-							imageVector = Icons.AutoMirrored.Default.ArrowBack,
+							imageVector = AppIconVectors.backArrow,
 							contentDescription = stringResource(id = R.string.back_arrow)
 						)
 					}

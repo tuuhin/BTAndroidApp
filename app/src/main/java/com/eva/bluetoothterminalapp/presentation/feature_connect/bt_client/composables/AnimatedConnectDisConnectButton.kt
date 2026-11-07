@@ -9,16 +9,14 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
@@ -29,8 +27,6 @@ fun AnimatedConnectDisconnectButton(
 	onConnect: () -> Unit,
 	onDisConnect: () -> Unit,
 	modifier: Modifier = Modifier,
-	colors: ButtonColors = ButtonDefaults.textButtonColors(),
-	style: TextStyle = MaterialTheme.typography.titleMedium
 ) {
 	AnimatedContent(
 		targetState = clientState,
@@ -41,17 +37,48 @@ fun AnimatedConnectDisconnectButton(
 	) { state ->
 		when (state) {
 			ClientConnectionState.CONNECTION_CONNECTED -> {
-				TextButton(onClick = onDisConnect, colors = colors) {
+				FilledTonalButton(
+					onClick = onDisConnect,
+					contentPadding = ButtonDefaults.contentPaddingFor(
+						ButtonDefaults.ExtraSmallContainerHeight,
+						hasStartIcon = true
+					),
+					shapes = ButtonDefaults.shapes(
+						pressedShape = ButtonDefaults.pressedShape,
+						shape = ButtonDefaults.shape
+					),
+					colors = ButtonDefaults.buttonColors(
+						containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+						contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+					)
+				) {
 					Text(
 						text = stringResource(id = R.string.disconnect_from_client),
-						style = style
+						style = ButtonDefaults.textStyleFor(ButtonDefaults.ExtraSmallContainerHeight)
 					)
 				}
 			}
 
 			ClientConnectionState.CONNECTION_DENIED, ClientConnectionState.CONNECTION_DISCONNECTED -> {
-				TextButton(onClick = onConnect, colors = colors) {
-					Text(text = stringResource(id = R.string.connect_to_client), style = style)
+				FilledTonalButton(
+					onClick = onConnect,
+					contentPadding = ButtonDefaults.contentPaddingFor(
+						ButtonDefaults.ExtraSmallContainerHeight,
+						hasStartIcon = true
+					),
+					shapes = ButtonDefaults.shapes(
+						pressedShape = ButtonDefaults.pressedShape,
+						shape = ButtonDefaults.shape
+					),
+					colors = ButtonDefaults.buttonColors(
+						containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+						contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+					)
+				) {
+					Text(
+						text = stringResource(id = R.string.connect_to_client),
+						style = ButtonDefaults.textStyleFor(ButtonDefaults.ExtraSmallContainerHeight)
+					)
 				}
 			}
 

@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -8,29 +7,29 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Cable
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -49,35 +48,23 @@ import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BluetoothLEDeviceModel
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
 import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(FlowPreview::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun BluetoothLEDeviceCard(
 	leDeviceModel: BluetoothLEDeviceModel,
 	modifier: Modifier = Modifier,
 	onItemSelect: () -> Unit = {},
 	shape: Shape = MaterialTheme.shapes.medium,
+	iconShape: Shape = MaterialShapes.Cookie4Sided.toShape(),
 	selectedColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh
 ) {
-	var isMenuExpanded by remember { mutableStateOf(false) }
-	var localRssi by remember { mutableIntStateOf(leDeviceModel.rssi) }
-
-	LaunchedEffect(leDeviceModel.rssi) {
-		// a debounced version
-		snapshotFlow { leDeviceModel.rssi }
-			.debounce(200.milliseconds)
-			.distinctUntilChanged()
-			.collect { rssi -> localRssi = rssi }
-	}
+	var isMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
 	val cardContainerColor by animateColorAsState(
 		targetValue = if (isMenuExpanded) selectedColor else containerColor,
@@ -102,13 +89,14 @@ fun BluetoothLEDeviceCard(
 			BTDeviceIcon(
 				device = leDeviceModel.deviceModel,
 				deviceName = leDeviceModel.deviceName,
+				shape = iconShape,
 				containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
 				contentColor = MaterialTheme.colorScheme.secondaryContainer,
 			)
 			Column(modifier = Modifier.weight(1f)) {
 				Text(
 					text = leDeviceModel.deviceName,
-					style = MaterialTheme.typography.titleMedium,
+					style = MaterialTheme.typography.titleMediumEmphasized,
 					maxLines = 1,
 					overflow = TextOverflow.Ellipsis,
 					color = MaterialTheme.colorScheme.onSurface
@@ -121,8 +109,9 @@ fun BluetoothLEDeviceCard(
 							append(leDeviceModel.deviceModel.address)
 						}
 					},
-					style = MaterialTheme.typography.bodyMedium,
+					style = MaterialTheme.typography.bodyMediumEmphasized,
 				)
+				Spacer(modifier = Modifier.height(2.dp))
 				Row(
 					verticalAlignment = Alignment.Bottom,
 					horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -131,25 +120,41 @@ fun BluetoothLEDeviceCard(
 						.padding(top = 4.dp)
 				) {
 					SignalsBars(
-						rssi = { localRssi },
+						rssi = leDeviceModel.rssi,
 						color = MaterialTheme.colorScheme.onPrimaryContainer,
 						modifier = Modifier.size(width = 20.dp, height = 20.dp)
 					)
 					Text(
 						text = buildString {
-							append(localRssi)
+							append(leDeviceModel.rssi())
 							append(" ")
 							append(BluetoothDeviceModel.RSSI_UNIT)
 						},
-						style = MaterialTheme.typography.labelLarge
+						color = MaterialTheme.colorScheme.onSurfaceVariant,
+						style = MaterialTheme.typography.labelLargeEmphasized
 					)
 				}
 			}
 			Box {
-				Icon(
-					imageVector = Icons.Default.MoreVert,
-					contentDescription = stringResource(id = R.string.menu_option_more)
-				)
+				FilledIconButton(
+					onClick = { isMenuExpanded = true },
+					colors = IconButtonDefaults.iconButtonColors(
+						containerColor = MaterialTheme.colorScheme.secondary,
+						contentColor = MaterialTheme.colorScheme.onSecondary,
+					),
+					modifier = Modifier
+						.minimumInteractiveComponentSize()
+						.size(IconButtonDefaults.smallContainerSize(IconButtonDefaults.IconButtonWidthOption.Wide)),
+					shapes = IconButtonDefaults.shapes(
+						shape = IconButtonDefaults.mediumRoundShape,
+						pressedShape = IconButtonDefaults.mediumRoundShape,
+					),
+				) {
+					Icon(
+						imageVector = AppIconVectors.moreVert,
+						contentDescription = stringResource(id = R.string.menu_option_more),
+					)
+				}
 				DropdownMenu(
 					expanded = isMenuExpanded,
 					onDismissRequest = { isMenuExpanded = false },
@@ -158,10 +163,13 @@ fun BluetoothLEDeviceCard(
 				) {
 					DropdownMenuItem(
 						text = { Text(text = stringResource(R.string.connect_to_client)) },
-						onClick = onItemSelect,
+						onClick = {
+							isMenuExpanded = false
+							onItemSelect()
+						},
 						leadingIcon = {
 							Icon(
-								imageVector = Icons.Outlined.Cable,
+								imageVector = AppIconVectors.cable,
 								contentDescription = stringResource(R.string.connect_to_client)
 							)
 						},
@@ -186,7 +194,7 @@ private fun SignalsBars(
 				val blockWidth = size.width / 3
 				val blockHeight = size.height / 3
 
-				val strokeWidth = maxOf(2.dp.toPx(), blockWidth * .5f)
+				val strokeWidth = maxOf(2.dp.toPx(), blockWidth * .6f)
 				val maxHeight = size.height - 4.dp.toPx()
 				val noOfBars = 3
 

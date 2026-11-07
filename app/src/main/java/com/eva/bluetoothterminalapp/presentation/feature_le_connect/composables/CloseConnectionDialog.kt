@@ -1,7 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.ButtonDefaults
@@ -17,6 +15,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.DialogProperties
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.feature_le_connect.state.CloseConnectionEvents
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
@@ -53,7 +52,7 @@ fun CloseConnectionDialog(
 		text = { Text(text = stringResource(id = R.string.close_ble_connection_desc)) },
 		icon = {
 			Icon(
-				imageVector = Icons.Default.Close,
+				imageVector = AppIconVectors.close,
 				contentDescription = stringResource(id = R.string.close_ble_connection_dialog)
 			)
 		},

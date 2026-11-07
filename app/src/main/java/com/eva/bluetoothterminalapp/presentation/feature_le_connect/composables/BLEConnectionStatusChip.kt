@@ -53,10 +53,6 @@ fun BLEConnectionStatusChip(
 				)
 			}
 		},
-		border = AssistChipDefaults.assistChipBorder(
-			enabled = true,
-			borderColor = contentColorFor(state.color),
-		),
 		shape = shape,
 		colors = AssistChipDefaults.assistChipColors(
 			containerColor = animatedColor,
