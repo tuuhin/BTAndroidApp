@@ -6,13 +6,13 @@ import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.stat
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileScreenState
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
+import java.util.UUID
 
 @KoinViewModel
 class BluetoothProfileViewModel(
@@ -38,16 +39,27 @@ class BluetoothProfileViewModel(
 			initialValue = BTProfileScreenState()
 		)
 
-	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	override val uiEvents: SharedFlow<UiEvents>
-		get() = _uiEvents.asSharedFlow()
-
-
+		field = MutableSharedFlow<UiEvents>()
 
 	fun onEvent(event: BTProfileEvents) {
 		when (event) {
 			BTProfileEvents.OnRetryFetchUUID -> refreshUUIDs()
+			is BTProfileEvents.OnAddCustomSPP -> onAddCustomUUids(event.uuid)
+		}
+	}
 
+	private fun onAddCustomUUids(uuidString: String) = viewModelScope.launch {
+		try {
+			val uuid = UUID.fromString(uuidString)
+			_profile.update { state ->
+				val newList = persistentListOf<UUID>()
+					.addingAll(state.customUUids)
+					.adding(uuid)
+				state.copy(customUUids = newList)
+			}
+		} catch (_: IllegalArgumentException) {
+			uiEvents.emit(UiEvents.ShowSnackBar("Failed to parse UUID"))
 		}
 	}
 
@@ -63,7 +75,7 @@ class BluetoothProfileViewModel(
 				}
 			},
 			onFailure = {
-				_uiEvents.emit(UiEvents.ShowSnackBar("Unable to load features refresh to continue"))
+				uiEvents.emit(UiEvents.ShowSnackBar("Unable to load features refresh to continue"))
 			},
 		)
 	}

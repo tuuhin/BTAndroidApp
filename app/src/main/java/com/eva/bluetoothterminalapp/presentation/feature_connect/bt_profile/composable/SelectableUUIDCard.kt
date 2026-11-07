@@ -44,6 +44,9 @@ fun SelectableUUIDCard(
 			)
 		},
 		content = { Text(text = uuidName, fontFamily = fontFamily) },
+		supportingContent = {
+			if (uniqueName != null) Text(uuid.toString())
+		},
 		modifier = modifier,
 	)
 }

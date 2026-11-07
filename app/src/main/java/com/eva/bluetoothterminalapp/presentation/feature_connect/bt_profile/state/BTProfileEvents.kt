@@ -3,4 +3,5 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.sta
 sealed interface BTProfileEvents {
 
 	data object OnRetryFetchUUID : BTProfileEvents
+	data class OnAddCustomSPP(val uuid: String) : BTProfileEvents
 }

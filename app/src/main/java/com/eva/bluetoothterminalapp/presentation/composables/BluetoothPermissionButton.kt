@@ -38,7 +38,7 @@ fun BluetoothPermissionButton(
 	var hasConnectPermission by rememberSaveable { mutableStateOf(context.hasBTConnectPermission) }
 	var hasAdvertisePermission by rememberSaveable { mutableStateOf(context.hasBTAdvertisePermission) }
 
-	val permissionLauncher = rememberLauncherForActivityResult(
+	val launcher = rememberLauncherForActivityResult(
 		contract = ActivityResultContracts.RequestMultiplePermissions()
 	) { perms ->
 		if (perms.containsKey(Manifest.permission.BLUETOOTH_SCAN)) {
@@ -57,13 +57,19 @@ fun BluetoothPermissionButton(
 
 	Button(
 		onClick = {
-			permissionLauncher.launch(
-				arrayOf(
-					Manifest.permission.BLUETOOTH_SCAN,
-					Manifest.permission.BLUETOOTH_CONNECT,
-					Manifest.permission.BLUETOOTH_ADVERTISE,
+			val permissions = buildList {
+				addAll(
+					setOf(
+						Manifest.permission.BLUETOOTH_SCAN,
+						Manifest.permission.BLUETOOTH_CONNECT,
+						Manifest.permission.BLUETOOTH_ADVERTISE
+					)
 				)
-			)
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+					add(Manifest.permission.POST_NOTIFICATIONS)
+
+			}
+			launcher.launch(permissions.toTypedArray())
 		},
 		contentPadding = ButtonDefaults.contentPaddingFor(
 			ButtonDefaults.MediumContainerHeight,
