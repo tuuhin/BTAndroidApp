@@ -91,7 +91,8 @@ dependencies {
 	// koin
 	implementation(platform(libs.koin.bom))
 	implementation(libs.bundles.koin)
-	// shapes
+	// color
+	implementation(libs.materialKolor.material3)
 	//datastore
 	implementation(libs.androidx.datastore)
 	implementation(libs.protobuf.javalite)

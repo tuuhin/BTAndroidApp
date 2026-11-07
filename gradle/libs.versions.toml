@@ -26,6 +26,7 @@ ksp_version = "2.3.11"
 protobufJavalite = "4.36.2"
 protobuf_plugin_version = "0.10.1"
 koin-plugin = "1.2.2"
+materialKolor = "6.0.0"
 
 [libraries]
 #core
@@ -74,6 +75,8 @@ protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", ve
 protobuf-protoc-compiler = { module = "com.google.protobuf:protoc", version.ref = "protobufJavalite" }
 # kotlinx serialization
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+#color
+materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
