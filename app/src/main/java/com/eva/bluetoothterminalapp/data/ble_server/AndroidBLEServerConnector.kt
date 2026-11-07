@@ -24,6 +24,7 @@ import com.eva.bluetoothterminalapp.domain.exceptions.BLEAdvertiseUnsupportedExc
 import com.eva.bluetoothterminalapp.domain.exceptions.BTAdvertisePermissionNotFound
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothNotEnabled
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
+import com.eva.bluetoothterminalapp.domain.utils.PlatformCoroutineDispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +40,7 @@ class AndroidBLEServerConnector(
 	private val batteryReader: BatteryReader,
 	private val lightSensorReader: LightSensorReader,
 	private val uuidReader: SampleUUIDReader,
+	private val dispatchers: PlatformCoroutineDispatchers,
 ) : BLEServerConnector {
 
 	private val _bluetoothManager by lazy { context.getSystemService<BluetoothManager>() }
@@ -47,13 +49,13 @@ class AndroidBLEServerConnector(
 			context = context,
 			batteryReader = batteryReader,
 			lightSensorReader = lightSensorReader,
-			uuidReader = uuidReader
+			uuidReader = uuidReader,
+			dispatchers = dispatchers
 		)
 	}
 
 	private var _bleServer: BluetoothGattServer? = null
 
-	private val _isServerRunning = MutableStateFlow(false)
 	private val _errorsChannel = Channel<Exception>(capacity = Channel.CONFLATED)
 
 	override val connectedDevices: Flow<List<BluetoothDeviceModel>>
@@ -63,7 +65,7 @@ class AndroidBLEServerConnector(
 		get() = _callback.services
 
 	override val isServerRunning: StateFlow<Boolean>
-		get() = _isServerRunning
+		field = MutableStateFlow(false)
 
 	override val errorsFlow: Flow<Exception>
 		get() = _errorsChannel.receiveAsFlow()
@@ -71,7 +73,7 @@ class AndroidBLEServerConnector(
 	private val _advertiseCallback = object : AdvertiseCallback() {
 		override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
 			super.onStartSuccess(settingsInEffect)
-			_isServerRunning.update { true }
+			isServerRunning.update { true }
 			Log.d(TAG, "ADVERTISEMENT STARTED!!")
 		}
 
@@ -178,7 +180,7 @@ class AndroidBLEServerConnector(
 
 		_bleServer?.clearServices()
 		Log.d(TAG, "STOPPING SERVER")
-		_isServerRunning.update { false }
+		isServerRunning.update { false }
 		_bleServer?.close()
 		_bleServer = null
 	}

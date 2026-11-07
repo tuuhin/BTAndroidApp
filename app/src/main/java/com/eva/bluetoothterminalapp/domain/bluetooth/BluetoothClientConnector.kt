@@ -55,6 +55,10 @@ interface BluetoothClientConnector {
 	 */
 	suspend fun sendData(data: String, trimData: Boolean = true): Result<Boolean>
 
+
+	/** Writes bytes without applying text charset or newline transformations. */
+	suspend fun sendBytes(data: ByteArray): Result<Boolean>
+
 	/**
 	 * Closes the [BluetoothSocket] to which the client is connected
 	 * @return [Result] indicating if sockets are closed properly

@@ -24,8 +24,8 @@ import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothConnectException
 import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProvided
 import com.eva.bluetoothterminalapp.domain.exceptions.InvalidBluetoothAddressException
 import com.eva.bluetoothterminalapp.domain.settings.repository.BTSettingsDataSore
+import com.eva.bluetoothterminalapp.domain.utils.PlatformCoroutineDispatchers
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -47,6 +47,7 @@ private const val CLIENT_LOGGER = "CLIENT_LOGGER"
 class AndroidBTClientConnector(
 	private val context: Context,
 	private val btSettings: BTSettingsDataSore,
+	private val dispatchers: PlatformCoroutineDispatchers,
 ) : BluetoothClientConnector {
 
 	private val _bTManager by lazy { context.getSystemService<BluetoothManager>() }
@@ -92,7 +93,7 @@ class AndroidBTClientConnector(
 			device.createBond()
 		}
 
-		return withContext(Dispatchers.IO) {
+		return withContext(dispatchers.io) {
 			try {
 				_btClientSocket = if (secure) device.createRfcommSocketToServiceRecord(connectUUID)
 				else device.createInsecureRfcommSocketToServiceRecord(connectUUID)
@@ -110,7 +111,7 @@ class AndroidBTClientConnector(
 				socket.connect()
 				Log.d(CLIENT_LOGGER, "CLIENT CONNECTED")
 				// set socket
-				_transferService = BluetoothTransferService(socket, btSettings)
+				_transferService = BluetoothTransferService(socket, btSettings, dispatchers)
 				// set connection mode to accepted
 				_connectState.update { ClientConnectionState.CONNECTION_CONNECTED }
 				Result.success(Unit)
@@ -193,6 +194,12 @@ class AndroidBTClientConnector(
 			?: Result.success(false)
 	}
 
+	override suspend fun sendBytes(data: ByteArray): Result<Boolean> {
+		if (data.isEmpty()) return Result.failure(IllegalArgumentException("Payload is empty"))
+
+		return _transferService?.writeBytesToStream(data)
+			?: Result.failure(IllegalStateException("Invalid state expected some result"))
+	}
 
 	override fun closeClient(): Result<Unit> {
 		if (_btClientSocket == null) return Result.success(Unit)
@@ -216,7 +223,7 @@ class AndroidBTClientConnector(
 
 
 	private suspend fun bluetoothDeviceFromAddress(address: String): Result<BluetoothDevice> {
-		return withContext(Dispatchers.IO) {
+		return withContext(dispatchers.io) {
 			try {
 				val isValid = BluetoothAdapter.checkBluetoothAddress(address)
 				if (!isValid)

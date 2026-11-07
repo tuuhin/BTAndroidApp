@@ -31,6 +31,7 @@ import com.eva.bluetoothterminalapp.domain.exceptions.BluetoothPermissionNotProv
 import com.eva.bluetoothterminalapp.domain.exceptions.InvalidBLEConfigurationException
 import com.eva.bluetoothterminalapp.domain.exceptions.InvalidDeviceAddressException
 import com.eva.bluetoothterminalapp.domain.exceptions.InvalidMTUValueException
+import com.eva.bluetoothterminalapp.domain.utils.PlatformCoroutineDispatchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +50,7 @@ private const val TAG = "BLE_CLIENT_LOGGER"
 class AndroidBLEClientConnector(
 	private val context: Context,
 	private val reader: SampleUUIDReader,
+	private val dispatchers: PlatformCoroutineDispatchers,
 ) : BluetoothLEClientConnector {
 
 	private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -106,7 +108,7 @@ class AndroidBLEClientConnector(
 					.build()
 
 				// we can have a dedicated executor for the connected client
-				val ioDispatcher = Dispatchers.IO
+				val ioDispatcher = dispatchers.io
 					.limitedParallelism(2, "bluetooth_connector_dispatcher")
 					.asExecutor()
 

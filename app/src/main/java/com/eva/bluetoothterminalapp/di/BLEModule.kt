@@ -11,6 +11,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEScanner
 import com.eva.bluetoothterminalapp.domain.device.BatteryReader
 import com.eva.bluetoothterminalapp.domain.device.LightSensorReader
 import com.eva.bluetoothterminalapp.domain.settings.repository.BLESettingsDataStore
+import com.eva.bluetoothterminalapp.domain.utils.PlatformCoroutineDispatchers
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -24,14 +25,16 @@ class BLEModule {
 	@Factory
 	fun bluetoothLEScanner(
 		context: Context,
-		bleSettings: BLESettingsDataStore
-	): BluetoothLEScanner = AndroidBluetoothLEScanner(context, bleSettings)
+		bleSettings: BLESettingsDataStore,
+		dispatchers: PlatformCoroutineDispatchers,
+	): BluetoothLEScanner = AndroidBluetoothLEScanner(context, bleSettings, dispatchers)
 
 	@Factory
 	fun bleClientConnector(
 		context: Context,
-		reader: SampleUUIDReader
-	): BluetoothLEClientConnector = AndroidBLEClientConnector(context, reader)
+		reader: SampleUUIDReader,
+		dispatchers: PlatformCoroutineDispatchers,
+	): BluetoothLEClientConnector = AndroidBLEClientConnector(context, reader, dispatchers)
 
 	@Factory
 	fun bleServerConnector(
@@ -39,6 +42,12 @@ class BLEModule {
 		batteryReader: BatteryReader,
 		lightSensorReader: LightSensorReader,
 		uuidReader: SampleUUIDReader,
-	): BLEServerConnector =
-		AndroidBLEServerConnector(context, batteryReader, lightSensorReader, uuidReader)
+		dispatchers: PlatformCoroutineDispatchers,
+	): BLEServerConnector = AndroidBLEServerConnector(
+		context,
+		batteryReader,
+		lightSensorReader,
+		uuidReader,
+		dispatchers
+	)
 }

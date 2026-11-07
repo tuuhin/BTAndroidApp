@@ -20,9 +20,9 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.settings.repository.BTSettingsDataSore
+import com.eva.bluetoothterminalapp.domain.utils.PlatformCoroutineDispatchers
 import com.eva.bluetoothterminalapp.presentation.util.BTConstants
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.awaitClose
@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val SERVER_LOGGER = "SERVER_LOGGER"
 
@@ -45,6 +46,7 @@ private const val SERVER_LOGGER = "SERVER_LOGGER"
 class AndroidBTServerConnector(
 	private val context: Context,
 	private val settings: BTSettingsDataSore,
+	private val dispatchers: PlatformCoroutineDispatchers,
 ) : BluetoothServerConnector {
 
 	private val _btManager by lazy { context.getSystemService<BluetoothManager>() }
@@ -59,14 +61,11 @@ class AndroidBTServerConnector(
 	private var _clientSocket: BluetoothSocket? = null
 	private var _transferService: BluetoothTransferService? = null
 
-	private val _serverState = MutableStateFlow(ServerConnectionState.SERVER_STARTING)
-	private val _remoteDevice = MutableStateFlow<BluetoothDeviceModel?>(null)
-
 	override val serverState: StateFlow<ServerConnectionState>
-		get() = _serverState
+		field = MutableStateFlow(ServerConnectionState.SERVER_STARTING)
 
 	override val remoteDevice: StateFlow<BluetoothDeviceModel?>
-		get() = _remoteDevice
+		field = MutableStateFlow<BluetoothDeviceModel?>(null)
 
 	@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 	override val peerConnectionState: Flow<PeerConnectionState>
@@ -100,14 +99,14 @@ class AndroidBTServerConnector(
 				Log.d(SERVER_LOGGER, "PEER CONNECTION RECEIVER REMOVED")
 				context.unregisterReceiver(remoteConnectInfoReceiver)
 			}
-		}.sample(200)
+		}.sample(200.milliseconds)
 			.distinctUntilChanged()
 
 	override suspend fun startServer(secure: Boolean) {
 		// if no permission provided return
 		if (!_hasBtPermission) return
 
-		withContext(Dispatchers.IO) {
+		withContext(dispatchers.io) {
 			try {
 				//creating socket based on the choice
 				_serverSocket = if (secure) _btAdapter?.listenUsingRfcommWithServiceRecord(
@@ -121,7 +120,7 @@ class AndroidBTServerConnector(
 
 
 				Log.d(SERVER_LOGGER, "SOCKET CREATED LISTENING FOR CONNECTION")
-				_serverState.update { ServerConnectionState.SERVER_LISTENING }
+				serverState.update { ServerConnectionState.SERVER_LISTENING }
 
 				do {
 					// ensure the coroutine is active
@@ -138,10 +137,10 @@ class AndroidBTServerConnector(
 					}
 					// socket is accepted
 					val clientSocket = _clientSocket ?: continue
-					_transferService = BluetoothTransferService(clientSocket, settings)
+					_transferService = BluetoothTransferService(clientSocket, settings, dispatchers)
 
-					_serverState.update { ServerConnectionState.PEER_CONNECTION_ACCEPTED }
-					_remoteDevice.update { clientSocket.remoteDevice.toDomainModel() }
+					serverState.update { ServerConnectionState.PEER_CONNECTION_ACCEPTED }
+					remoteDevice.update { clientSocket.remoteDevice.toDomainModel() }
 
 					Log.d(SERVER_LOGGER, "NEW DEVICE CONNECTED")
 					// as only one client can be connected once thus closing the server socket
@@ -161,7 +160,7 @@ class AndroidBTServerConnector(
 
 	@OptIn(ExperimentalCoroutinesApi::class)
 	override val readIncomingData: Flow<BluetoothMessage>
-		get() = _serverState.flatMapLatest { status ->
+		get() = serverState.flatMapLatest { status ->
 			// start reading from the flow is remote device is connected
 			// will return an empty flow
 			val canRead = status == ServerConnectionState.PEER_CONNECTION_ACCEPTED
@@ -185,8 +184,8 @@ class AndroidBTServerConnector(
 			_serverSocket?.close()
 			_serverSocket = null
 			// update the states
-			_remoteDevice.update { null }
-			_serverState.update { ServerConnectionState.SERVER_STOPPED }
+			remoteDevice.update { null }
+			serverState.update { ServerConnectionState.SERVER_STOPPED }
 			Log.d(SERVER_LOGGER, "CLOSED SERVER SUCCESSFULLY")
 		} catch (e: IOException) {
 			Log.e(SERVER_LOGGER, "CANNOT CLOSE SERVER SOCKET", e)

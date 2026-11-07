@@ -8,6 +8,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothScanner
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothServerConnector
 import com.eva.bluetoothterminalapp.domain.settings.repository.BTSettingsDataSore
+import com.eva.bluetoothterminalapp.domain.utils.PlatformCoroutineDispatchers
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 
@@ -20,12 +21,14 @@ class BTClassicModule {
 	@Factory
 	fun btClientConnector(
 		context: Context,
-		btSettings: BTSettingsDataSore
-	): BluetoothClientConnector = AndroidBTClientConnector(context, btSettings)
+		btSettings: BTSettingsDataSore,
+		dispatchers: PlatformCoroutineDispatchers
+	): BluetoothClientConnector = AndroidBTClientConnector(context, btSettings, dispatchers)
 
 	@Factory
 	fun btServerConnector(
 		context: Context,
-		btSettings: BTSettingsDataSore
-	): BluetoothServerConnector = AndroidBTServerConnector(context, btSettings)
+		btSettings: BTSettingsDataSore,
+		dispatchers: PlatformCoroutineDispatchers
+	): BluetoothServerConnector = AndroidBTServerConnector(context, btSettings, dispatchers)
 }
