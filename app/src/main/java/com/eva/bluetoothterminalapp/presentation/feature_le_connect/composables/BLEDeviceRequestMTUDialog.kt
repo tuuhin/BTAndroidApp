@@ -7,12 +7,9 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,9 +27,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BLEDeviceRequestMTUDialog(
 	showDialog: Boolean,
@@ -78,7 +75,7 @@ fun BLEDeviceRequestMTUDialog(
 					trailingIcon = {
 						IconButton(onClick = { focusRequester.freeFocus() }) {
 							Icon(
-								imageVector = Icons.Outlined.Close,
+								imageVector = AppIconVectors.close,
 								contentDescription = "Cancel focus"
 							)
 						}

@@ -1,7 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -31,7 +30,7 @@ fun ClientConnectionStateChip(
 	connectionState: ClientConnectionState,
 	modifier: Modifier = Modifier,
 	onClick: () -> Unit = {},
-	shape: Shape = MaterialTheme.shapes.small,
+	shape: Shape = MaterialTheme.shapes.extraLarge,
 	elevation: ChipElevation = AssistChipDefaults.elevatedAssistChipElevation(
 		elevation = 6.dp,
 		pressedElevation = 8.dp
@@ -58,7 +57,6 @@ fun ClientConnectionStateChip(
 			containerColor = animatedCardColors,
 			labelColor = contentColorFor(connectionState.color)
 		),
-		border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface),
 		elevation = elevation,
 		modifier = modifier,
 	)

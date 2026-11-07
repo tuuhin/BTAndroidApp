@@ -1,14 +1,9 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,10 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,23 +47,12 @@ fun BTClientDeviceProfile(
 	AnimatedVisibility(
 		visible = device != null,
 		enter = expandIn(
-			animationSpec = spring(
-				dampingRatio = Spring.DampingRatioMediumBouncy,
-				stiffness = Spring.StiffnessMedium
-			),
+			animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
 			expandFrom = Alignment.TopCenter,
 		) + fadeIn(
-			animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+			animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
 		),
-		exit = shrinkOut(
-			animationSpec = spring(
-				dampingRatio = Spring.DampingRatioMediumBouncy,
-				stiffness = Spring.StiffnessMedium
-			),
-			shrinkTowards = Alignment.TopCenter,
-		) + fadeOut(
-			animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-		)
+		exit = fadeOut(animationSpec = MaterialTheme.motionScheme.fastEffectsSpec())
 	) {
 		// the content will not be visible if its null
 		if (device == null) return@AnimatedVisibility
@@ -93,12 +79,15 @@ fun BTClientDeviceProfile(
 				) {
 					Text(
 						text = device.name,
-						style = MaterialTheme.typography.titleLarge,
+						style = MaterialTheme.typography.titleLargeEmphasized,
+						color = MaterialTheme.colorScheme.primary,
 						fontWeight = FontWeight.SemiBold
 					)
 					Text(
 						text = device.address,
-						style = MaterialTheme.typography.labelLarge,
+						style = MaterialTheme.typography.labelLargeEmphasized,
+						color = MaterialTheme.colorScheme.onSurfaceVariant,
+						fontWeight = FontWeight.Bold,
 						fontFamily = FontFamily.Monospace,
 					)
 					Spacer(modifier = Modifier.height(4.dp))
@@ -107,7 +96,7 @@ fun BTClientDeviceProfile(
 						elevation = AssistChipDefaults.elevatedAssistChipElevation()
 					)
 				}
-				BTDeviceIconLarge(device = device)
+				BTDeviceIconLarge(device = device, shape = MaterialShapes.Ghostish.toShape())
 			}
 		}
 	}

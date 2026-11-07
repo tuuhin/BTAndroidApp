@@ -7,16 +7,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,17 +36,19 @@ fun BLEScanModeSelector(
 	scanMode: BLESettingsScanMode,
 	onScanModeChange: (BLESettingsScanMode) -> Unit,
 	modifier: Modifier = Modifier,
+	colors: ListItemColors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+	shapes: ListItemShapes = ListItemDefaults.segmentedShapes(0, 1),
 ) {
 
-	var showDialog by remember { mutableStateOf(false) }
+	var showDialog by rememberSaveable { mutableStateOf(false) }
 
-	ListItem(
-		headlineContent = { Text(text = stringResource(id = R.string.ble_settings_scan_mode_title)) },
+	SegmentedListItem(
+		shapes = shapes,
+		colors = colors,
+		onClick = { showDialog = true },
+		content = { Text(text = stringResource(id = R.string.ble_settings_scan_mode_title)) },
 		supportingContent = { Text(text = scanMode.textResource) },
-		tonalElevation = 2.dp,
 		modifier = modifier
-			.clip(MaterialTheme.shapes.medium)
-			.clickable { showDialog = true }
 	)
 
 	if (!showDialog) return

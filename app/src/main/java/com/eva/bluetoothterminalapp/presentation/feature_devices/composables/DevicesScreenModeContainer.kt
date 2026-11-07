@@ -1,10 +1,10 @@
 package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -45,7 +45,7 @@ fun DevicesScreenModeContainer(
 		Crossfade(
 			targetState = screenType,
 			label = "Show some type of screen based on screen type",
-			animationSpec = tween(durationMillis = 400),
+			animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
 		) { mode ->
 			when (mode) {
 				BluetoothScreenType.BLUETOOTH_NOT_ENABLED -> BTNotEnabledBox(

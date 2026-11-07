@@ -9,6 +9,5 @@ object BTConstants {
 
 	const val BLE_ASSIGNED_NUMBERS_WEBSITE =
 		"https://www.bluetooth.com/specifications/assigned-numbers"
-
 	const val SOURCE_CODE_REPO = "https://github.com/tuuhin/BTAndroidApp"
 }

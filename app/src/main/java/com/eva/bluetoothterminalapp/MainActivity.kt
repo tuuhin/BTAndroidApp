@@ -15,7 +15,6 @@ import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 class MainActivity : ComponentActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
-
 		installSplashScreen()
 
 		super.onCreate(savedInstanceState)

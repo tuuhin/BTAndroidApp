@@ -2,15 +2,13 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -21,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -30,6 +29,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.BTPeerInteractionContent
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.BTServerTopAppBar
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.composables.StartServerBox
@@ -44,11 +44,7 @@ import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 import kotlinx.collections.immutable.persistentListOf
 
-@OptIn(
-	ExperimentalMaterial3Api::class,
-	ExperimentalLayoutApi::class,
-	ExperimentalSharedTransitionApi::class,
-)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BTServerRoute(
 	deviceState: BTServerDeviceState,
@@ -59,6 +55,7 @@ fun BTServerRoute(
 	navigation: @Composable () -> Unit = {},
 ) {
 	val snackBarHostState = LocalSnackBarProvider.current
+	val layoutDirection = LocalLayoutDirection.current
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
 	KeepScreenOnSideEffect(
@@ -95,10 +92,11 @@ fun BTServerRoute(
 		AnimatedContent(
 			targetState = messagesState.showServerTerminal,
 			modifier = Modifier
-				.padding(top = scPadding.calculateTopPadding())
 				.padding(
-					horizontal = dimensionResource(id = R.dimen.sc_padding),
-					vertical = dimensionResource(id = R.dimen.sc_padding_secondary)
+					top = scPadding.calculateTopPadding() + dimensionResource(R.dimen.sc_padding_secondary),
+					bottom = scPadding.calculateBottomPadding() + dimensionResource(R.dimen.sc_padding_secondary),
+					start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
+					end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
 				)
 				.fillMaxSize()
 				.imePadding(),
@@ -146,7 +144,7 @@ private fun BTServerRoutePreview() = BlueToothTerminalAppTheme {
 		onEvent = {},
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Default.ArrowBack,
+				imageVector = AppIconVectors.backArrow,
 				contentDescription = stringResource(id = R.string.back_arrow)
 			)
 		},

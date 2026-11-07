@@ -14,14 +14,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,11 +54,11 @@ fun BLEDeviceServiceCard(
 	modifier: Modifier = Modifier,
 	selectedCharacteristic: BLECharacteristicsModel? = null,
 	onCharacteristicSelect: (BLECharacteristicsModel) -> Unit = {},
-	shape: Shape = MaterialTheme.shapes.medium,
+	shape: Shape = MaterialTheme.shapes.extraLarge,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainer
 ) {
 	val isInspectionMode = LocalInspectionMode.current
-	var isSelected by remember { mutableStateOf(isInspectionMode) }
+	var isSelected by rememberSaveable { mutableStateOf(isInspectionMode) }
 
 	Card(
 		onClick = { isSelected = !isSelected },
@@ -71,13 +73,13 @@ fun BLEDeviceServiceCard(
 		Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(12.dp),
+				.padding(18.dp),
 			verticalArrangement = Arrangement.spacedBy(2.dp),
 		) {
 			Text(
 				text = bleService.probableName ?: stringResource(R.string.ble_service_unknown),
 				color = MaterialTheme.colorScheme.primary,
-				style = MaterialTheme.typography.titleMedium
+				style = MaterialTheme.typography.titleMediumEmphasized
 			)
 			Text(
 				text = buildAnnotatedString {
@@ -92,16 +94,16 @@ fun BLEDeviceServiceCard(
 						append("${bleService.serviceUUID}")
 					}
 				},
-				style = MaterialTheme.typography.bodySmall,
+				style = MaterialTheme.typography.labelLargeEmphasized,
 				maxLines = 2,
 				overflow = TextOverflow.Clip
 			)
 			Text(
 				text = "Type : ${bleService.serviceTypeText}",
-				style = MaterialTheme.typography.labelLarge,
+				style = MaterialTheme.typography.bodyMediumEmphasized,
 			)
 
-			Spacer(modifier = Modifier.height(4.dp))
+			Spacer(modifier = Modifier.height(8.dp))
 
 			when (bleService.characteristicsCount) {
 				0 -> Text(
@@ -116,7 +118,7 @@ fun BLEDeviceServiceCard(
 					exit = shrinkVertically() + fadeOut(),
 				) {
 					Column(
-						verticalArrangement = Arrangement.spacedBy(4.dp)
+						verticalArrangement = Arrangement.spacedBy(8.dp)
 					) {
 						Row(
 							horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -126,12 +128,13 @@ fun BLEDeviceServiceCard(
 								text = stringResource(R.string.ble_characteristics_title),
 								style = MaterialTheme.typography.labelLarge,
 								fontWeight = FontWeight.SemiBold,
-								color = MaterialTheme.colorScheme.tertiary
+								color = MaterialTheme.colorScheme.tertiary,
+								modifier = Modifier.weight(1f)
 							)
 							Surface(
 								color = MaterialTheme.colorScheme.tertiaryContainer,
 								contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-								shape = MaterialTheme.shapes.small,
+								shape = MaterialShapes.Square.toShape(),
 							) {
 								Text(
 									text = "${bleService.characteristicsCount}",

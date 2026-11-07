@@ -18,7 +18,7 @@ Model-ViewModel-ViewModel)** for the presentation layer. It is a single-module A
       and exceptions. This layer is independent of Android-specific implementation details where
       possible.
     - `di/`: Koin dependency injection modules (organized by functionality like `BLEModule`,
-      `BluetoothModule`, etc.).
+      `BTClassicModule`, etc.).
     - `presentation/`: UI logic and State management.
         - Organized by features: `feature_connect`, `feature_devices`, `feature_le_connect`, etc.
         - Each feature contains its own ViewModels, event contracts, and screen-level composables.
@@ -51,8 +51,8 @@ If you need to modify or understand core functionality, start here:
 
 ### Settings & State
 
-- **Persistence:** `data/datastore/` (Implementation) and `domain/settings/repository/` (
-  Interfaces).
+- **Persistence:** `data/datastore/` (Implementation) and `domain/settings/repository/`
+  (Interfaces).
 - **Global Settings ViewModel:** `presentation/feature_settings/AppSettingsViewModel.kt`
 
 ### Navigation

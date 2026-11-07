@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -58,7 +57,6 @@ fun BLEServicesList(
 					modifier = Modifier
 						.fillMaxWidth()
 						.animateItem()
-						.animateContentSize()
 				)
 			}
 		} else item {
@@ -71,6 +69,7 @@ fun BLEServicesList(
 			) {
 				Text(
 					text = stringResource(R.string.ble_device_no_service_found),
+					style = MaterialTheme.typography.bodyMediumEmphasized,
 					textAlign = TextAlign.Center,
 				)
 			}

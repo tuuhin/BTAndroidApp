@@ -1,8 +1,7 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Text
@@ -15,11 +14,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
+import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BTClientTopBar(
 	clientState: ClientConnectionState,
@@ -39,6 +39,7 @@ fun BTClientTopBar(
 				onConnect = onReconnect,
 				onDisConnect = onDisconnect,
 			)
+			Spacer(modifier = Modifier.width(4.dp))
 		},
 		colors = colors,
 		scrollBehavior = scrollBehavior,
@@ -56,7 +57,6 @@ private class ClientConnectionStatePreviewParams :
 		)
 	)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @PreviewLightDark
 @Composable
 private fun AnimatedConnectDisconnectButtonPreview(
@@ -69,7 +69,7 @@ private fun AnimatedConnectDisconnectButtonPreview(
 		onReconnect = {},
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Default.ArrowBack,
+				imageVector = AppIconVectors.backArrow,
 				contentDescription = stringResource(id = R.string.back_arrow)
 			)
 		}

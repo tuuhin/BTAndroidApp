@@ -1,113 +1,77 @@
 package com.eva.bluetoothterminalapp.presentation.navigation.screens
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.compose.dropUnlessResumed
-import com.eva.bluetoothterminalapp.R
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.composables.BTAppNavigationDrawer
 import com.eva.bluetoothterminalapp.presentation.feature_devices.BTDeviceViewmodel
 import com.eva.bluetoothterminalapp.presentation.feature_devices.BTDevicesRoute
+import com.eva.bluetoothterminalapp.presentation.navigation.NavDestinationBuilder
+import com.eva.bluetoothterminalapp.presentation.navigation.NavRoutes
 import com.eva.bluetoothterminalapp.presentation.navigation.UIEventsSideEffect
-import com.eva.bluetoothterminalapp.presentation.navigation.args.toArgs
-import com.eva.bluetoothterminalapp.presentation.navigation.config.RouteAnimation
-import com.eva.bluetoothterminalapp.presentation.navigation.config.Routes
-import com.eva.bluetoothterminalapp.presentation.util.LocalSharedTransitionVisibilityScopeProvider
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.BleClientRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.BleServerRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.BtProfileDestination
-import com.ramcosta.composedestinations.generated.destinations.BtServerRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.InfoDestination
-import com.ramcosta.composedestinations.generated.destinations.SettingsDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.annotation.Single
 
-@Destination<RootGraph>(
-	start = true,
-	route = Routes.DEVICES_ROUTE,
-	style = RouteAnimation::class
-)
-@Composable
-fun AnimatedVisibilityScope.BTDevicesScreen(
-	navigator: DestinationsNavigator
-) {
-	val viewModel = koinViewModel<BTDeviceViewmodel>()
+@Single(binds = [NavDestinationBuilder::class])
+class BTDevicesScreen : NavDestinationBuilder {
 
-	val state by viewModel.screenState.collectAsStateWithLifecycle()
-	val isBTActive by viewModel.isBTActive.collectAsStateWithLifecycle()
-	val isScanning by viewModel.isScanning.collectAsStateWithLifecycle()
+	override fun EntryProviderScope<NavKey>.navEntry(backStack: NavBackStack<NavKey>) =
+		entry<NavRoutes.DevicesRoute> {
+			val viewModel = koinViewModel<BTDeviceViewmodel>()
 
-	UIEventsSideEffect(
-		events = { viewModel.uiEvents },
-		onPopBack = dropUnlessResumed { navigator.popBackStack() }
-	)
+			val state by viewModel.screenState.collectAsStateWithLifecycle()
+			val isBTActive by viewModel.isBTActive.collectAsStateWithLifecycle()
+			val isScanning by viewModel.isScanning.collectAsStateWithLifecycle()
 
-	val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-	val scope = rememberCoroutineScope()
+			UIEventsSideEffect(events = { viewModel.uiEvents })
 
+			val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+			val scope = rememberCoroutineScope()
 
-	CompositionLocalProvider(LocalSharedTransitionVisibilityScopeProvider provides this) {
-		ModalNavigationDrawer(
-			drawerState = drawerState,
-			gesturesEnabled = true,
-			drawerContent = {
-				BTAppNavigationDrawer(
-					modifier = Modifier.fillMaxWidth(.7f),
-					onNavigateToFeedBackRoute = {
-						navigator.navigate(InfoDestination)
+			ModalNavigationDrawer(
+				drawerState = drawerState,
+				gesturesEnabled = true,
+				drawerContent = {
+					BTAppNavigationDrawer(
+						onNavigateToBLEServer = { backStack.add(NavRoutes.BLEServerRoute) },
+						onNavigateToClassicServer = { backStack.add(NavRoutes.ClassicServerRoute) },
+						onNavigateToSettingsRoute = { backStack.add(NavRoutes.SettingsRoute) },
+						onNavigateToFeedBackRoute = { backStack.add(NavRoutes.AboutRoute) }
+					)
+				},
+			) {
+				BTDevicesRoute(
+					state = state,
+					isBTActive = isBTActive,
+					isScanning = isScanning,
+					onEvent = viewModel::onEvents,
+					navigation = {
+						IconButton(onClick = { scope.launch { drawerState.open() } }) {
+							Icon(imageVector = AppIconVectors.menu_open, "")
+						}
 					},
-					onNavigateToSettingsRoute = {
-						navigator.navigate(SettingsDestination)
+					onSelectDevice = { device ->
+						backStack.add(NavRoutes.DeviceProfileRoute(device.address, device.name))
 					},
-					onNavigateToClassicServer = {
-						navigator.navigate(BtServerRouteDestination)
-					},
-					onNavigateToBLEServer = {
-						navigator.navigate(BleServerRouteDestination)
+					onSelectLeDevice = { device ->
+						backStack.add(
+							NavRoutes.BLEClientRoute(
+								device.deviceModel.address,
+								device.deviceName
+							)
+						)
 					},
 				)
-			},
-		) {
-			BTDevicesRoute(
-				state = state,
-				isBTActive = isBTActive,
-				isScanning = isScanning,
-				onEvent = viewModel::onEvents,
-				onSelectDevice = { device ->
-					val args = device.toArgs()
-					navigator.navigate(BtProfileDestination(args))
-				},
-				onSelectLeDevice = { device ->
-					val args = device.toArgs()
-					navigator.navigate(BleClientRouteDestination(args))
-				},
-				navigation = {
-					IconButton(
-						onClick = { scope.launch { drawerState.open() } },
-					) {
-						Icon(
-							imageVector = Icons.Default.Menu,
-							contentDescription = stringResource(id = R.string.menu_option_more)
-						)
-					}
-				},
-			)
+			}
 		}
-	}
 }

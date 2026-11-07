@@ -3,6 +3,7 @@ package com.eva.bluetoothterminalapp.presentation.feature_devices
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothScanner
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.BluetoothLEScanner
+import com.eva.bluetoothterminalapp.presentation.contracts.ContractsResultsProvider
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenEvents
 import com.eva.bluetoothterminalapp.presentation.feature_devices.state.BTDevicesScreenState
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
@@ -13,7 +14,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.merge
@@ -22,10 +23,13 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 
+@KoinViewModel
 class BTDeviceViewmodel(
 	private val bluetoothScanner: BluetoothScanner,
 	private val bLEScanner: BluetoothLEScanner,
+	private val contracts: ContractsResultsProvider,
 ) : AppViewModel() {
 
 	private val _isPairedDevicesReady = MutableStateFlow(false)
@@ -40,7 +44,7 @@ class BTDeviceViewmodel(
 	val isScanning = merge(bluetoothScanner.isScanRunning, bLEScanner.isScanning)
 		.stateIn(
 			scope = viewModelScope,
-			started = SharingStarted.Eagerly,
+			started = SharingStarted.WhileSubscribed(5_000),
 			initialValue = false
 		)
 
@@ -69,9 +73,8 @@ class BTDeviceViewmodel(
 
 	private val _hasBtPermission = MutableStateFlow(bluetoothScanner.hasBTPermissions)
 
-	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	override val uiEvents: SharedFlow<UiEvents>
-		get() = _uiEvents.asSharedFlow()
+		field = MutableSharedFlow<UiEvents>()
 
 	private var _leScanJob: Job? = null
 
@@ -84,9 +87,11 @@ class BTDeviceViewmodel(
 			BTDevicesScreenEvents.StartLEDeviceScan -> startLEScan()
 			BTDevicesScreenEvents.StopLEDevicesScan -> stopLEScan()
 			is BTDevicesScreenEvents.OnBTPermissionChanged -> _hasBtPermission.update { event.isGranted }
-			is BTDevicesScreenEvents.OnLocationPermissionChanged -> {
-				// nothing to be look for
-			}
+			is BTDevicesScreenEvents.OnHandleStartBTDiscoveryContract -> contracts.handleBluetoothDiscovery(
+				event.code
+			)
+
+			is BTDevicesScreenEvents.OnLocationPermissionChanged -> {}
 		}
 	}
 
@@ -116,8 +121,9 @@ class BTDeviceViewmodel(
 
 	private fun checkLEScanFailedReasons() = viewModelScope.launch {
 		bLEScanner.scanErrorCode.onEach { error ->
-			_uiEvents.emit(UiEvents.ShowSnackBar(message = error.name))
-		}.launchIn(this)
+			uiEvents.emit(UiEvents.ShowSnackBar(message = error.name))
+		}.catch { _ -> uiEvents.emit(UiEvents.ShowToast("Scan error occured")) }
+			.launchIn(this)
 	}
 
 	private fun setPairedDevices() {
@@ -129,11 +135,13 @@ class BTDeviceViewmodel(
 				onFailure = { exp ->
 					val message = exp.message ?: "Some issues in loading paired devices"
 					viewModelScope.launch {
-						_uiEvents.emit(UiEvents.ShowSnackBar(message))
+						uiEvents.emit(UiEvents.ShowSnackBar(message))
 					}
 				},
 			)
-		}.launchIn(viewModelScope)
+		}
+			.catch { _ -> uiEvents.emit(UiEvents.ShowToast("Cannot find paired devices")) }
+			.launchIn(viewModelScope)
 	}
 
 	private fun startBTClassicScan() = viewModelScope.launch {
@@ -142,10 +150,10 @@ class BTDeviceViewmodel(
 		status.fold(
 			onSuccess = { hasStarted ->
 				val message = if (hasStarted) "Scan started" else "Scan cannot be stated"
-				_uiEvents.emit(UiEvents.ShowToast(message))
+				uiEvents.emit(UiEvents.ShowToast(message))
 			},
 			onFailure = { exception ->
-				_uiEvents.emit(
+				uiEvents.emit(
 					UiEvents.ShowSnackBar(exception.message ?: "SOME ERROR OCCURRED")
 				)
 			},
@@ -158,10 +166,10 @@ class BTDeviceViewmodel(
 		status.fold(
 			onSuccess = { stopped ->
 				val message = if (stopped) "Scan stopped" else "Scan cannot be stoped"
-				_uiEvents.emit(UiEvents.ShowToast(message))
+				uiEvents.emit(UiEvents.ShowToast(message))
 			},
 			onFailure = { exception ->
-				_uiEvents.emit(
+				uiEvents.emit(
 					UiEvents.ShowSnackBar(exception.message ?: "SOME ERROR OCCURRED")
 				)
 			},
@@ -172,6 +180,5 @@ class BTDeviceViewmodel(
 		// release resources when done
 		bLEScanner.clearResources()
 		bluetoothScanner.releaseResources()
-		super.onCleared()
 	}
 }

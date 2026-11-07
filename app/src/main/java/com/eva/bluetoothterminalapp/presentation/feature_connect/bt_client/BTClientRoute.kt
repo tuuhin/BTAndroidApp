@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imeNestedScroll
@@ -13,10 +15,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ClientConnectionState
 import com.eva.bluetoothterminalapp.domain.settings.models.BTSettingsModel
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.composables.BTClientTopBar
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientDeviceState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientMessagesState
@@ -50,10 +50,7 @@ import com.eva.bluetoothterminalapp.presentation.util.LocalSnackBarProvider
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(
-	ExperimentalLayoutApi::class,
-	ExperimentalMaterial3Api::class,
-)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BTClientRoute(
 	device: BTClientDeviceState,
@@ -65,6 +62,7 @@ fun BTClientRoute(
 	navigation: @Composable () -> Unit = {},
 ) {
 	val snackBarHostState = LocalSnackBarProvider.current
+	val layoutDirection = LocalLayoutDirection.current
 
 	val isConnected by remember(device.connectionStatus) {
 		derivedStateOf { device.connectionStatus == ClientConnectionState.CONNECTION_CONNECTED }
@@ -99,18 +97,20 @@ fun BTClientRoute(
 	) { scPadding ->
 		Column(
 			modifier = Modifier
-				.padding(scPadding)
 				.padding(
-					horizontal = dimensionResource(id = R.dimen.sc_padding),
-					vertical = dimensionResource(R.dimen.sc_padding_secondary)
+					top = scPadding.calculateTopPadding() + dimensionResource(R.dimen.sc_padding_secondary),
+					bottom = scPadding.calculateBottomPadding() + dimensionResource(R.dimen.sc_padding_secondary),
+					start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
+					end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
 				)
 				.imePadding()
 				.fillMaxSize(),
-			verticalArrangement = Arrangement.spacedBy(6.dp)
+			verticalArrangement = Arrangement.spacedBy(10.dp)
 		) {
 			BTClientDeviceProfile(
 				device = device.device,
-				connectionState = device.connectionStatus
+				connectionState = device.connectionStatus,
+				shape = MaterialTheme.shapes.large
 			)
 			BTMessagesList(
 				messages = messages.messages,
@@ -120,15 +120,10 @@ fun BTClientRoute(
 					horizontal = dimensionResource(id = R.dimen.messages_list_horizontal_padding),
 					vertical = dimensionResource(id = R.dimen.messages_list_vertical_padding)
 				),
+				shape = MaterialTheme.shapes.extraLarge,
 				modifier = Modifier
 					.fillMaxWidth()
 					.weight(1f)
-			)
-			HorizontalDivider(
-				color = MaterialTheme.colorScheme.outlineVariant,
-				modifier = Modifier.padding(
-					vertical = dimensionResource(id = R.dimen.messages_text_field_spacing)
-				)
 			)
 			SendCommandTextField(
 				value = messages.textFieldValue,
@@ -160,7 +155,7 @@ private fun BTClientRouteMessagesPreview(
 		onBackPress = {},
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Default.ArrowBack,
+				imageVector = AppIconVectors.backArrow,
 				contentDescription = stringResource(id = R.string.back_arrow)
 			)
 		},
@@ -181,7 +176,7 @@ private fun BTClientRoutePreview(
 		onBackPress = {},
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Default.ArrowBack,
+				imageVector = AppIconVectors.backArrow,
 				contentDescription = stringResource(id = R.string.back_arrow)
 			)
 		},

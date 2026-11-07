@@ -2,16 +2,8 @@ package com.eva.bluetoothterminalapp.presentation.feature_le_connect.composables
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -25,10 +17,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -63,7 +58,7 @@ fun BLEDeviceScreenContent(
 	AnimatedContent(
 		targetState = profile.device != null,
 		contentAlignment = Alignment.Center,
-		modifier = modifier
+		modifier = modifier.fillMaxSize()
 	) { isReady ->
 		if (isReady && profile.device != null) {
 			Column(
@@ -78,21 +73,20 @@ fun BLEDeviceScreenContent(
 					rssi = profile.signalStrength,
 					modifier = Modifier.animateEnterExit(
 						enter = slideInVertically(
-							animationSpec = tween(durationMillis = 200, easing = EaseIn)
-						) { height -> height } + scaleIn(
-							initialScale = .75f,
-							animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)
+							animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()
+						) { height -> height } + fadeIn(
+							animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
 						),
 						exit = slideOutVertically(
-							animationSpec = tween(durationMillis = 200, easing = EaseOut)
-						) { height -> -height } + scaleOut(
-							targetScale = .75f,
-							animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)
+							animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
+						) { height -> -height } + fadeOut(
+							animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
 						),
 					)
 				)
 				AnimatedVisibility(
-					visible = isConnectedOrConnecting
+					visible = isConnectedOrConnecting,
+					modifier = Modifier.padding(vertical = 4.dp)
 				) {
 					Row(
 						horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -105,26 +99,32 @@ fun BLEDeviceScreenContent(
 						Text(
 							text = stringResource(id = R.string.le_available_devices),
 							style = MaterialTheme.typography.titleLarge,
-							modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
+							modifier = Modifier
+								.padding(horizontal = 4.dp, vertical = 6.dp)
+								.weight(1f)
 						)
 						Surface(
 							color = MaterialTheme.colorScheme.primaryContainer,
 							contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-							shape = MaterialTheme.shapes.small,
+							shape = MaterialShapes.Sunny.toShape(),
 						) {
 							Text(
 								text = "$servicesCount",
 								style = MaterialTheme.typography.bodyMedium,
 								fontWeight = FontWeight.SemiBold,
-								modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+								modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
 							)
 						}
 					}
 				}
 				AnimatedVisibility(
 					visible = profile.connectionState == BLEConnectionState.CONNECTED,
-					enter = slideInVertically(animationSpec = tween(easing = FastOutLinearInEasing)) { height -> height } + fadeIn(),
-					exit = slideOutVertically(animationSpec = tween(easing = FastOutLinearInEasing)) { height -> height } + fadeOut(),
+					enter = slideInVertically(
+						animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()
+					) { height -> height } + fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()),
+					exit = slideOutVertically(
+						animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
+					) { height -> height } + fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
 					modifier = Modifier.weight(1f)
 				) {
 					BLEServicesList(
@@ -142,11 +142,11 @@ fun BLEDeviceScreenContent(
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Center
 		) {
-			CircularProgressIndicator()
+			LoadingIndicator(modifier = Modifier.size(36.dp))
 			Spacer(modifier = Modifier.height(12.dp))
 			Text(
 				text = stringResource(R.string.ble_device_connecting),
-				style = MaterialTheme.typography.titleLarge,
+				style = MaterialTheme.typography.titleLargeEmphasized,
 				color = MaterialTheme.colorScheme.onSurface
 			)
 		}

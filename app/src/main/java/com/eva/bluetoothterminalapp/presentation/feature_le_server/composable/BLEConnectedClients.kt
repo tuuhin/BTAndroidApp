@@ -18,15 +18,18 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
@@ -62,19 +65,19 @@ fun BLEConnectedClients(
 			) {
 				Text(
 					text = stringResource(R.string.ble_server_connected_clients_title),
-					style = MaterialTheme.typography.titleLarge,
+					style = MaterialTheme.typography.titleLargeEmphasized,
 					color = MaterialTheme.colorScheme.onSurface
 				)
 				Text(
 					text = stringResource(R.string.ble_server_connected_clients_text),
-					style = MaterialTheme.typography.bodyMedium,
+					style = MaterialTheme.typography.bodyMediumEmphasized,
 					color = MaterialTheme.colorScheme.onSurfaceVariant
 				)
 			}
 			Surface(
 				color = MaterialTheme.colorScheme.primaryContainer,
 				contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-				shape = MaterialTheme.shapes.medium
+				shape = MaterialShapes.Bun.toShape()
 			) {
 				AnimatedContent(
 					targetState = connectedClients.size,
@@ -91,7 +94,8 @@ fun BLEConnectedClients(
 				) { targetCount ->
 					Text(
 						text = "$targetCount",
-						style = MaterialTheme.typography.titleLarge
+						style = MaterialTheme.typography.titleLargeEmphasized,
+						fontWeight = FontWeight.Bold
 					)
 				}
 			}
@@ -99,7 +103,7 @@ fun BLEConnectedClients(
 		LazyRow(
 			modifier = Modifier.fillMaxWidth(),
 			contentPadding = PaddingValues(vertical = 6.dp),
-			horizontalArrangement = Arrangement.spacedBy(12.dp)
+			horizontalArrangement = Arrangement.spacedBy(8.dp)
 		) {
 			if (connectedClients.isNotEmpty()) {
 				itemsIndexed(
@@ -108,9 +112,9 @@ fun BLEConnectedClients(
 				) { _, device ->
 					ConnectedDeviceCard(
 						device = device,
+						shape = MaterialTheme.shapes.large,
 						containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-						modifier = Modifier
-							.animateItem(),
+						modifier = Modifier.animateItem(),
 					)
 				}
 			} else {

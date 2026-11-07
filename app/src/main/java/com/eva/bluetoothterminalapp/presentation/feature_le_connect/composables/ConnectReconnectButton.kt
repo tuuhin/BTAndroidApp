@@ -38,15 +38,13 @@ fun ConnectReconnectButton(
 
 		when (state) {
 			BLEConnectionState.CONNECTED -> TextButton(
-				onClick = onDisconnect,
-				enabled = !transition.isRunning
+				onClick = onDisconnect
 			) {
 				Text(text = stringResource(id = R.string.disconnect_from_client))
 			}
 
 			BLEConnectionState.DISCONNECTED -> TextButton(
-				onClick = onReconnect,
-				enabled = !transition.isRunning
+				onClick = onReconnect
 			) {
 				Text(text = stringResource(id = R.string.connect_to_client))
 			}

@@ -4,28 +4,24 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.outlined.Mail
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
@@ -35,15 +31,13 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.util.BTConstants
 import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKeys
 import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(
-	ExperimentalMaterial3Api::class,
-	ExperimentalSharedTransitionApi::class
-)
+
 @Composable
 fun AboutRoute(
 	modifier: Modifier = Modifier,
@@ -52,15 +46,11 @@ fun AboutRoute(
 	val context = LocalContext.current
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-
 	Scaffold(
 		topBar = {
 			MediumTopAppBar(
 				title = {
-					Text(
-						text = stringResource(id = R.string.about_route_title),
-
-						)
+					Text(text = stringResource(id = R.string.about_route_title))
 				},
 				navigationIcon = navigation,
 				scrollBehavior = scrollBehavior
@@ -72,80 +62,76 @@ fun AboutRoute(
 	) { scPadding ->
 		LazyColumn(
 			contentPadding = scPadding,
-			verticalArrangement = Arrangement.spacedBy(8.dp),
+			verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
 			modifier = Modifier
 				.fillMaxSize()
 				.padding(horizontal = dimensionResource(id = R.dimen.sc_padding)),
 		) {
-
 			item {
 				Text(
 					text = stringResource(id = R.string.information_title_bluetooth_and_ble),
-					style = MaterialTheme.typography.titleMedium,
-					color = MaterialTheme.colorScheme.onSurface,
+					style = MaterialTheme.typography.titleMediumEmphasized,
+					color = MaterialTheme.colorScheme.secondary,
 					modifier = Modifier.padding(6.dp)
 				)
 			}
 			item {
-				ListItem(
-					headlineContent = { Text(text = stringResource(id = R.string.information_baud_rate)) },
-					supportingContent = {
-						Text(
-							text = stringResource(id = R.string.information_baud_rate_desc),
-							style = MaterialTheme.typography.labelLarge
-						)
-					},
+				SegmentedListItem(
+					shapes = ListItemDefaults.segmentedShapes(index = 0, count = 2),
+					colors = ListItemDefaults.colors(MaterialTheme.colorScheme.surfaceContainer),
 					leadingContent = {
 						Icon(
-							imageVector = Icons.Default.Speed,
+							imageVector = AppIconVectors.speed_3,
 							contentDescription = stringResource(id = R.string.information_baud_rate)
 						)
 					},
-					tonalElevation = 2.dp,
-					modifier = Modifier.clip(MaterialTheme.shapes.small)
+					supportingContent = { Text(text = stringResource(id = R.string.information_baud_rate_desc)) },
+					content = { Text(text = stringResource(id = R.string.information_baud_rate)) }
 				)
 			}
 
 			item {
-				ListItem(
-					headlineContent = { Text(text = stringResource(id = R.string.ble_assigned_numbers_title)) },
-					supportingContent = {
-						Text(
-							text = stringResource(id = R.string.ble_assigned_numbers_desc),
-							style = MaterialTheme.typography.labelLarge
-						)
-					},
-					leadingContent = {
-						Icon(
-							imageVector = Icons.Default.Numbers,
-							contentDescription = stringResource(id = R.string.ble_assigned_numbers_title)
-						)
-					},
+				SegmentedListItem(
+					shapes = ListItemDefaults.segmentedShapes(index = 1, count = 2),
+					colors = ListItemDefaults.colors(MaterialTheme.colorScheme.surfaceContainer),
 					trailingContent = {
-						TextButton(onClick = context::openAssignedNumbersList) {
+						TextButton(
+							onClick = context::openAssignedNumbersList,
+							shapes = ButtonDefaults.shapes()
+						) {
 							Text(text = stringResource(id = R.string.info_visit_link))
 						}
 					},
-					tonalElevation = 2.dp,
-					modifier = Modifier.clip(MaterialTheme.shapes.small),
+					leadingContent = {
+						Icon(
+							imageVector = AppIconVectors.numbers,
+							contentDescription = stringResource(id = R.string.ble_assigned_numbers_title)
+						)
+					},
+					supportingContent = { Text(text = stringResource(id = R.string.ble_assigned_numbers_desc)) },
+					content = { Text(text = stringResource(id = R.string.ble_assigned_numbers_title)) }
 				)
+				Spacer(modifier = Modifier.height(12.dp))
 			}
 			item {
 				Text(
 					text = stringResource(id = R.string.information_title_development),
-					style = MaterialTheme.typography.titleMedium,
-					color = MaterialTheme.colorScheme.onSurface,
+					style = MaterialTheme.typography.titleMediumEmphasized,
+					color = MaterialTheme.colorScheme.secondary,
 					modifier = Modifier.padding(6.dp)
 				)
 			}
 			item {
-				ListItem(
-					headlineContent = { Text(text = stringResource(id = R.string.information_source_code)) },
-					supportingContent = {
-						Text(
-							text = stringResource(id = R.string.information_source_code_desc),
-							style = MaterialTheme.typography.labelLarge
-						)
+				SegmentedListItem(
+					shapes = ListItemDefaults.segmentedShapes(index = 0, count = 2),
+					colors = ListItemDefaults.colors(MaterialTheme.colorScheme.surfaceContainer),
+					trailingContent = {
+						TextButton(
+							onClick = context::openGithub,
+							shapes = ButtonDefaults.shapes()
+						) {
+							Text(text = stringResource(id = R.string.info_visit_github))
+						}
 					},
 					leadingContent = {
 						Icon(
@@ -153,32 +139,30 @@ fun AboutRoute(
 							contentDescription = stringResource(id = R.string.info_visit_github)
 						)
 					},
-					trailingContent = {
-						TextButton(onClick = context::openGithub) {
-							Text(text = stringResource(id = R.string.info_visit_github))
-						}
-					},
-					tonalElevation = 2.dp,
-					modifier = Modifier.clip(MaterialTheme.shapes.small)
+					supportingContent = { Text(text = stringResource(id = R.string.information_source_code_desc)) },
+					content = { Text(text = stringResource(id = R.string.information_source_code)) }
 				)
 			}
 			item {
-				ListItem(
-					headlineContent = { Text(text = stringResource(id = R.string.contacts)) },
-					supportingContent = { Text(text = stringResource(id = R.string.contracts_with_email)) },
-					leadingContent = {
-						Icon(
-							imageVector = Icons.Outlined.Mail,
-							contentDescription = stringResource(id = R.string.contacts)
-						)
-					},
+				SegmentedListItem(
+					shapes = ListItemDefaults.segmentedShapes(index = 1, count = 2),
+					colors = ListItemDefaults.colors(MaterialTheme.colorScheme.surfaceContainer),
 					trailingContent = {
-						TextButton(onClick = context::sendEmailToMe) {
+						TextButton(
+							onClick = context::sendEmailToMe,
+							shapes = ButtonDefaults.shapes()
+						) {
 							Text(text = stringResource(id = R.string.mail_title))
 						}
 					},
-					tonalElevation = 2.dp,
-					modifier = Modifier.clip(MaterialTheme.shapes.small)
+					leadingContent = {
+						Icon(
+							imageVector = AppIconVectors.email,
+							contentDescription = stringResource(id = R.string.contacts)
+						)
+					},
+					supportingContent = { Text(text = stringResource(id = R.string.contracts_with_email)) },
+					content = { Text(text = stringResource(id = R.string.contacts)) }
 				)
 			}
 		}
@@ -237,7 +221,7 @@ private fun InformationRoutePreview() = BlueToothTerminalAppTheme {
 	AboutRoute(
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Default.ArrowBack,
+				imageVector = AppIconVectors.backArrow,
 				contentDescription = stringResource(id = R.string.back_arrow)
 			)
 		},

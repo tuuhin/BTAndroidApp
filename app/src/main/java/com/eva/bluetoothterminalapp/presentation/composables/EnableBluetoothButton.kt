@@ -3,18 +3,15 @@ package com.eva.bluetoothterminalapp.presentation.composables
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.launch
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.presentation.contracts.EnableBluetoothContract
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
@@ -33,16 +30,24 @@ fun EnableBluetoothButton(
 	Button(
 		onClick = launcher::launch,
 		modifier = modifier,
-		shape = MaterialTheme.shapes.medium
+		contentPadding = ButtonDefaults.contentPaddingFor(
+			ButtonDefaults.MediumContainerHeight,
+			hasStartIcon = true
+		),
+		shapes = ButtonDefaults.shapes(
+			pressedShape = ButtonDefaults.mediumPressedShape,
+			shape = ButtonDefaults.shape
+		),
 	) {
 		Icon(
-			imageVector = Icons.Default.Bluetooth,
-			contentDescription = null
+			imageVector = AppIconVectors.bluetooth,
+			contentDescription = null,
+			modifier = Modifier.size(ButtonDefaults.iconSizeFor(ButtonDefaults.MediumContainerHeight)),
 		)
-		Spacer(modifier = Modifier.width(2.dp))
+		Spacer(Modifier.size(ButtonDefaults.iconSpacingFor(ButtonDefaults.MediumContainerHeight)))
 		Text(
 			text = stringResource(id = R.string.enable_bluetooth_button_text),
-			style = MaterialTheme.typography.bodyMedium,
+			style = ButtonDefaults.textStyleFor(ButtonDefaults.MediumContainerHeight),
 		)
 	}
 }

@@ -1,7 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client
 
-import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
@@ -12,10 +10,8 @@ import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientMessagesState
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.BTClientRouteEvents
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client.state.EndConnectionEvents
-import com.eva.bluetoothterminalapp.presentation.navigation.args.BluetoothClientConnectArgs
 import com.eva.bluetoothterminalapp.presentation.util.AppViewModel
 import com.eva.bluetoothterminalapp.presentation.util.UiEvents
-import com.ramcosta.composedestinations.generated.navArgs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,14 +32,17 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
+import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
-private const val LOGGER = "BLUETOOTH_CLIENT_VIEW_MODEL"
-
+@KoinViewModel
 class BTClientViewModel(
+	@InjectedParam private val address: String,
+	@InjectedParam private val connectionUid: Uuid,
 	private val connector: BluetoothClientConnector,
 	private val bTSettings: BTSettingsDataSore,
-	private val savedStateHandle: SavedStateHandle,
 ) : AppViewModel() {
 
 	private val _messagesState = MutableStateFlow(BTClientMessagesState())
@@ -87,8 +86,6 @@ class BTClientViewModel(
 		initialValue = BTSettingsModel()
 	)
 
-	private val clientConnect: BluetoothClientConnectArgs
-		get() = savedStateHandle.navArgs()
 
 	private var _connectAsClientJob: Job? = null
 
@@ -140,8 +137,8 @@ class BTClientViewModel(
 		// create a client job to connect to the client
 		_connectAsClientJob = viewModelScope.launch {
 			val results = connector.connectClient(
-				clientConnect.address,
-				clientConnect.uuid.toJavaUuid()
+				address,
+				connectionUid.toJavaUuid()
 			)
 			results.fold(
 				onSuccess = {},
@@ -193,8 +190,7 @@ class BTClientViewModel(
 			// otherwise only the incomming flow
 			else connector.readIncomingData
 		}
-		.catch { err ->
-			Log.e(LOGGER, "SOME_ERROR_OCCURRED", err)
+		.catch { _ ->
 			_uiEvents.emit(
 				UiEvents.ShowSnackBarWithActions(
 					message = "Unable to read incoming data",
@@ -205,7 +201,7 @@ class BTClientViewModel(
 		}
 		.onEach { message ->
 			_messagesState.update { state ->
-				val updatedMessages = state.messages.add(message)
+				val updatedMessages = state.messages.adding(message)
 				state.copy(messages = updatedMessages)
 			}
 		}.launchIn(viewModelScope)
@@ -230,9 +226,6 @@ class BTClientViewModel(
 		if (_connectAsClientJob?.isActive == true) {
 			closeConnection()
 		}
-		// log viewmodel is cleared
-		Log.d(LOGGER, "CLEAN UP IN CLIENT")
-		super.onCleared()
 	}
 
 }

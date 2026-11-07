@@ -2,26 +2,24 @@ package com.eva.bluetoothterminalapp.presentation.composables
 
 import android.Manifest
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
+import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.data.utils.hasBTAdvertisePermission
 import com.eva.bluetoothterminalapp.data.utils.hasBTConnectPermission
 import com.eva.bluetoothterminalapp.data.utils.hasBTScanPermission
@@ -36,9 +34,9 @@ fun BluetoothPermissionButton(
 
 	val context = LocalContext.current
 
-	var hasScanPermission by remember { mutableStateOf(context.hasBTScanPermission) }
-	var hasConnectPermission by remember { mutableStateOf(context.hasBTConnectPermission) }
-	var hasAdvertisePermission by remember { mutableStateOf(context.hasBTAdvertisePermission) }
+	var hasScanPermission by rememberSaveable { mutableStateOf(context.hasBTScanPermission) }
+	var hasConnectPermission by rememberSaveable { mutableStateOf(context.hasBTConnectPermission) }
+	var hasAdvertisePermission by rememberSaveable { mutableStateOf(context.hasBTAdvertisePermission) }
 
 	val permissionLauncher = rememberLauncherForActivityResult(
 		contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -53,12 +51,6 @@ fun BluetoothPermissionButton(
 			hasAdvertisePermission =
 				perms.getOrDefault(Manifest.permission.BLUETOOTH_ADVERTISE, false)
 		}
-
-		Log.d(
-			"PERMISSIONS",
-			"SCAN: $hasScanPermission CONNECT:$hasConnectPermission ADVERTISE: $hasAdvertisePermission"
-		)
-
 		val hasAllPermissions = hasScanPermission && hasConnectPermission && hasAdvertisePermission
 		onResults(hasAllPermissions)
 	}
@@ -73,12 +65,26 @@ fun BluetoothPermissionButton(
 				)
 			)
 		},
-		modifier = modifier,
-		shape = MaterialTheme.shapes.medium
+		contentPadding = ButtonDefaults.contentPaddingFor(
+			ButtonDefaults.MediumContainerHeight,
+			hasStartIcon = true
+		),
+		shapes = ButtonDefaults.shapes(
+			pressedShape = ButtonDefaults.mediumPressedShape,
+			shape = ButtonDefaults.shape
+		),
+		modifier = modifier
 	) {
-		Icon(imageVector = Icons.Default.Bluetooth, contentDescription = null)
-		Spacer(modifier = Modifier.width(2.dp))
-		Text(text = "Allow Permissions")
+		Icon(
+			imageVector = AppIconVectors.bluetooth,
+			contentDescription = null,
+			modifier = Modifier.size(ButtonDefaults.iconSizeFor(ButtonDefaults.MediumContainerHeight)),
+		)
+		Spacer(Modifier.size(ButtonDefaults.iconSpacingFor(ButtonDefaults.MediumContainerHeight)))
+		Text(
+			text = stringResource(R.string.allow_bluetooth_permission),
+			style = ButtonDefaults.textStyleFor(ButtonDefaults.MediumContainerHeight),
+		)
 	}
 
 }

@@ -33,6 +33,11 @@ sealed interface BTDevicesScreenEvents {
 	data object StopLEDevicesScan : BTDevicesScreenEvents
 
 	/**
+	 * Marks handling the results for scan discovery
+	 */
+	data class OnHandleStartBTDiscoveryContract(val code: Int) : BTDevicesScreenEvents
+
+	/**
 	 * Stops any running scan,used when switching tabs
 	 */
 	data object OnStopAnyRunningScan : BTDevicesScreenEvents

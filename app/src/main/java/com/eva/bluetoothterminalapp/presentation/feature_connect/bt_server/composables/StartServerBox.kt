@@ -3,18 +3,20 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.comp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,43 +40,59 @@ fun StartServerBox(
 		verticalArrangement = Arrangement.Center,
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
-		Icon(
-			painter = painterResource(R.drawable.ic_connect_variant),
-			contentDescription = stringResource(id = R.string.bt_server_start_connection_text),
-			tint = MaterialTheme.colorScheme.tertiary,
-			modifier = Modifier.size(200.dp),
-		)
+		Surface(
+			color = MaterialTheme.colorScheme.tertiaryContainer,
+			contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+			shape = MaterialShapes.Cookie12Sided.toShape(),
+			modifier = Modifier.sizeIn(minWidth = 200.dp, minHeight = 200.dp)
+		) {
+			Icon(
+				painter = painterResource(R.drawable.ic_connect_variant),
+				contentDescription = stringResource(id = R.string.bt_server_start_connection_text),
+				modifier = Modifier.padding(20.dp),
+			)
+		}
+
 		Spacer(modifier = Modifier.height(12.dp))
 		Text(
 			text = stringResource(id = R.string.bt_server_start_connection_text),
-			style = MaterialTheme.typography.headlineSmall,
+			style = MaterialTheme.typography.headlineSmallEmphasized,
 			color = MaterialTheme.colorScheme.primary
 		)
 		Text(
 			text = stringResource(id = R.string.bt_server_start_connection_desc),
-			style = MaterialTheme.typography.bodyMedium,
+			style = MaterialTheme.typography.bodyMediumEmphasized,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
-			modifier = Modifier.fillMaxWidth(.75f),
+			modifier = Modifier.fillMaxWidth(.9f),
 			textAlign = TextAlign.Center
 		)
 		Spacer(modifier = Modifier.height(12.dp))
-		FilledTonalButton(
+		Button(
 			onClick = onStartServer,
-			shape = MaterialTheme.shapes.medium,
-			colors = ButtonDefaults.filledTonalButtonColors(
+			contentPadding = ButtonDefaults.contentPaddingFor(
+				ButtonDefaults.MediumContainerHeight,
+				hasStartIcon = true
+			),
+			shapes = ButtonDefaults.shapes(
+				pressedShape = ButtonDefaults.mediumPressedShape,
+				shape = ButtonDefaults.shape
+			),
+			colors = ButtonDefaults.buttonColors(
 				containerColor = MaterialTheme.colorScheme.primaryContainer,
 				contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-			)
+			),
+			modifier = Modifier.fillMaxWidth(.75f)
 		) {
 			Text(
 				text = stringResource(id = R.string.bt_server_start_connection_text),
-				fontWeight = FontWeight.SemiBold
+				fontWeight = FontWeight.SemiBold,
+				style = ButtonDefaults.textStyleFor(ButtonDefaults.MediumContainerHeight)
 			)
 		}
-		HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+		Spacer(modifier = Modifier.height(12.dp))
 		Text(
 			text = stringResource(R.string.bt_server_start_connection_extra_info),
-			style = MaterialTheme.typography.labelMedium,
+			style = MaterialTheme.typography.labelMediumEmphasized,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
 			modifier = Modifier.fillMaxWidth(.75f),
 			textAlign = TextAlign.Center
@@ -88,6 +106,7 @@ private fun StartServerBoxPreview() = BlueToothTerminalAppTheme {
 	Surface {
 		StartServerBox(
 			onStartServer = { },
+			modifier = Modifier.fillMaxSize()
 		)
 	}
 }

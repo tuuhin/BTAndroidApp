@@ -1,11 +1,8 @@
-@file:OptIn(ExperimentalSharedTransitionApi::class)
-
 package com.eva.bluetoothterminalapp.presentation.util
 
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Spring.StiffnessMediumLow
 import androidx.compose.animation.core.VisibilityThreshold
@@ -20,6 +17,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 
 private val NormalSpring = spring(
 	stiffness = StiffnessMediumLow,
@@ -36,8 +34,7 @@ fun Modifier.sharedElementWrapper(
 	clipShape: Shape = RectangleShape,
 ) = composed {
 	val transitionScope = LocalSharedTransitionScopeProvider.current ?: return@composed Modifier
-	val visibilityScope =
-		LocalSharedTransitionVisibilityScopeProvider.current ?: return@composed Modifier
+	val visibilityScope = LocalNavAnimatedContentScope.current
 
 	with(transitionScope) {
 		val state = rememberSharedContentState(key)
@@ -70,8 +67,7 @@ fun Modifier.sharedBoundsWrapper(
 ) = composed {
 
 	val transitionScope = LocalSharedTransitionScopeProvider.current ?: return@composed Modifier
-	val visibilityScope =
-		LocalSharedTransitionVisibilityScopeProvider.current ?: return@composed Modifier
+	val visibilityScope = LocalNavAnimatedContentScope.current
 
 	with(transitionScope) {
 

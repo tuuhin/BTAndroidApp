@@ -16,7 +16,7 @@ import com.eva.bluetoothterminalapp.presentation.feature_connect.composables.BTS
 @Composable
 fun BTServerConnectionHeader(
 	device: BTServerDeviceState,
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
 ) {
 	AnimatedContent(
 		targetState = device.serverState,

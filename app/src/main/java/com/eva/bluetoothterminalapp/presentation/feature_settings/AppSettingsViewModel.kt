@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 
+@KoinViewModel
 class AppSettingsViewModel(
 	private val bleDatastore: BLESettingsDataStore,
 	private val btDatastore: BTSettingsDataSore,

@@ -3,12 +3,12 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server.comp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +32,7 @@ fun BTPeerInteractionContent(
 	modifier: Modifier = Modifier,
 ) {
 	Column(
-		verticalArrangement = Arrangement.spacedBy(8.dp),
+		verticalArrangement = Arrangement.spacedBy(10.dp),
 		modifier = modifier
 	) {
 		BTServerConnectionHeader(
@@ -43,17 +43,13 @@ fun BTPeerInteractionContent(
 			messages = messagesState.messages,
 			scrollToEnd = btSettings.autoScrollEnabled,
 			showTimeInMessage = btSettings.showTimeStamp,
+			shape = MaterialTheme.shapes.extraLarge,
 			contentPadding = PaddingValues(dimensionResource(R.dimen.sc_padding_secondary)),
 			modifier = Modifier
 				.fillMaxWidth()
 				.weight(1f)
 		)
-		HorizontalDivider(
-			color = MaterialTheme.colorScheme.outlineVariant,
-			modifier = Modifier.padding(
-				vertical = dimensionResource(id = R.dimen.messages_text_field_spacing)
-			)
-		)
+		Spacer(modifier = Modifier.height(2.dp))
 		SendCommandTextField(
 			value = messagesState.textFieldValue,
 			isEnable = deviceState.isAccepted,

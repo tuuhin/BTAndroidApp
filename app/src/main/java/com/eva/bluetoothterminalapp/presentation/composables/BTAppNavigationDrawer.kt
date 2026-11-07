@@ -1,6 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.composables
 
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -33,7 +33,6 @@ import com.eva.bluetoothterminalapp.presentation.util.SharedElementTransitionKey
 import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun BTAppNavigationDrawer(
 	modifier: Modifier = Modifier,
@@ -65,14 +64,23 @@ fun BTAppNavigationDrawer(
 			)
 			Text(
 				text = stringResource(R.string.drawer_option_servers),
-				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.onSurfaceVariant,
+				style = MaterialTheme.typography.labelLargeEmphasized,
+				color = MaterialTheme.colorScheme.onSurface,
 				modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
 			)
 			NavigationDrawerItem(
-				label = { Text(text = stringResource(R.string.bt_server_route)) },
+				label = {
+					Text(
+						text = stringResource(R.string.bt_server_route),
+						style = MaterialTheme.typography.titleMediumEmphasized
+					)
+				},
 				selected = false,
 				onClick = onNavigateToClassicServer,
+				colors = NavigationDrawerItemDefaults.colors(
+					unselectedTextColor = MaterialTheme.colorScheme.primary,
+					unselectedIconColor = MaterialTheme.colorScheme.secondary
+				),
 				icon = {
 					Icon(
 						painter = painterResource(R.drawable.ic_server),
@@ -82,9 +90,18 @@ fun BTAppNavigationDrawer(
 				modifier = Modifier.sharedBoundsWrapper(SharedElementTransitionKeys.CLASSIC_SERVER_ITEM_TO_SERVER)
 			)
 			NavigationDrawerItem(
-				label = { Text(text = stringResource(R.string.drawer_option_ble_server)) },
+				label = {
+					Text(
+						text = stringResource(R.string.drawer_option_ble_server),
+						style = MaterialTheme.typography.titleMediumEmphasized
+					)
+				},
 				selected = false,
 				onClick = onNavigateToBLEServer,
+				colors = NavigationDrawerItemDefaults.colors(
+					unselectedTextColor = MaterialTheme.colorScheme.primary,
+					unselectedIconColor = MaterialTheme.colorScheme.secondary
+				),
 				icon = {
 					Icon(
 						painter = painterResource(R.drawable.ic_server_2),
@@ -99,14 +116,23 @@ fun BTAppNavigationDrawer(
 			)
 			Text(
 				text = stringResource(R.string.drawer_option_others),
-				color = MaterialTheme.colorScheme.onSurfaceVariant,
-				style = MaterialTheme.typography.titleMedium,
+				color = MaterialTheme.colorScheme.onSurface,
+				style = MaterialTheme.typography.labelLargeEmphasized,
 				modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
 			)
 			NavigationDrawerItem(
-				label = { Text(text = stringResource(id = R.string.settings_route_title)) },
+				label = {
+					Text(
+						text = stringResource(id = R.string.settings_route_title),
+						style = MaterialTheme.typography.titleMediumEmphasized
+					)
+				},
 				selected = false,
 				onClick = onNavigateToSettingsRoute,
+				colors = NavigationDrawerItemDefaults.colors(
+					unselectedTextColor = MaterialTheme.colorScheme.primary,
+					unselectedIconColor = MaterialTheme.colorScheme.secondary
+				),
 				icon = {
 					Icon(
 						painter = painterResource(R.drawable.ic_app_settings),
@@ -116,12 +142,22 @@ fun BTAppNavigationDrawer(
 				modifier = Modifier.sharedBoundsWrapper(SharedElementTransitionKeys.SETTINGS_ITEM_TO_SETTING_SCREEN)
 			)
 			NavigationDrawerItem(
-				label = { Text(text = stringResource(id = R.string.about_route_title)) },
+				label = {
+					Text(
+						text = stringResource(id = R.string.about_route_title),
+						style = MaterialTheme.typography.titleMediumEmphasized
+					)
+				},
 				selected = false,
 				onClick = onNavigateToFeedBackRoute,
+				colors = NavigationDrawerItemDefaults.colors(
+					unselectedTextColor = MaterialTheme.colorScheme.primary,
+					unselectedIconColor = MaterialTheme.colorScheme.secondary
+				),
 				icon = {
 					Icon(
 						painter = painterResource(R.drawable.ic_info),
+
 						contentDescription = stringResource(id = R.string.about_route_title)
 					)
 				},
@@ -148,7 +184,7 @@ private fun AppIconWithTitle(modifier: Modifier = Modifier) {
 
 		Text(
 			text = stringResource(id = R.string.app_name),
-			style = MaterialTheme.typography.titleMedium,
+			style = MaterialTheme.typography.titleMediumEmphasized,
 			color = MaterialTheme.colorScheme.onSurface,
 			fontWeight = FontWeight.SemiBold
 		)

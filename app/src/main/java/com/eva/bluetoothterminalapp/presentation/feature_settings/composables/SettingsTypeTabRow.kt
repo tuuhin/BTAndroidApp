@@ -1,7 +1,5 @@
 package com.eva.bluetoothterminalapp.presentation.feature_settings.composables
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
@@ -29,9 +26,6 @@ import com.eva.bluetoothterminalapp.presentation.util.BluetoothTypes
 import com.eva.bluetoothterminalapp.presentation.util.textResource
 import kotlinx.coroutines.launch
 
-@OptIn(
-	ExperimentalMaterial3Api::class
-)
 @Composable
 fun BTSettingsTabs(
 	classicTabContent: @Composable () -> Unit,
@@ -89,10 +83,7 @@ fun BTSettingsTabs(
 			flingBehavior = PagerDefaults.flingBehavior(
 				state = pagerState,
 				snapPositionalThreshold = .4f,
-				snapAnimationSpec = spring(
-					dampingRatio = Spring.DampingRatioLowBouncy,
-					stiffness = Spring.StiffnessVeryLow
-				)
+				snapAnimationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
 			),
 			pageSpacing = dimensionResource(id = R.dimen.page_spacing),
 			modifier = Modifier.fillMaxSize(),

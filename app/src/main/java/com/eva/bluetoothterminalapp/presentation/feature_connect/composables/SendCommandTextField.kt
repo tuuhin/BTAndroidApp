@@ -4,18 +4,21 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,7 +48,6 @@ fun SendCommandTextField(
 	isEnable: Boolean = true,
 	onImeAction: () -> Unit = {},
 	maxLines: Int = 2,
-	shape: Shape = MaterialTheme.shapes.large,
 	cursorColor: Brush = SolidColor(MaterialTheme.colorScheme.primary),
 	textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
 	color: Color = MaterialTheme.colorScheme.onSurface
@@ -60,27 +61,23 @@ fun SendCommandTextField(
 		label = "Container color"
 	)
 
-	val iconButtonColor by animateColorAsState(
-		targetValue = if (isEnable) MaterialTheme.colorScheme.primaryContainer
-		else MaterialTheme.colorScheme.primary.copy(alpha = .4f),
-		label = "Icon button colors"
-	)
 
 	BasicTextField(
 		value = value,
 		onValueChange = onChange,
 		decorationBox = { content ->
 			Row(
-				verticalAlignment = Alignment.CenterVertically
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.spacedBy(8.dp)
 			) {
 				Surface(
 					color = surfaceColor,
-					shape = shape,
+					shape = MaterialTheme.shapes.extraLarge,
 					contentColor = color,
 					modifier = Modifier.weight(1f),
 				) {
 					Box(
-						modifier = Modifier.padding(all = 16.dp),
+						modifier = Modifier.padding(vertical = 16.dp, horizontal = 20.dp),
 					) {
 						when {
 							value.isBlank() ->
@@ -95,11 +92,16 @@ fun SendCommandTextField(
 						}
 					}
 				}
-				IconButton(
+				FilledIconButton(
 					onClick = onImeAction,
 					enabled = isEnable,
-					colors = IconButtonDefaults
-						.filledIconButtonColors(containerColor = iconButtonColor)
+					modifier = Modifier
+						.minimumInteractiveComponentSize()
+						.size(IconButtonDefaults.smallContainerSize(IconButtonDefaults.IconButtonWidthOption.Wide)),
+					shapes = IconButtonDefaults.shapes(
+						shape = IconButtonDefaults.mediumRoundShape,
+						pressedShape = IconButtonDefaults.mediumRoundShape,
+					),
 				) {
 					Icon(
 						painter = painterResource(id = R.drawable.ic_send),

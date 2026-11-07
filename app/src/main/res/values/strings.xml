@@ -224,5 +224,7 @@
   <string name="ble_device_profile_action_request_mtu">Request MTU</string>
   <string name="dialog_action_request">Request</string>
   <string name="ble_device_profile_action_request_mtu_info">On some device updating the mtu will work a singletime with max 517, independent of the value entered</string>
-  <string name="ble_device_profile_mtu_placeholder">23-517</string>
+  <string name="ble_device_profile_mtu_placeholder">23–517</string>
+  <string name="paired_devices_loading">Paired devices loading</string>
+  <string name="allow_bluetooth_permission">Allow permissions</string>
 </resources>

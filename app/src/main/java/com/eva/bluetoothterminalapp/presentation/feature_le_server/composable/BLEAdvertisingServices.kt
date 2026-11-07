@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -20,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
@@ -40,7 +43,7 @@ fun BLEAdvertisingServices(
 
 	Column(
 		modifier = modifier,
-		verticalArrangement = Arrangement.spacedBy(4.dp)
+		verticalArrangement = Arrangement.spacedBy(8.dp)
 	) {
 		Row(
 			modifier = Modifier
@@ -56,24 +59,25 @@ fun BLEAdvertisingServices(
 			) {
 				Text(
 					text = stringResource(R.string.ble_server_serving_services),
-					style = MaterialTheme.typography.titleMedium,
+					style = MaterialTheme.typography.titleMediumEmphasized,
 					color = MaterialTheme.colorScheme.onSurface
 				)
 				Text(
 					text = stringResource(R.string.ble_server_serving_services_text),
-					style = MaterialTheme.typography.labelLarge,
+					style = MaterialTheme.typography.bodyMediumEmphasized,
 					color = MaterialTheme.colorScheme.onSurfaceVariant
 				)
 			}
 			Surface(
 				color = MaterialTheme.colorScheme.primaryContainer,
 				contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-				shape = MaterialTheme.shapes.medium
+				shape = MaterialShapes.Square.toShape()
 			) {
 				Text(
 					text = "${services.size}",
-					style = MaterialTheme.typography.titleMedium,
-					modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+					style = MaterialTheme.typography.titleMediumEmphasized,
+					fontWeight = FontWeight.SemiBold,
+					modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
 				)
 			}
 		}
@@ -98,7 +102,7 @@ fun BLEAdvertisingServices(
 					Box(
 						modifier = Modifier
 							.fillMaxWidth()
-							.heightIn(min = 40.dp)
+							.heightIn(min = 80.dp)
 							.animateItem(),
 						contentAlignment = Alignment.Center
 					) {

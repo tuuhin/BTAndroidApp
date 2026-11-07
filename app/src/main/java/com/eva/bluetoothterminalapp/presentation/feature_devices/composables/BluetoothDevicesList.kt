@@ -2,23 +2,32 @@ package com.eva.bluetoothterminalapp.presentation.feature_devices.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
@@ -55,39 +64,47 @@ fun BluetoothDevicesList(
 
 
 	LazyColumn(
-		modifier = modifier.fillMaxSize(),
-		verticalArrangement = Arrangement.spacedBy(8.dp),
+		modifier = modifier
+			.fillMaxSize()
+			.widthIn(max = 640.dp),
+		verticalArrangement = Arrangement.spacedBy(4.dp),
 		contentPadding = contentPadding
 	) {
-
 		pairedDevicesHeader()
 
-		if (isPairedDevicesReady && isPairedListEmpty) {
+		if (isPairedListEmpty) {
 			item {
-				Text(
-					text = stringResource(id = R.string.paired_device_not_found),
-					textAlign = TextAlign.Center,
-					style = MaterialTheme.typography.bodyLarge,
+				Box(
 					modifier = Modifier
+						.heightIn(80.dp)
 						.fillMaxWidth()
 						.animateItem(),
+					contentAlignment = Alignment.Center
+				) {
+					Text(
+						text = if (isPairedDevicesReady) stringResource(id = R.string.paired_device_not_found)
+						else stringResource(R.string.paired_devices_loading),
+						textAlign = TextAlign.Center,
+						style = MaterialTheme.typography.bodyLargeEmphasized,
+					)
+				}
+			}
+		} else {
+			itemsIndexed(
+				items = pairedDevices,
+				key = devicesKey,
+				contentType = devicesContentKey,
+			) { _, device ->
+				BluetoothDeviceCard(
+					device = device,
+					isPaired = true,
+					iconShape = MaterialShapes.Cookie6Sided.toShape(),
+					onConnect = { onSelectDevice(device) },
+					modifier = Modifier
+						.fillMaxWidth()
+						.animateItem()
 				)
 			}
-		}
-
-		itemsIndexed(
-			items = pairedDevices,
-			key = devicesKey,
-			contentType = devicesContentKey,
-		) { _, device ->
-			BluetoothDeviceCard(
-				device = device,
-				isPaired = true,
-				onConnect = { onSelectDevice(device) },
-				modifier = Modifier
-					.fillMaxWidth()
-					.animateItem()
-			)
 		}
 
 		availableDevicesHeader()
@@ -111,6 +128,7 @@ fun BluetoothDevicesList(
 			BluetoothDeviceCard(
 				device = device,
 				isPaired = false,
+				iconShape = MaterialShapes.Cookie4Sided.toShape(startAngle = 45),
 				onConnect = { onSelectDevice(device) },
 				modifier = Modifier
 					.fillMaxWidth()
@@ -129,18 +147,21 @@ private fun LazyListScope.pairedDevicesHeader() = stickyHeader {
 	) {
 		Text(
 			text = stringResource(id = R.string.paired_device),
-			style = MaterialTheme.typography.titleMedium,
-			color = MaterialTheme.colorScheme.onSurface
+			style = MaterialTheme.typography.titleMediumEmphasized,
+			fontWeight = FontWeight.SemiBold,
+			color = MaterialTheme.colorScheme.tertiary
 		)
 		Text(
 			text = stringResource(id = R.string.paired_device_desc),
-			style = MaterialTheme.typography.labelLarge,
+			style = MaterialTheme.typography.bodyMediumEmphasized,
 			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
 	}
 }
 
 private fun LazyListScope.availableDevicesHeader() = stickyHeader {
+	Spacer(modifier = Modifier.height(12.dp))
+
 	Column(
 		modifier = Modifier
 			.background(MaterialTheme.colorScheme.surface)
@@ -149,12 +170,13 @@ private fun LazyListScope.availableDevicesHeader() = stickyHeader {
 	) {
 		Text(
 			text = stringResource(id = R.string.available_scan_devices),
-			style = MaterialTheme.typography.titleMedium,
-			color = MaterialTheme.colorScheme.onSurface
+			style = MaterialTheme.typography.titleMediumEmphasized,
+			fontWeight = FontWeight.SemiBold,
+			color = MaterialTheme.colorScheme.tertiary
 		)
 		Text(
 			text = stringResource(id = R.string.available_scan_devices_desc),
-			style = MaterialTheme.typography.labelLarge,
+			style = MaterialTheme.typography.bodyMediumEmphasized,
 			color = MaterialTheme.colorScheme.onSurfaceVariant
 		)
 	}

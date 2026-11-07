@@ -5,7 +5,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,42 +31,65 @@ fun BTSettingsContent(
 	contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
 
+	val colors =
+		ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+
 	LazyColumn(
 		modifier = modifier,
 		contentPadding = contentPadding,
-		verticalArrangement = Arrangement.spacedBy(8.dp),
+		verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
 	) {
 		bTListItemTitle {
 			Text(text = stringResource(id = R.string.bt_classic_settings_category_terminal))
 		}
 		item {
 			BTCharsetSelector(
+				shapes = ListItemDefaults.segmentedShapes(0, 4),
+				colors = colors,
 				selectedCharset = settings.btTerminalCharSet,
 				onCharsetChange = { charset -> onEvent(BTSettingsEvent.OnCharsetChange(charset)) },
 			)
 		}
 		item {
 			BTDisplayModeSelector(
+				shapes = ListItemDefaults.segmentedShapes(1, 4),
+				colors = colors,
 				mode = settings.displayMode,
 				onModeChange = { mode -> onEvent(BTSettingsEvent.OnDisplayModeChange(mode)) },
 			)
 		}
 		item {
-			BTShowTimestampSelector(
-				showTimeStamp = settings.showTimeStamp,
-				onChange = { show -> onEvent(BTSettingsEvent.OnShowTimeStampValueChanged(show)) },
+			SegmentedListItem(
+				shapes = ListItemDefaults.segmentedShapes(2, 4),
+				colors = colors,
+				checked = settings.showTimeStamp,
+				onCheckedChange = { show -> onEvent(BTSettingsEvent.OnShowTimeStampValueChanged(show)) },
+				trailingContent = {
+					Switch(
+						checked = settings.showTimeStamp,
+						onCheckedChange = null
+					)
+				},
+				content = { Text(text = stringResource(id = R.string.bt_classic_settings_show_time_title)) },
+				supportingContent = { Text(text = stringResource(id = R.string.bt_classic_settings_show_time_desc)) },
 			)
 		}
 		item {
-			BTAutoScrollEnabled(
-				isAutoScrollEnabled = settings.autoScrollEnabled,
-				onAutoScrollChange = { isEnabled ->
-					onEvent(
-						BTSettingsEvent.OnAutoScrollValueChanged(
-							isEnabled
-						)
+			SegmentedListItem(
+				shapes = ListItemDefaults.segmentedShapes(3, 4),
+				colors = colors,
+				checked = settings.autoScrollEnabled,
+				onCheckedChange = { isEnabled ->
+					onEvent(BTSettingsEvent.OnAutoScrollValueChanged(isEnabled))
+				},
+				trailingContent = {
+					Switch(
+						checked = settings.autoScrollEnabled,
+						onCheckedChange = null
 					)
 				},
+				content = { Text(text = stringResource(id = R.string.bt_classic_settings_auto_scroll_title)) },
+				supportingContent = { Text(text = stringResource(id = R.string.bt_classic_settings_auto_scroll_desc)) },
 			)
 		}
 		bTListItemTitle {
@@ -70,13 +97,11 @@ fun BTSettingsContent(
 		}
 		item {
 			BTNewLineSelector(
+				shapes = ListItemDefaults.segmentedShapes(0, 1),
+				colors = colors,
 				newLineChar = settings.newLineCharReceive,
 				onNewLineCharChange = { newLineChar ->
-					onEvent(
-						BTSettingsEvent.OnReceiveNewLineCharChanged(
-							newLineChar
-						)
-					)
+					onEvent(BTSettingsEvent.OnReceiveNewLineCharChanged(newLineChar))
 				},
 			)
 		}
@@ -85,53 +110,68 @@ fun BTSettingsContent(
 		}
 		item {
 			BTNewLineSelector(
+				shapes = ListItemDefaults.segmentedShapes(0, 3),
+				colors = colors,
 				newLineChar = settings.newLineCharSend,
 				onNewLineCharChange = { newLineChar ->
-					onEvent(
-						BTSettingsEvent.OnSendNewLineCharChanged(
-							newLineChar
-						)
-					)
+					onEvent(BTSettingsEvent.OnSendNewLineCharChanged(newLineChar))
 				},
 			)
 		}
 		item {
-			BTLocalEchoSelector(
-				isLocalEcho = settings.localEchoEnabled,
-				onLocalEchoChange = { isAllowed ->
-					onEvent(
-						BTSettingsEvent.OnLocalEchoValueChange(
-							isAllowed
-						)
+			SegmentedListItem(
+				shapes = ListItemDefaults.segmentedShapes(1, 3),
+				colors = colors,
+				checked = settings.localEchoEnabled,
+				onCheckedChange = { isAllowed ->
+					onEvent(BTSettingsEvent.OnLocalEchoValueChange(isAllowed))
+				},
+				trailingContent = {
+					Switch(
+						checked = settings.localEchoEnabled,
+						onCheckedChange = null
 					)
 				},
+				content = { Text(text = stringResource(id = R.string.bt_classic_settings_local_echo_title)) },
+				supportingContent = { Text(text = stringResource(id = R.string.bt_classic_settings_local_echo_desc)) },
 			)
 		}
 		item {
-			BTClearInputSelector(
-				isClear = settings.clearInputOnSend,
-				onClearSettingsChange = { isAllowed ->
-					onEvent(
-						BTSettingsEvent.OnClearInputValueChange(
-							isAllowed
-						)
+			SegmentedListItem(
+				shapes = ListItemDefaults.segmentedShapes(2, 3),
+				colors = colors,
+				checked = settings.clearInputOnSend,
+				onCheckedChange = { isAllowed ->
+					onEvent(BTSettingsEvent.OnClearInputValueChange(isAllowed))
+				},
+				trailingContent = {
+					Switch(
+						checked = settings.clearInputOnSend,
+						onCheckedChange = null
 					)
 				},
+				content = { Text(text = stringResource(id = R.string.bt_classic_settings_clear_input_title)) },
 			)
 		}
 		bTListItemTitle {
 			Text(text = stringResource(id = R.string.bt_classic_settings_category_misc))
 		}
 		item {
-			BTKeppScreenOnSelector(
-				isKeepScreenTrue = settings.keepScreenOnWhenConnected,
-				onKeepScreenOnSettingsChange = { keepOn ->
-					onEvent(
-						BTSettingsEvent.OnKeepScreenOnValueChange(
-							keepOn
-						)
+			SegmentedListItem(
+				shapes = ListItemDefaults.segmentedShapes(0, 1),
+				colors = colors,
+				checked = settings.keepScreenOnWhenConnected,
+				onCheckedChange = { keepOn ->
+					onEvent(BTSettingsEvent.OnKeepScreenOnValueChange(keepOn))
+				},
+				trailingContent = {
+					Switch(
+						checked = settings.localEchoEnabled,
+						onCheckedChange = null
 					)
 				},
+				content = { Text(text = stringResource(id = R.string.bt_classic_settings_keep_screen_on_title)) },
+				supportingContent = { Text(text = stringResource(id = R.string.bt_classic_settings_keep_screen_on_desc)) },
 			)
 		}
 	}

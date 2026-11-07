@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 
@@ -31,9 +32,9 @@ fun AnimatedScanButton(
 	modifier: Modifier = Modifier,
 	startScan: () -> Unit = {},
 	stopScan: () -> Unit = {},
-	style: TextStyle = MaterialTheme.typography.titleMedium,
+	style: TextStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
 	colors: ButtonColors = ButtonDefaults
-		.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
+		.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
 ) {
 
 	val actionState by remember(canShowScanOption, isScanning) {
@@ -62,26 +63,28 @@ fun AnimatedScanButton(
 		modifier = modifier,
 	) { state ->
 		when (state) {
-			ScanButtonState.STOP_SCAN -> TextButton(
-				onClick = stopScan,
-				colors = colors,
-				enabled = !transition.isRunning
-			) {
-				Text(
-					text = stringResource(id = R.string.stop_bluetooth_scan),
-					style = style
-				)
+			ScanButtonState.STOP_SCAN -> {
+				TextButton(
+					onClick = stopScan,
+					colors = colors
+				) {
+					Text(
+						text = stringResource(id = R.string.stop_bluetooth_scan),
+						style = style
+					)
+				}
 			}
 
-			ScanButtonState.START_SCAN -> TextButton(
-				onClick = startScan,
-				colors = colors,
-				enabled = !transition.isRunning
-			) {
-				Text(
-					text = stringResource(id = R.string.start_bluetooth_scan),
-					style = style
-				)
+			ScanButtonState.START_SCAN -> {
+				TextButton(
+					onClick = startScan,
+					colors = colors
+				) {
+					Text(
+						text = stringResource(id = R.string.start_bluetooth_scan),
+						style = style
+					)
+				}
 			}
 
 			ScanButtonState.BLANK -> Box(modifier = Modifier.size(60.dp, 40.dp))

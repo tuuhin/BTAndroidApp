@@ -2,23 +2,22 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile
 
 import android.os.ParcelUuid
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -31,11 +30,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import com.eva.bluetoothterminalapp.R
+import com.eva.bluetoothterminalapp.presentation.composables.AppIconVectors
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.composable.ConnectionProfileList
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.composable.ConnectionProfileTopBar
 import com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.state.BTProfileEvents
@@ -47,10 +49,7 @@ import com.eva.bluetoothterminalapp.presentation.util.sharedBoundsWrapper
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 import java.util.UUID
 
-@OptIn(
-	ExperimentalMaterial3Api::class,
-	ExperimentalSharedTransitionApi::class
-)
+
 @Composable
 fun BluetoothProfileRoute(
 	address: String,
@@ -63,6 +62,12 @@ fun BluetoothProfileRoute(
 
 	val isInspectionMode = LocalInspectionMode.current
 	val snackBarHost = LocalSnackBarProvider.current
+	val layoutDirection = LocalLayoutDirection.current
+	val windowInfo = currentWindowAdaptiveInfoV2()
+
+	val isLargeScreen by remember {
+		derivedStateOf { windowInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) }
+	}
 
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -95,19 +100,23 @@ fun BluetoothProfileRoute(
 				ExtendedFloatingActionButton(
 					onClick = { selectedUUID?.let(onConnect) },
 					shape = MaterialTheme.shapes.large,
+					expanded = isLargeScreen,
+					icon = {
+						Icon(
+							painter = painterResource(R.drawable.ic_connect_variant),
+							contentDescription = "Connect"
+						)
+					},
+					text = { Text(text = stringResource(id = R.string.dialog_action_connect)) },
 					modifier = Modifier.sharedBoundsWrapper(
-						SharedElementTransitionKeys.btClientScreen(address)
-					)
-				) {
-					Icon(
-						painter = painterResource(R.drawable.ic_connect_variant),
-						contentDescription = "Connect"
-					)
-					Spacer(modifier = Modifier.widthIn(4.dp))
-					Text(text = stringResource(id = R.string.dialog_action_connect))
-				}
+						SharedElementTransitionKeys.btClientScreen(
+							address
+						)
+					),
+				)
 			}
 		},
+		floatingActionButtonPosition = FabPosition.End,
 		snackbarHost = { SnackbarHost(hostState = snackBarHost) },
 		modifier = modifier
 			.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -118,7 +127,12 @@ fun BluetoothProfileRoute(
 			isDiscovering = state.isDiscovering,
 			available = state.deviceUUIDS,
 			onUUIDSelect = { uuid -> selectedUUID = uuid },
-			contentPadding = scPadding
+			contentPadding = PaddingValues(
+				top = scPadding.calculateTopPadding() + dimensionResource(R.dimen.sc_padding_secondary),
+				bottom = scPadding.calculateBottomPadding() + dimensionResource(R.dimen.sc_padding_secondary),
+				start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
+				end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
+			)
 		)
 	}
 }
@@ -143,7 +157,7 @@ private fun BluetoothProfileRoutePreview() = BlueToothTerminalAppTheme {
 		onConnect = {},
 		navigation = {
 			Icon(
-				imageVector = Icons.AutoMirrored.Default.ArrowBack,
+				imageVector = AppIconVectors.backArrow,
 				contentDescription = stringResource(id = R.string.back_arrow)
 			)
 		},

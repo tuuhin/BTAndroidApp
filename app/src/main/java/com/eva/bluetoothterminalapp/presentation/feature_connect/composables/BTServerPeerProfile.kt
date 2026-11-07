@@ -1,14 +1,9 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,23 +43,12 @@ fun BTServerPeerProfile(
 	AnimatedVisibility(
 		visible = device != null,
 		enter = expandIn(
-			animationSpec = spring(
-				dampingRatio = Spring.DampingRatioMediumBouncy,
-				stiffness = Spring.StiffnessMedium
-			),
+			animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
 			expandFrom = Alignment.TopCenter,
 		) + fadeIn(
-			animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+			animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
 		),
-		exit = shrinkOut(
-			animationSpec = spring(
-				dampingRatio = Spring.DampingRatioMediumBouncy,
-				stiffness = Spring.StiffnessMedium
-			),
-			shrinkTowards = Alignment.TopCenter,
-		) + fadeOut(
-			animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-		)
+		exit = fadeOut(animationSpec = MaterialTheme.motionScheme.fastEffectsSpec())
 	) {
 		// the content will not be visible if its null
 		if (device == null) return@AnimatedVisibility
