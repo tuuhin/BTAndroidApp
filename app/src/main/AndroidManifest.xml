@@ -16,9 +16,15 @@
   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
   <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
 
+  <!--  Foreground connected service-->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+
   <!--  Location permissions are required for BLE scan-->
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
   <uses-feature android:name="android.hardware.bluetooth" />
   <uses-feature
@@ -43,6 +49,21 @@
     android:supportsRtl="true"
     android:theme="@style/Theme.App.Starting"
     tools:targetApi="33">
+
+    <receiver
+      android:name=".data.services.SPPConnectionReceiver"
+      android:enabled="true"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="com.eva.bluetoothterminalapp.action.SPP_SEND" />
+      </intent-filter>
+    </receiver>
+
+    <service
+      android:name=".data.services.SPPConnectionService"
+      android:exported="false"
+      android:foregroundServiceType="connectedDevice" />
+
     <activity
       android:name=".MainActivity"
       android:exported="true"

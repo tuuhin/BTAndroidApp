@@ -59,6 +59,9 @@
   <string name="bl_connect_profile_device_uuid_desc">The list of features (uuid) the device provides for connection</string>
   <string name="bl_connect_profile_device_uuid_fetching">Fetching device information…</string>
   <string name="bl_connect_profile_device_uuids_not_found">No UUIDs found</string>
+  <string name="bl_connect_profile_custom_uuid">Custom SPP UUID</string>
+  <string name="bl_connect_profile_add_uuid">Use UUID</string>
+  <string name="bl_connect_profile_invalid_uuid">Enter a valid UUID</string>
   <string name="bl_connect_profile_title">Connection Profile</string>
   <string name="ble_service_unknown">Unknown Service</string>
   <string name="ble_service_secondary">Secondary Service</string>
