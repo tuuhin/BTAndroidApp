@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import androidx.core.content.getSystemService
-import kotlinx.coroutines.Dispatchers
+import com.eva.bluetoothterminalapp.domain.utils.PlatformCoroutineDispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +16,10 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class BLEServerNotificationManager(private val context: Context) {
+class BLEServerNotificationManager(
+	private val context: Context,
+	private val dispatchers: PlatformCoroutineDispatchers
+) {
 
 	private val _btManager by lazy { context.getSystemService<BluetoothManager>() }
 
@@ -37,7 +40,7 @@ class BLEServerNotificationManager(private val context: Context) {
 			.mapLatest { filterClients(BLENotificationTypes.ILLUMINANCE) }
 
 	private suspend fun filterClients(type: BLENotificationTypes): List<BluetoothDevice> {
-		return withContext(Dispatchers.IO) {
+		return withContext(dispatchers.io) {
 			_notificationsMap.asSequence()
 				.filter { (_, notificationMap) -> notificationMap[type] == true }
 				.mapNotNull { (address, _) ->
@@ -54,8 +57,8 @@ class BLEServerNotificationManager(private val context: Context) {
 
 	fun onUpdateNotification(address: String, type: BLENotificationTypes, isEnabled: Boolean) {
 		val resultMap = (_notificationsMap[address] ?: emptyMap()).toMutableMap()
-		resultMap.put(type, isEnabled)
-		_notificationsMap.put(address, resultMap)
+		resultMap[type] = isEnabled
+		_notificationsMap[address] = resultMap
 		_latestNotification.tryEmit(type)
 	}
 

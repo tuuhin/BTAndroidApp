@@ -17,6 +17,7 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothDeviceModel
 import com.eva.bluetoothterminalapp.domain.bluetooth_le.models.BLEServiceModel
 import com.eva.bluetoothterminalapp.domain.device.BatteryReader
 import com.eva.bluetoothterminalapp.domain.device.LightSensorReader
+import com.eva.bluetoothterminalapp.domain.utils.PlatformCoroutineDispatchers
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,9 +49,10 @@ class BLEServerGattCallback(
 	private val batteryReader: BatteryReader,
 	private val lightSensorReader: LightSensorReader,
 	private val uuidReader: SampleUUIDReader,
+	private val dispatchers: PlatformCoroutineDispatchers,
 ) : BluetoothGattServerCallback() {
 
-	private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+	private val scope = CoroutineScope(dispatchers.main + SupervisorJob())
 
 	private val _connectedDevices = MutableStateFlow<List<BluetoothDeviceModel>>(emptyList())
 	val connectedDevices = _connectedDevices.asStateFlow()
@@ -63,7 +65,7 @@ class BLEServerGattCallback(
 	private val _nusValuesMap = ConcurrentHashMap<String, BLEMessageModel.NUSMessage>()
 
 	// notifications : latest one and the notification map
-	private val _notificationHandler by lazy { BLEServerNotificationManager(context) }
+	private val _notificationHandler by lazy { BLEServerNotificationManager(context, dispatchers) }
 
 	private var _sendResponse: SendResponse? = null
 	private var _notifyCharacteristicsChanged: NotifyCharacteristicsChanged? = null

@@ -126,6 +126,8 @@ fun BluetoothProfileRoute(
 			selected = selectedUUID,
 			isDiscovering = state.isDiscovering,
 			available = state.deviceUUIDS,
+			customUuids = state.customUUids,
+			onAddCustomUUID = { onEvent(BTProfileEvents.OnAddCustomSPP(it)) },
 			onUUIDSelect = { uuid -> selectedUUID = uuid },
 			contentPadding = PaddingValues(
 				top = scPadding.calculateTopPadding() + dimensionResource(R.dimen.sc_padding_secondary),

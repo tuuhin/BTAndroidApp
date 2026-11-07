@@ -76,7 +76,8 @@ dependencies {
 	//	compose
 	implementation(platform(libs.androidx.compose.bom))
 	implementation(libs.bundles.compose)
-	//lifecycle compose runtime
+	//lifecycle runtime
+	implementation(libs.androidx.lifecycle.service)
 	implementation(libs.androidx.lifecycle.runtime.compose)
 	//navigation and adaptive layout
 	implementation(libs.bundles.navigation3)

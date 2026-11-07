@@ -3,6 +3,7 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_profile.com
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,6 +33,7 @@ import com.eva.bluetoothterminalapp.presentation.util.BTConstants
 import com.eva.bluetoothterminalapp.presentation.util.PreviewFakes
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import java.util.UUID
 
@@ -40,10 +42,11 @@ fun ConnectionProfileList(
 	selected: UUID?,
 	available: ImmutableList<UUID>,
 	modifier: Modifier = Modifier,
+	onAddCustomUUID: (String) -> Unit = {},
 	isDiscovering: Boolean = false,
 	onUUIDSelect: (UUID) -> Unit = {},
+	customUuids: ImmutableList<UUID> = persistentListOf(),
 	contentPadding: PaddingValues = PaddingValues(0.dp),
-	verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(0.dp)
 ) {
 	val isNoUuidFound by remember(available) {
 		derivedStateOf(available::isEmpty)
@@ -62,7 +65,7 @@ fun ConnectionProfileList(
 	LazyColumn(
 		modifier = modifier,
 		contentPadding = contentPadding,
-		verticalArrangement = verticalArrangement
+		verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
 	) {
 		stickyHeader {
 			ListItem(
@@ -77,8 +80,34 @@ fun ConnectionProfileList(
 				isSelected = selected == BTConstants.SERVICE_UUID,
 				onSelect = { onUUIDSelect(BTConstants.SERVICE_UUID) },
 				fontFamily = FontFamily.Default,
+				shape = ListItemDefaults.segmentedShapes(0, 1),
 				modifier = Modifier.fillMaxWidth()
 			)
+			Spacer(modifier = Modifier.height(8.dp))
+		}
+		stickyHeader {
+			ListItem(
+				content = { Text(text = stringResource(id = R.string.bl_connect_profile_custom_connect_uuid)) },
+				supportingContent = { Text(text = stringResource(id = R.string.bl_connect_profile_custom_connect_uuid_desc)) },
+			)
+		}
+		itemsIndexed(
+			items = customUuids,
+			key = uuidsKey,
+			contentType = uuidContentType
+		) { idx, uuid ->
+			SelectableUUIDCard(
+				uuid = uuid,
+				isSelected = selected == uuid,
+				shape = ListItemDefaults.segmentedShapes(idx, available.size),
+				onSelect = { onUUIDSelect(uuid) },
+				modifier = Modifier.fillMaxWidth(),
+			)
+		}
+		// custom spp uuid
+		item {
+			CustomSPPUuidReader(onAddCustomUuid = onAddCustomUUID)
+			Spacer(modifier = Modifier.height(8.dp))
 		}
 		stickyHeader {
 			ListItem(

@@ -10,7 +10,8 @@ import org.koin.core.annotation.Module
 		BLEModule::class,
 		SettingsModule::class,
 		PresentationModule::class,
-		BTClassicModule::class
+		BTClassicModule::class,
+		UtilsModule::class,
 	]
 )
 class AppModule

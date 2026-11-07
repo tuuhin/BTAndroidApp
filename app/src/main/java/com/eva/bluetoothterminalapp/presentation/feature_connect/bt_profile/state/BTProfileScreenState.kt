@@ -6,5 +6,6 @@ import java.util.UUID
 
 data class BTProfileScreenState(
 	val deviceUUIDS: ImmutableList<UUID> = persistentListOf(),
+	val customUUids: ImmutableList<UUID> = persistentListOf(),
 	val isDiscovering: Boolean = true,
 )

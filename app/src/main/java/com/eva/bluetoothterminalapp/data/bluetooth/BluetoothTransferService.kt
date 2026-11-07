@@ -9,6 +9,8 @@ import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessageType
 import com.eva.bluetoothterminalapp.domain.exceptions.BTSocketNotConnectedException
 import com.eva.bluetoothterminalapp.domain.settings.repository.BTSettingsDataSore
+import com.eva.bluetoothterminalapp.domain.utils.PlatformCoroutineDispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -27,6 +29,7 @@ private const val TAG = "TRANSFER_LOGGER"
 class BluetoothTransferService(
 	private val socket: BluetoothSocket,
 	private val btSettings: BTSettingsDataSore,
+	private val dispatchers: PlatformCoroutineDispatchers,
 ) {
 	private val _inputStream: InputStream
 		get() = socket.inputStream
@@ -84,7 +87,7 @@ class BluetoothTransferService(
 		val convertedValue = value.replaceLineSeparatorTo(to = newlineChar)
 		val bytes = convertedValue.toByteArray(charset)
 
-		return withContext(Dispatchers.IO) {
+		return withContext(dispatchers.io) {
 			try {
 				// if the socket is not connected return Result failure
 				if (!socket.isConnected)
@@ -94,9 +97,30 @@ class BluetoothTransferService(
 				Log.d(TAG, "WRITTEN TO STREAM")
 				Result.success(true)
 			} catch (e: Exception) {
+				if (e is CancellationException) throw e
 				e.printStackTrace()
 				Result.failure(e)
 			}
 		}
+	}
+
+	suspend fun writeBytesToStream(value: ByteArray): Result<Boolean> =
+		withContext(dispatchers.io) {
+			writeBytesToOutputStream(_outputStream, socket.isConnected, value)
+		}
+}
+
+internal fun writeBytesToOutputStream(
+	outputStream: OutputStream,
+	isConnected: Boolean,
+	value: ByteArray,
+): Result<Boolean> {
+	if (!isConnected) return Result.failure(BTSocketNotConnectedException())
+	return try {
+		outputStream.write(value)
+		outputStream.flush()
+		Result.success(true)
+	} catch (e: Exception) {
+		Result.failure(e)
 	}
 }

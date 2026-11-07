@@ -25,8 +25,8 @@ import com.eva.bluetoothterminalapp.domain.exceptions.LocationPermissionNotProvi
 import com.eva.bluetoothterminalapp.domain.settings.enums.BLESettingsScanMode
 import com.eva.bluetoothterminalapp.domain.settings.enums.BLESettingsSupportedLayer
 import com.eva.bluetoothterminalapp.domain.settings.repository.BLESettingsDataStore
+import com.eva.bluetoothterminalapp.domain.utils.PlatformCoroutineDispatchers
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.delay
@@ -46,6 +46,7 @@ private typealias BluetoothDevices = List<BluetoothLEDeviceModel>
 class AndroidBluetoothLEScanner(
 	private val context: Context,
 	private val bleSettings: BLESettingsDataStore,
+	private val dispatchers: PlatformCoroutineDispatchers,
 ) : BluetoothLEScanner {
 
 	private val _bluetoothManager by lazy { context.getSystemService<BluetoothManager>() }
@@ -141,7 +142,7 @@ class AndroidBluetoothLEScanner(
 			// starts the scan
 			startScanCallBack()
 			// the function suspends for breaktime
-			withContext(Dispatchers.Main) {
+			withContext(dispatchers.main) {
 				delay(breakTime)
 			}
 		} catch (e: Exception) {
