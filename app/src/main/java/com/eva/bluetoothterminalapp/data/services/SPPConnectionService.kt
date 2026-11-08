@@ -11,8 +11,13 @@ import androidx.lifecycle.lifecycleScope
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.data.utils.NotificationConstants
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
@@ -21,6 +26,7 @@ class SPPConnectionService : LifecycleService() {
 
 	private val _connector: BluetoothClientConnector by inject()
 	private val _notificationManager by lazy { applicationContext.getSystemService<NotificationManager>() }
+	private val _lock = Mutex()
 
 	private var commandJob: Job? = null
 
@@ -60,47 +66,23 @@ class SPPConnectionService : LifecycleService() {
 			return START_NOT_STICKY
 		}
 
-
-		try {
-			if (commandJob?.isActive == true) {
-				Log.w(TAG, "PREVIOUS CONNECTION WAS ALIVE NEED CANCELLING IT")
-				commandJob?.cancel()
-			}
-			commandJob = lifecycleScope.launch {
-				// close the client if connected
-				_connector.closeClient()
-				// create a new connection
-				val connected =
-					_connector.connectClient(address.orEmpty(), uuid.toJavaUuid(), secure = true)
-				if (connected.isFailure) {
-					Log.w(TAG, "FAILED TO MAKE A CONNECTION STOPING SERVICE")
-					showFailure(connected.exceptionOrNull())
-					stopSelf(startId)
-					return@launch
+		lifecycleScope.launch {
+			try {
+				// connect and send payload
+				val result = connectAndSendPayload(address, uuid, finalPayload, startId)
+				// in case we have an error
+				if (result.isFailure) showFailure(startId, result.exceptionOrNull())
+			} catch (e: CancellationException) {
+				throw e
+			} catch (e: Exception) {
+				Log.e(TAG, "Something went south stoping service", e)
+				// detach the foreground notification so it stays
+				showFailure(startId, e)
+			} finally {
+				withContext(NonCancellable) {
+					connectorCleanup(startId)
 				}
-
-				val isSendSuccess = _connector.sendBytes(finalPayload)
-				if (isSendSuccess.isFailure || !isSendSuccess.getOrDefault(false)) {
-					Log.w(TAG, "FAILED TO SEND PAYLOAD TO THE CLIENT")
-					Log.w(TAG, "CLOSING CONNECTION")
-					showFailure(isSendSuccess.exceptionOrNull())
-
-					_connector.closeClient()
-					stopSelf(startId)
-					return@launch
-				}
-				// send payload success
-				_notificationManager?.notify(NOTIFICATION_ID, buildNotification("Payload sent"))
 			}
-		} catch (e: Exception) {
-			Log.e(TAG, "Something went south stoping service", e)
-
-			// detach the foreground notification so it stays
-			_notificationManager?.notify(NOTIFICATION_ID, buildNotification("Failed to connect"))
-			stopForeground(STOP_FOREGROUND_DETACH)
-
-			stopSelf(startId)
-			return START_NOT_STICKY
 		}
 		// not sticky so system will not restart if there is a process death
 		return START_NOT_STICKY
@@ -113,11 +95,63 @@ class SPPConnectionService : LifecycleService() {
 		super.onDestroy()
 	}
 
-	private fun showFailure(error: Throwable?) {
+
+	private suspend fun connectAndSendPayload(
+		address: String?,
+		uuid: Uuid,
+		finalPayload: ByteArray,
+		startId: Int
+	): Result<Unit> = _lock.withLock {
+		// show a foreground message
+		_notificationManager?.notify(NOTIFICATION_ID, buildNotification("Connecting to the client"))
+		// close the client if connected
+		_connector.closeClient()
+
+		// create a new connection
+		val connected = _connector
+			.connectClient(address.orEmpty(), uuid.toJavaUuid(), secure = true)
+
+		// in case we failed to connect
+		if (connected.isFailure) {
+			Log.w(TAG, "FAILED TO MAKE A CONNECTION STOPING SERVICE")
+			return@withLock Result.failure(
+				connected.exceptionOrNull()
+					?: IllegalStateException("Should be connected state")
+			)
+		}
+		val isSendSuccess = _connector.sendBytes(finalPayload)
+		if (isSendSuccess.isFailure || !isSendSuccess.getOrDefault(false)) {
+			_connector.closeClient()
+			Log.w(TAG, "FAILED TO SEND PAYLOAD TO THE CLIENT")
+			showFailure(startId, isSendSuccess.exceptionOrNull())
+			return@withLock Result.failure(
+				connected.exceptionOrNull()
+					?: IllegalStateException("Unable to send data")
+			)
+		}
+		_notificationManager?.notify(NOTIFICATION_ID, buildNotification("Payload sent"))
+		Result.success(Unit)
+	}
+
+	private suspend fun connectorCleanup(startId: Int) = _lock.withLock {
+		Log.i(TAG, "CLOSING CLIENT CONNECTION")
+		_connector.closeClient()
+
+		// remove the fg service
+		if (stopSelfResult(startId)) {
+			stopForeground(STOP_FOREGROUND_REMOVE)
+		}
+	}
+
+	private fun showFailure(startId: Int, error: Throwable?) {
 		Log.e(TAG, "SPP CONNECTION FAILED", error)
 
 		val failedMessage = error?.message ?: "Failed to connect to bluetooth client"
 		_notificationManager?.notify(NOTIFICATION_ID, buildNotification(failedMessage))
+
+		// stop self and remove foreground
+		if (stopSelfResult(startId))
+			stopForeground(STOP_FOREGROUND_DETACH)
 	}
 
 	private fun buildNotification(message: String): Notification =

@@ -1,9 +1,13 @@
 package com.eva.bluetoothterminalapp.data.services
 
+import android.app.Activity
+import android.app.ForegroundServiceStartNotAllowedException
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
+import androidx.core.content.ContextCompat
 
 class SPPConnectionReceiver : BroadcastReceiver() {
 
@@ -25,9 +29,18 @@ class SPPConnectionReceiver : BroadcastReceiver() {
 				putExtra(SPPConnectionConstants.EXTRA_SPP_UUID, sppUuidString)
 				putExtra(SPPConnectionConstants.EXTRA_PAYLOAD_HEX, payloadHex)
 			}
-			context.startForegroundService(serviceIntent)
+			ContextCompat.startForegroundService(context, serviceIntent)
 		} catch (e: Exception) {
-			Log.e(TAG, "Failed to start SPP foreground service", e)
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e is ForegroundServiceStartNotAllowedException) {
+				Log.e(TAG, "BACKGROUND START IS NOT ALLOWED FROM BACKGROUND ", e)
+				// Report failure to the caller
+				resultCode = Activity.RESULT_CANCELED
+				resultData = "ERROR: Foreground service start not allowed. Open the app and retry."
+				return
+			}
+			Log.e(TAG, "FAILED TO START THE SPP SERVICE", e)
+			resultCode = Activity.RESULT_CANCELED
+			resultData = "ERROR: ${e.message}"
 		}
 	}
 
