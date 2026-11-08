@@ -32,7 +32,7 @@ fun BTPeerInteractionContent(
 	modifier: Modifier = Modifier,
 ) {
 	Column(
-		verticalArrangement = Arrangement.spacedBy(10.dp),
+		verticalArrangement = Arrangement.spacedBy(8.dp),
 		modifier = modifier
 	) {
 		BTServerConnectionHeader(
@@ -44,7 +44,7 @@ fun BTPeerInteractionContent(
 			scrollToEnd = btSettings.autoScrollEnabled,
 			showTimeInMessage = btSettings.showTimeStamp,
 			shape = MaterialTheme.shapes.extraLarge,
-			contentPadding = PaddingValues(dimensionResource(R.dimen.sc_padding_secondary)),
+			contentPadding = PaddingValues(dimensionResource(R.dimen.sc_padding)),
 			modifier = Modifier
 				.fillMaxWidth()
 				.weight(1f)

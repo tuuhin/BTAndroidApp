@@ -3,11 +3,14 @@ package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -23,6 +26,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.PeerConnectionState
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.ServerConnectionState
@@ -92,13 +97,14 @@ fun BTServerRoute(
 		AnimatedContent(
 			targetState = messagesState.showServerTerminal,
 			modifier = Modifier
+				.consumeWindowInsets(WindowInsets.navigationBars)
+				.fillMaxSize()
 				.padding(
 					top = scPadding.calculateTopPadding() + dimensionResource(R.dimen.sc_padding_secondary),
-					bottom = scPadding.calculateBottomPadding() + dimensionResource(R.dimen.sc_padding_secondary),
+					bottom = scPadding.calculateBottomPadding() + dimensionResource(R.dimen.sc_padding),
 					start = scPadding.calculateStartPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding),
 					end = scPadding.calculateEndPadding(layoutDirection) + dimensionResource(R.dimen.sc_padding)
 				)
-				.fillMaxSize()
 				.imePadding(),
 		) { show ->
 			if (show) {
@@ -106,7 +112,8 @@ fun BTServerRoute(
 					deviceState = deviceState,
 					messagesState = messagesState,
 					btSettings = btSettings,
-					onEvent = onEvent
+					onEvent = onEvent,
+					modifier = Modifier.fillMaxSize()
 				)
 			} else {
 				StartServerBox(
@@ -119,11 +126,20 @@ fun BTServerRoute(
 }
 
 
+private class BooleanPreviewParams : PreviewParameterProvider<Boolean> {
+	override val values: Sequence<Boolean>
+		get() = sequenceOf(true, false)
+}
+
 @PreviewLightDark
 @Composable
-private fun BTServerRoutePreview() = BlueToothTerminalAppTheme {
+private fun BTServerRoutePreview(
+	@PreviewParameter(BooleanPreviewParams::class)
+	showTerminal: Boolean
+) = BlueToothTerminalAppTheme {
 	BTServerRoute(
 		messagesState = BTServerScreenState(
+			showServerTerminal = showTerminal,
 			messages = persistentListOf(
 				BluetoothMessage(
 					message = "Hello",
@@ -138,7 +154,7 @@ private fun BTServerRoutePreview() = BlueToothTerminalAppTheme {
 		deviceState = BTServerDeviceState(
 			serverState = ServerConnectionState.PEER_CONNECTION_ACCEPTED,
 			peerState = PeerConnectionState.PEER_CONNECTED,
-			device = PreviewFakes.FAKE_DEVICE_MODEL
+			device = PreviewFakes.FAKE_DEVICE_MODEL,
 		),
 		btSettings = BTSettingsModel(),
 		onEvent = {},
