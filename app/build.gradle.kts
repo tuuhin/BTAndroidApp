@@ -17,8 +17,8 @@ android {
 		applicationId = "com.eva.bluetoothterminalapp"
 		minSdk = libs.versions.android.minsdk.get().toInt()
 		targetSdk = libs.versions.android.targetsdk.get().toInt()
-		versionCode = 7
-		versionName = "1.3.0"
+		versionCode = 8
+		versionName = "1.3.1-beta01"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		vectorDrawables {
