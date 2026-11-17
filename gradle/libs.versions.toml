@@ -10,23 +10,25 @@ adaptiveNavigationSuite = "1.4.0"
 androidxWindow = "1.5.1"
 coreSplashscreen = "1.2.0"
 datastore = "1.3.0"
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 coreKtx = "1.19.1"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 kotlinxCollectionsImmutable = "0.5.2"
 kotlinxDatetime = "0.8.0"
-kotlinxSerializationJson = "1.12.0"
+kotlinxSerializationJson = "1.13.0"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
 composeBom = "2026.09.00"
 koinBom = "4.2.2"
-ksp_version = "2.3.11"
+ksp_version = "2.3.14"
 protobufJavalite = "4.36.2"
 protobuf_plugin_version = "0.10.1"
-koin-plugin = "1.2.2"
+koin-plugin = "1.2.3"
 materialKolor = "6.0.0"
+coroutines = "1.11.0"
+assertk = "0.28.1"
 
 [libraries]
 #core
@@ -78,6 +80,11 @@ protobuf-protoc-compiler = { module = "com.google.protobuf:protoc", version.ref 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 #color
 materialKolor-material3 = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialKolor" }
+# testing
+assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
+kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
