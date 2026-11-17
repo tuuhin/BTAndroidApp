@@ -17,8 +17,8 @@ android {
 		applicationId = "com.eva.bluetoothterminalapp"
 		minSdk = libs.versions.android.minsdk.get().toInt()
 		targetSdk = libs.versions.android.targetsdk.get().toInt()
-		versionCode = 8
-		versionName = "1.3.1-beta01"
+		versionCode = 9
+		versionName = "1.3.1"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		vectorDrawables {
@@ -98,8 +98,13 @@ dependencies {
 	implementation(libs.androidx.datastore)
 	implementation(libs.protobuf.javalite)
 	implementation(libs.protobuf.kotlin.lite)
-	//tests
+	// tests
 	testImplementation(libs.junit)
+	testImplementation(libs.kotlin.test)
+	testImplementation(libs.kotlin.test.junit)
+	testImplementation(libs.kotlinx.coroutines.test)
+	testImplementation(libs.assertk)
+	// device tests
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
 	androidTestImplementation(platform(libs.androidx.compose.bom))
