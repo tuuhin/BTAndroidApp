@@ -12,8 +12,8 @@ import androidx.core.content.ContextCompat
 class SPPConnectionReceiver : BroadcastReceiver() {
 
 	override fun onReceive(context: Context, intent: Intent) {
-		// check the action
-		if (intent.action != SPPConnectionConstants.ACTION_SPP_SEND) return
+
+		if (intent.action !in validActions) return
 
 		// retrieve the values from the intent
 		val deviceAddress = intent.getStringExtra(SPPConnectionConstants.EXTRA_DEVICE_ADDRESS)
@@ -21,9 +21,27 @@ class SPPConnectionReceiver : BroadcastReceiver() {
 		val payload = intent.getByteArrayExtra(SPPConnectionConstants.EXTRA_PAYLOAD)
 		val payloadHex = intent.getStringExtra(SPPConnectionConstants.EXTRA_PAYLOAD_HEX)
 
+		// validate incoming args
+		if (intent.action == SPPConnectionConstants.ACTION_SPP_SEND) {
+			try {
+				SPPConnectionConstants.validateArgs(
+					deviceAddress,
+					sppUuidString,
+					payload,
+					payloadHex
+				)
+			} catch (e: Exception) {
+				Log.w(TAG, "FAILED TO READ IN ARGUMENTS", e)
+				resultCode = Activity.RESULT_CANCELED
+				resultData = "ERROR: ${e.message}"
+				return
+			}
+		}
+
 		// start the fg service with the received command data
 		try {
 			val serviceIntent = Intent(context, SPPConnectionService::class.java).apply {
+				this.action = action
 				putExtra(SPPConnectionConstants.EXTRA_DEVICE_ADDRESS, deviceAddress)
 				putExtra(SPPConnectionConstants.EXTRA_PAYLOAD, payload)
 				putExtra(SPPConnectionConstants.EXTRA_SPP_UUID, sppUuidString)
@@ -45,6 +63,11 @@ class SPPConnectionReceiver : BroadcastReceiver() {
 	}
 
 	private companion object {
+
+		private val validActions = arrayOf(
+			SPPConnectionConstants.ACTION_SPP_SEND,
+			SPPConnectionConstants.ACTION_SPP_DISCONNECT
+		)
 		const val TAG = "SPP_AUTOMATION_RECEIVER"
 
 	}
