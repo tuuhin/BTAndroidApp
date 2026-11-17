@@ -36,17 +36,20 @@ class SPPConnectionService : LifecycleService() {
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 		super.onStartCommand(intent, flags, startId)
 
-		if (intent == null) return START_NOT_STICKY
-		if (intent.action !in validActions) return START_NOT_STICKY
+		// start the foreground asap
+		startForeground(NOTIFICATION_ID, buildNotification(isConnected = false))
+
+		if (intent == null || intent.action !in validActions) {
+			// stop the foreground and stop the service
+			stopForeground(STOP_FOREGROUND_REMOVE)
+			stopSelfResult(startId)
+			return START_NOT_STICKY
+		}
 
 		val address = intent.getStringExtra(SPPConnectionConstants.EXTRA_DEVICE_ADDRESS) ?: ""
 		val sppUuidString = intent.getStringExtra(SPPConnectionConstants.EXTRA_SPP_UUID) ?: ""
 		val payload = intent.getByteArrayExtra(SPPConnectionConstants.EXTRA_PAYLOAD)
 		val payloadHex = intent.getStringExtra(SPPConnectionConstants.EXTRA_PAYLOAD_HEX) ?: ""
-
-		if (intent.action != SPPConnectionConstants.ACTION_SPP_DISCONNECT) {
-			startForeground(NOTIFICATION_ID, buildNotification("Preparing SPP command"))
-		}
 
 		lifecycleScope.launch {
 			try {
@@ -62,7 +65,7 @@ class SPPConnectionService : LifecycleService() {
 								payload ?: SPPConnectionConstants.hexToByteArray(payloadHex)
 							connectAndSendPayload(address, uuid, payload)
 
-							val notification = buildNotification("Payload send")
+							val notification = buildNotification(isConnected = true)
 							_notificationManager?.notify(NOTIFICATION_ID, notification)
 						}
 
@@ -89,7 +92,7 @@ class SPPConnectionService : LifecycleService() {
 
 
 	private suspend fun connectAndSendPayload(address: String, uuid: Uuid, payload: ByteArray) {
-		val notification = buildNotification("Connecting to $address")
+		val notification = buildNotification(isConnected = false)
 		_notificationManager?.notify(NOTIFICATION_ID, notification)
 		session.send(address, uuid, payload)
 	}
@@ -102,13 +105,18 @@ class SPPConnectionService : LifecycleService() {
 	private suspend fun failSession(startId: Int, error: Throwable) {
 		session.close()
 
-		val notification = buildNotification(error.message ?: "SPP command failed")
+		val notification = buildNotification(isConnected = false)
 		_notificationManager?.notify(NOTIFICATION_ID, notification)
 
 		if (stopSelfResult(startId)) stopForeground(STOP_FOREGROUND_DETACH)
 	}
 
-	private fun buildNotification(message: String): Notification {
+	private fun buildNotification(isConnected: Boolean): Notification {
+		val message = applicationContext.getString(
+			if (isConnected) R.string.connection_accepted
+			else R.string.connection_disconnected
+		)
+
 		val builder = NotificationCompat.Builder(
 			this,
 			NotificationConstants.BT_CONNECTION_NOTIFICATION_ID
@@ -130,7 +138,7 @@ class SPPConnectionService : LifecycleService() {
 
 		val action = NotificationCompat.Action.Builder(
 			IconCompat.createWithResource(applicationContext, R.drawable.ic_disconnect),
-			applicationContext.getString(R.string.connection_disconnected),
+			applicationContext.getString(R.string.disconnect_from_client),
 			pendingIntent
 		).build()
 

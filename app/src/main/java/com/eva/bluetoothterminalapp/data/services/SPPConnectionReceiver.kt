@@ -41,7 +41,7 @@ class SPPConnectionReceiver : BroadcastReceiver() {
 		// start the fg service with the received command data
 		try {
 			val serviceIntent = Intent(context, SPPConnectionService::class.java).apply {
-				this.action = action
+				action = intent.action
 				putExtra(SPPConnectionConstants.EXTRA_DEVICE_ADDRESS, deviceAddress)
 				putExtra(SPPConnectionConstants.EXTRA_PAYLOAD, payload)
 				putExtra(SPPConnectionConstants.EXTRA_SPP_UUID, sppUuidString)

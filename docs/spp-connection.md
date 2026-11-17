@@ -51,8 +51,12 @@ adb shell am broadcast --user 0 \
   -a com.eva.bluetoothterminalapp.action.SPP_DISCONNECT
 ```
 
-The ongoing notification also has a **Disconnect** action. Either method closes this app's SPP
-session and stops its foreground service; it cannot close a Bluetooth socket owned by another app.
+The foreground-service notification appears as soon as a service command starts and shows whether
+the device is **Device Connected** or **Device Disconnected**. It includes a **Disconnect** action;
+there is no separate notification action for sending payloads. Either the action or broadcast closes
+this app's SPP session and stops its foreground service; it cannot close a Bluetooth socket owned
+by another app. On Android versions that require it, grant notification permission to show the
+foreground notification in the notification drawer.
 
 ## Results and connection lifecycle
 
@@ -60,7 +64,8 @@ The receiver validates send arguments before starting the service. An ordered br
 read an immediate canceled result and error message for invalid arguments or a foreground-service
 start failure. A successful receiver result only means the command was accepted for service
 processing; connecting and writing happen asynchronously and are not reported as a final delivery
-result through the broadcast. Check the ongoing notification for connection/send status or failure.
+result through the broadcast. Check the ongoing notification for connection status; send failures
+are logged by the service and close the session.
 
 The first send establishes a connection; later sends with the same device address and UUID reuse
 it. A send for a different address or UUID fails and requires an explicit disconnect before
