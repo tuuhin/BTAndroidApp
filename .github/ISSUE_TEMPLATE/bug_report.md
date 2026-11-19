@@ -24,7 +24,9 @@ If applicable, add screenshots to help explain your problem.
 
 **Device Info:**
 
-- Android Version: [e.g. API 33 ]
+- App Version: [e.g. 1.3.1]
+- Build Type: [e.g. debug, release]
+- Android Version: [e.g. API 33]
 - Device Manufacturer [e.g. Samsung, Google]
 - Bluetooth Device: [ e.g. esp32 microcontroller, HC-05 bluetooth module ]
 

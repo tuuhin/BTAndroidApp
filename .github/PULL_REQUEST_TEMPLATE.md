@@ -1,8 +1,3 @@
----
-name: Pull Request
-about: Propose changes for review and merge
----
-
 ## Description
 
 Please include a summary of the change and which issue is fixed or feature is added.
@@ -22,4 +17,9 @@ Please delete options that are not relevant.
 
 ## Screenshots (if applicable)
 
----
+## Checklist
+
+- [ ] I have read and followed the [Code of Conduct](CODE_OF_CONDUCT.md) and
+  [Contributing Guidelines](CONTRIBUTING.md).
+- [ ] The project builds (`./gradlew assembleDebug`)
+- [ ] I have linked the related issue above.
