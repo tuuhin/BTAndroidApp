@@ -51,9 +51,8 @@ fun BTPeerInteractionContent(
 		)
 		Spacer(modifier = Modifier.height(2.dp))
 		SendCommandTextField(
-			value = messagesState.textFieldValue,
+			state = messagesState.textFieldState,
 			isEnable = deviceState.isAccepted,
-			onChange = { value -> onEvent(BTServerEvents.OnTextFieldValue(value)) },
 			onImeAction = { onEvent(BTServerEvents.OnSendEvents) },
 			modifier = Modifier
 				.windowInsetsPadding(WindowInsets.navigationBars)

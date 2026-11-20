@@ -1,5 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_client
 
+import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothClientConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth.models.BluetoothMessage
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
@@ -57,7 +57,7 @@ class BTClientViewModel(
 	// remote device need to emit something in order to be collected
 	private val _connectedDevice = connector.remoteDevice.stateIn(
 		scope = viewModelScope,
-		started = SharingStarted.Eagerly,
+		started = SharingStarted.WhileSubscribed(2_000),
 		initialValue = null
 	)
 
@@ -76,9 +76,8 @@ class BTClientViewModel(
 	private val _showCloseDialog = MutableStateFlow(false)
 	val showCloseDialog = _showCloseDialog.asStateFlow()
 
-	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	override val uiEvents: SharedFlow<UiEvents>
-		get() = _uiEvents.asSharedFlow()
+		field = MutableSharedFlow<UiEvents>()
 
 	val btSettings = bTSettings.settingsFlow.stateIn(
 		scope = viewModelScope,
@@ -86,11 +85,10 @@ class BTClientViewModel(
 		initialValue = BTSettingsModel()
 	)
 
-
 	private var _connectAsClientJob: Job? = null
 
 	private val _textFieldValueTrimmed: String
-		get() = _messagesState.value.textFieldValue.trim()
+		get() = _messagesState.value.textFieldState.text.toString().trim()
 
 	private val _localEcho = MutableSharedFlow<BluetoothMessage>()
 
@@ -107,9 +105,6 @@ class BTClientViewModel(
 			BTClientRouteEvents.OnReconnectClient -> startClientJob(true)
 			BTClientRouteEvents.OnDisconnectClient -> closeConnection()
 			BTClientRouteEvents.OnSendEvents -> sendText()
-			is BTClientRouteEvents.OnSendFieldTextChanged -> _messagesState.update { state ->
-				state.copy(textFieldValue = event.text)
-			}
 		}
 	}
 
@@ -120,7 +115,7 @@ class BTClientViewModel(
 		// close the connection
 		closeConnection(showToast = true)
 		//navigate back
-		_uiEvents.emit(UiEvents.NavigateBack)
+		uiEvents.emit(UiEvents.NavigateBack)
 	}
 
 	private fun toggleDialog(isOpen: Boolean) = _showCloseDialog.update { isOpen }
@@ -130,7 +125,7 @@ class BTClientViewModel(
 		if (_connectAsClientJob?.isActive == true) {
 			if (showEvent) {
 				val event = UiEvents.ShowSnackBar("Trying to connect please wait")
-				viewModelScope.launch { _uiEvents.emit(event) }
+				viewModelScope.launch { uiEvents.emit(event) }
 			}
 			return
 		}
@@ -143,7 +138,7 @@ class BTClientViewModel(
 			results.fold(
 				onSuccess = {},
 				onFailure = { err ->
-					_uiEvents.emit(UiEvents.ShowSnackBar(message = err.message ?: ""))
+					uiEvents.emit(UiEvents.ShowSnackBar(message = err.message ?: ""))
 				},
 			)
 		}
@@ -158,7 +153,7 @@ class BTClientViewModel(
 
 		val message = _textFieldValueTrimmed.trim()
 		if (message.isEmpty()) {
-			_uiEvents.emit(UiEvents.ShowSnackBar("Cannot send empty message"))
+			uiEvents.emit(UiEvents.ShowSnackBar("Cannot send empty message"))
 			return@launch
 		}
 		val result = connector.sendData(message)
@@ -172,10 +167,10 @@ class BTClientViewModel(
 					)
 					_localEcho.emit(selfMessage)
 				}
-				if (isClearTextField) _messagesState.update { state -> state.copy(textFieldValue = "") }
+				if (isClearTextField) _messagesState.value.textFieldState.clearText()
 			},
 			onFailure = { err ->
-				_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "Failed to send message"))
+				uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "Failed to send message"))
 			},
 		)
 	}
@@ -191,7 +186,7 @@ class BTClientViewModel(
 			else connector.readIncomingData
 		}
 		.catch { _ ->
-			_uiEvents.emit(
+			uiEvents.emit(
 				UiEvents.ShowSnackBarWithActions(
 					message = "Unable to read incoming data",
 					actionText = "Disconnect",
@@ -209,14 +204,14 @@ class BTClientViewModel(
 
 	private fun closeConnection(showToast: Boolean = false) {
 		// cancels the job and close the connection
-		_messagesState.update { state -> state.copy(textFieldValue = "") }
+		_messagesState.value.textFieldState.clearText()
 		_connectAsClientJob?.cancel()
 		val result = connector.closeClient()
 
 		result.onFailure {
 			val event = if (showToast) UiEvents.ShowToast("Connection Closed")
 			else UiEvents.ShowSnackBar("Connection Closed")
-			viewModelScope.launch { _uiEvents.emit(event) }
+			viewModelScope.launch { uiEvents.emit(event) }
 		}
 	}
 

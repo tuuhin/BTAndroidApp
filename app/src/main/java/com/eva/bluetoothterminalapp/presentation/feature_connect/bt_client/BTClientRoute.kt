@@ -128,9 +128,8 @@ fun BTClientRoute(
 					.weight(1f)
 			)
 			SendCommandTextField(
-				value = messages.textFieldValue,
+				state = messages.textFieldState,
 				isEnable = isConnected,
-				onChange = { onConnectionEvent(BTClientRouteEvents.OnSendFieldTextChanged(it)) },
 				onImeAction = { onConnectionEvent(BTClientRouteEvents.OnSendEvents) },
 				modifier = Modifier
 					.fillMaxWidth()

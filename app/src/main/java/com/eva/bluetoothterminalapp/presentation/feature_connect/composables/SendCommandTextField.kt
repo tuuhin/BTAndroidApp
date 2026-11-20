@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -34,16 +36,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.eva.bluetoothterminalapp.R
 import com.eva.bluetoothterminalapp.ui.theme.BlueToothTerminalAppTheme
 
 @Composable
 fun SendCommandTextField(
-	value: String,
-	onChange: (String) -> Unit,
+	state: TextFieldState,
 	modifier: Modifier = Modifier,
 	isEnable: Boolean = true,
 	onImeAction: () -> Unit = {},
@@ -63,9 +62,8 @@ fun SendCommandTextField(
 
 
 	BasicTextField(
-		value = value,
-		onValueChange = onChange,
-		decorationBox = { content ->
+		state = state,
+		decorator = { content ->
 			Row(
 				verticalAlignment = Alignment.CenterVertically,
 				horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -80,7 +78,7 @@ fun SendCommandTextField(
 						modifier = Modifier.padding(vertical = 16.dp, horizontal = 20.dp),
 					) {
 						when {
-							value.isBlank() ->
+							state.text.isBlank() ->
 								Text(
 									text = stringResource(id = R.string.text_field_placeholder),
 									style = MaterialTheme.typography.labelLarge,
@@ -113,33 +111,33 @@ fun SendCommandTextField(
 		enabled = isEnable,
 		textStyle = textStyle.copy(color = color),
 		cursorBrush = cursorColor,
-		keyboardActions = KeyboardActions(onSend = { onImeAction() }),
+		lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = maxLines),
+		onKeyboardAction = {
+			onImeAction()
+			it()
+		},
 		keyboardOptions = KeyboardOptions(
 			capitalization = KeyboardCapitalization.None,
 			autoCorrectEnabled = false,
 			keyboardType = KeyboardType.Text,
 			imeAction = ImeAction.Send
 		),
-		maxLines = maxLines,
 		interactionSource = interaction,
 		modifier = modifier.focusable(enabled = true)
 	)
 }
 
-private class TextValuePreviewParams :
-	CollectionPreviewParameterProvider<String>(listOf("", "Some value"))
 
 @PreviewLightDark
 @Composable
-private fun SendCommandTextFieldPreview(
-	@PreviewParameter(TextValuePreviewParams::class)
-	value: String
-) = BlueToothTerminalAppTheme {
+private fun SendCommandTextFieldPreview() = BlueToothTerminalAppTheme {
+
+	val state = rememberTextFieldState()
+
 	Surface {
 		SendCommandTextField(
-			value = value,
+			state = state,
 			isEnable = false,
-			onChange = {},
 			modifier = Modifier.padding(10.dp)
 		)
 	}

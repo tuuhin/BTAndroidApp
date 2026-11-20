@@ -37,8 +37,4 @@ sealed interface BTServerEvents {
 	 */
 	data object OnSendEvents : BTServerEvents
 
-	/**
-	 * On TextField value change
-	 */
-	data class OnTextFieldValue(val message: String) : BTServerEvents
 }
