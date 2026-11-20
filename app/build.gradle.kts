@@ -11,7 +11,13 @@ plugins {
 
 android {
 	namespace = "com.eva.bluetoothterminalapp"
-	compileSdk = libs.versions.android.compilesdk.get().toInt()
+	compileSdk {
+		val majorVersion = libs.versions.android.compilesdk.major.get().toInt()
+		version = release(majorVersion) {
+			minorApiLevel = libs.versions.android.compilesdk.revision.get().toInt()
+		}
+	}
+
 
 	defaultConfig {
 		applicationId = "com.eva.bluetoothterminalapp"
