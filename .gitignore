@@ -18,3 +18,4 @@ keystore.properties
 *.jks
 .kotlin/*
 .idea/*
+!.idea/icon.svg

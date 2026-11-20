@@ -1,104 +1,96 @@
 # BluetoothTerminalApp
 
-This document provides an immediate, high-level understanding of the BluetoothTerminalApp codebase
-for AI assistants, agents, and new developers.
+Single-module Android app (`com.eva.bluetoothterminalapp`). Clean Architecture + MVVM. Layers:
+`data/` (Android impls) → `domain/` (interfaces/models) ← `presentation/` (UI/state), wired by
+`di/` (Koin). Presentation depends on `domain/` only, never on concrete `data/` classes.
 
-## 1. Architecture Overview
+## Structure (`app/src/main/java/com/eva/bluetoothterminalapp/`)
 
-The project follows **Clean Architecture** principles combined with **MVVM (
-Model-ViewModel-ViewModel)** for the presentation layer. It is a single-module Android application (
-`app` module) with internal layering and feature-based organization.
+- `data/`: `bluetooth/` (classic: scanner, client/server connectors, transfer service,
+  `receivers/`, `util/`), `bluetooth_le/` (BLE client + GATT callback), `ble_server/` (GATT
+  peripheral server + `BLEConstructorDSL`), `services/` (SPP automation), `datastore/` (Protobuf
+  settings), `device/` (battery/light sensors), `mapper/`, `samples/`, `utils/`.
+- `domain/`: `bluetooth/`, `bluetooth_le/`, `device/`, `settings/`, `exceptions/`, `utils/`
+  (interfaces, enums, models).
+- `di/`: Koin modules (`AppModule` + `KoinDependencyContainer`).
+- `presentation/`: `feature_devices/`, `feature_connect/` (`bt_client`, `bt_server`,
+  `bt_profile`), `feature_le_connect/`, `feature_le_server/`, `feature_settings/`, `navigation/`,
+  `composables/`, `contracts/`, `util/`.
+- `ui/theme/`: theme tokens.
 
-### Directory Structure
+## Tech stack
 
-- `app/src/main/java/com/eva/bluetoothterminalapp/`
-    - `data/`: Implementations of domain repositories. Contains Android-specific Bluetooth and BLE
-      logic, DataStore persistence (Protobuf), and mappers.
-    - `domain/`: Business logic abstractions. Contains repository interfaces, domain models, enums,
-      and exceptions. This layer is independent of Android-specific implementation details where
-      possible.
-    - `di/`: Koin dependency injection modules (organized by functionality like `BLEModule`,
-      `BTClassicModule`, etc.).
-    - `presentation/`: UI logic and State management.
-        - Organized by features: `feature_connect`, `feature_devices`, `feature_le_connect`, etc.
-        - Each feature contains its own ViewModels, event contracts, and screen-level composables.
-    - `ui/`: Global UI theme (Color, Typography, Shape).
+Versions: `gradle/libs.versions.toml`. Build: `app/build.gradle.kts`.
 
-## 2. Core Tech Stack & Dependencies
+- AGP 9.5.1, Gradle 9.9.1, Kotlin 2.4.21, JDK 17; compileSdk/targetSdk 37, minSdk 26.
+- Jetpack Compose + **Material 3 Expressive** + **Material Kolor** dynamic theming.
+- **Navigation 3** (serializable `NavKey` back stack) + adaptive list-detail.
+- **Koin 4.2.2** with the Compiler Plugin + annotations, started via `KoinStartup`.
+- DataStore + Protobuf (`app/src/main/proto/`); kotlinx Serialization.
+- Android Bluetooth APIs: Classic SPP + BLE (client and GATT server).
+- Tests: JUnit 4, `kotlin-test`, `assertk`, `kotlinx-coroutines-test`.
 
-- **UI:** Jetpack Compose (Material 3) with **Compose Destinations** for navigation.
-- **Concurrency:** Kotlin Coroutines & Flow for asynchronous operations and reactive state.
-- **Dependency Injection:** **Koin** (using `KoinStartup` for initialization).
-- **Persistence:** **DataStore** with **Protobuf** serialization for app settings.
-- **Bluetooth:** Standard Android Bluetooth APIs for Classic BT and Bluetooth Low Energy (BLE).
-- **Serialization:** Kotlinx Serialization for JSON and Protobuf for DataStore.
+## Key files
 
-## 3. Key Logic Hubs (The "Where to Look" Guide)
+- **BT Classic:** `data/bluetooth/AndroidBluetoothScanner.kt`, `AndroidBTClientConnector.kt`,
+  `AndroidBTServerConnector.kt`, `BluetoothTransferService.kt`. SPP automation:
+  `data/services/` (see `docs/spp-connection.md`).
+- **BLE:** `data/bluetooth_le/AndroidBluetoothLEScanner.kt`, `AndroidBLEClientConnector.kt`,
+  `BLEClientGattCallback.kt`; server in `data/ble_server/`.
+- **Settings:** `data/datastore/` + `domain/settings/repository/`; schemas in `app/src/main/proto/`.
+- **Navigation:** `presentation/navigation/` (`AppNavigation.kt`, `NavRoutes.kt`,
+  `NavDestinationBuilder.kt`, `screens/`).
+- **DI:** `di/AppModule.kt` + feature modules.
 
-If you need to modify or understand core functionality, start here:
+## Navigation 3
 
-### Bluetooth Classic (BT)
+- Routes are `@Serializable` members of the `NavRoutes` sealed interface (implements `NavKey`) in
+  `NavRoutes.kt`.
+- Each screen implements `NavDestinationBuilder`, annotated
+  `@Single(binds = [NavDestinationBuilder::class])`, and registers itself via
+  `entry<NavRoutes.X> { ... }`.
+- `AppNavigation` collects all builders and drives a `NavDisplay` with Dialog / BottomSheet /
+  list-detail scene strategies.
+- Navigate with plain list ops: `backStack.add(NavRoutes.X)` / `removeLastOrNull()`.
+- **Add a screen:** add a route to `NavRoutes` and a `NavDestinationBuilder` impl (auto-scanned).
+  No manual graph wiring.
 
-- **Scanning:** `data/bluetooth/AndroidBluetoothScanner.kt`
-- **Connection:** `data/bluetooth/AndroidBTClientConnector.kt` and `AndroidBTServerConnector.kt`
-- **Data Transfer:** `data/bluetooth/BluetoothTransferService.kt`
+## Dependency injection (Koin)
 
-### Bluetooth Low Energy (BLE)
+- `AppModule` is `@Module(includes = [...])`; `KoinDependencyContainer` is `@KoinApplication`;
+  started in `BluetoothTerminalApp` via `KoinStartup`.
+- Use `@Single` / `@Factory` / `@KoinViewModel`; runtime args via `@InjectedParam` +
+  `parametersOf(...)`. `PresentationModule` `@ComponentScan`s the `presentation` package.
+- Get ViewModels in Compose with `koinViewModel()`.
 
-- **Scanning:** `data/bluetooth_le/AndroidBluetoothLEScanner.kt`
-- **Connection & GATT:** `data/bluetooth_le/AndroidBLEClientConnector.kt` and
-  `data/bluetooth_le/BLEClientGattCallback.kt`
+## Data flow (UDF)
 
-### Settings & State
+UI event → ViewModel (`AppViewModel`) → domain Repository → `Flow` → `StateFlow` (`stateIn`) →
+`collectAsStateWithLifecycle()`. One-off effects (snackbar/toast/navigate-back) go through
+`uiEvents: SharedFlow<UiEvents>` handled by `UIEventsSideEffect`.
 
-- **Persistence:** `data/datastore/` (Implementation) and `domain/settings/repository/`
-  (Interfaces).
-- **Global Settings ViewModel:** `presentation/feature_settings/AppSettingsViewModel.kt`
+## Guidelines
 
-### Navigation
+- Compose + Material 3 Expressive; pull tokens from `ui/theme`, never hardcode colors.
+- Navigation 3 only — no `NavController`/`NavHost`/Compose Destinations.
+- Register new bindings with Koin annotations + Compiler Plugin.
+- Keep ViewModel state immutable (`kotlinx-collections-immutable`).
+- Permissions: `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`, `BLUETOOTH_ADVERTISE`,
+  `ACCESS_FINE_LOCATION` (BLE scan).
+- Never call Android Bluetooth APIs from ViewModels; go through a `domain/` interface.
+- Platform-specific impls are prefixed `Android` (e.g., `AndroidBluetoothScanner`).
+- Inject `PlatformCoroutineDispatchers`; don't reference `Dispatchers` directly.
+- Tests live in `app/src/test/`; use fakes, not Android mocks.
 
-- **Graph Definition:** `presentation/navigation/AppNavigation.kt`
-- Uses **Compose Destinations** (look for `@Destination` annotations on composables).
+## Build & R8
 
-## 4. Data Flow & State Management
+- `./gradlew assembleDebug` | `testDebugUnitTest` | `connectedDebugAndroidTest`. CI runs
+  `assembleDebug` on PRs to `main`.
+- Release signing via `keystore.properties` or `STORE_*` / `KEY_*` env vars.
+- R8 full mode: avoid broad keep rules; Protobuf keeps in `app/src/main/keepRules/rules.keep`.
+- `stability_config.conf` marks types stable for the Compose compiler.
+- Verify a `release` build when upgrading libraries or adding reflection-heavy code.
 
-The app follows a unidirectional data flow (UDF):
+## Docs
 
-1. **User Action:** UI triggers an `Event` (e.g., `BTSettingsEvent`) in the `ViewModel`.
-2. **ViewModel logic:** The `ViewModel` performs logic or calls a `Repository` method.
-3. **Repository Action:** The `Repository` (implemented in `data/`) interacts with the Bluetooth
-   hardware or `DataStore`.
-4. **State Update:** `DataStore` or Bluetooth status flows back as a `Flow`.
-5. **UI Observation:** The `ViewModel` converts the `Flow` into a `StateFlow` (often using
-   `stateIn`). The Compose UI observes this state and recomposes.
-
-## 5. AI/Agent Context & Guidelines
-
-- **UI Development:** Always use **Jetpack Compose**. Follow the Material 3 design system. Design
-  tokens should be pulled from the `ui/theme` package.
-- **Navigation:** Use **Compose Destinations**. Do not manually manage the NavGraph; use the
-  generated code and annotations.
-- **Dependency Injection:** Use **Koin**. When adding new services or ViewModels, ensure they are
-  registered in the appropriate module in the `di/` package.
-- **Immutability:** State exposed from ViewModels should be immutable. Use
-  `kotlinx-collections-immutable` where appropriate.
-- **Permissions:** Bluetooth operations require runtime permissions. Ensure you check for
-  `android.permission.BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`, and `ACCESS_FINE_LOCATION` where
-  necessary.
-- **Architecture Integrity:** Do not call Android Bluetooth APIs directly from ViewModels. Always go
-  through a domain-defined interface (Repository) and provide an implementation in the `data/`
-  layer.
-- **Naming Conventions:** Repository implementations should be prefixed with `Android` if they are
-  platform-specific (e.g., `AndroidBluetoothScanner`).
-
-## 6. Performance & Optimization (R8)
-
-- **R8 Full Mode:** The project is configured to use **strict R8 Full Mode** (no compatibility
-  flags). This allows for aggressive constructor and member shrinking.
-- **Rule Discipline:** Avoid adding broad keep rules (e.g., `-keep class com.package.** { *; }`).
-  Prefer narrow rules or relying on library consumer rules.
-- **Protobuf:** Unused field shrinking for Protobuf is enabled via `-shrinkunusedprotofields` in
-  `proguard-rules.pro`.
-- **Validation:** When upgrading libraries or adding reflection-heavy code, always verify
-  functionality in a `release` build variant to ensure R8 hasn't stripped required members.
-
+`docs/spp-connection.md`, `README.md`, `CONTRIBUTING.md`.

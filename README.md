@@ -12,7 +12,8 @@ including ESP32-based microcontrollers.
 - Connect to a device over Serial Port Profile (SPP) and exchange data.
 - Run an SPP server so another device can connect to the app.
 - Configure client and server connection settings, including a custom SPP service UUID.
-- Use SPP connection automation and send raw bytes.
+- Use SPP connection automation and send raw bytes (see
+  the [SPP automation guide](docs/spp-connection.md)).
 
 ### Bluetooth Low Energy (BLE)
 
@@ -44,8 +45,12 @@ Bluetooth Low Energy screens:
 ## :building_construction: Getting Started
 
 The app requires a device with Bluetooth. BLE features require BLE-capable hardware; BLE support is
-optional on devices that install the app. The minimum supported Android version is Android 9 (API
-28). Grant the Bluetooth permissions requested by Android when using the corresponding features.
+optional on devices that install the app. The minimum supported Android version is Android 8.0 (API
+26). Grant the Bluetooth permissions requested by Android when using the corresponding features.
+
+The app has been tested on Android 10 (API 29), Android 14 (API 34), and Android 15 (API 35). If
+something fails on your Android version or API level,
+please [open an issue](https://github.com/tuuhin/BTAndroidApp/issues/new).
 
 1. **Clone the repository:**
 
@@ -81,3 +86,7 @@ Special thanks to the teams behind these open-source Bluetooth apps:
 
 - [Nordic Semiconductor Android app](https://github.com/NordicSemiconductor/Android-nRF-Connect)
 - [Simple Bluetooth Terminal](https://github.com/kai-morich/SimpleBluetoothTerminal)
+
+## :scroll: License
+
+This project is licensed under the [MIT License](LICENSE).

@@ -30,7 +30,7 @@ To maintain project quality and coordination, we follow a specific workflow for 
     * Once approved to work, please create a new branch from `main` using one of the following
       conventions:
         * For new features: `feat/<descriptive_feature_name>`
-        * For bug fixes: `bug/<bug-decription>`
+      * For bug fixes: `bug-fix/<bug-description>`
 
 ---
 
@@ -51,7 +51,7 @@ If you're unsure how to get the project running locally, here are the basic step
 1. **Prerequisites:**
     * Java Development Kit (JDK) 17 or higher.
     * Android Studio (latest stable version recommended).
-    * Android SDK Platform 34 (or the target API level of the app).
+   * Android SDK Platform 37 (the app's compile/target SDK).
 
 2. **Clone the repository:**
    ```bash

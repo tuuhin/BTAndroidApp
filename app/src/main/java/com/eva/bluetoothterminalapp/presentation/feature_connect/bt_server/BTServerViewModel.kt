@@ -1,5 +1,6 @@
 package com.eva.bluetoothterminalapp.presentation.feature_connect.bt_server
 
+import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.viewModelScope
 import com.eva.bluetoothterminalapp.domain.bluetooth.BluetoothServerConnector
 import com.eva.bluetoothterminalapp.domain.bluetooth.enums.PeerConnectionState
@@ -19,7 +20,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -51,7 +51,7 @@ class BTServerViewModel(
 	// remote device need to emit something in order to be collected
 	private val _remoteDevice = serverConnector.remoteDevice.stateIn(
 		scope = viewModelScope,
-		started = SharingStarted.Eagerly,
+		started = SharingStarted.WhileSubscribed(2000),
 		initialValue = null
 	)
 
@@ -68,9 +68,8 @@ class BTServerViewModel(
 			initialValue = BTServerDeviceState()
 		)
 
-	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	override val uiEvents: SharedFlow<UiEvents>
-		get() = _uiEvents.asSharedFlow()
+		field = MutableSharedFlow<UiEvents>()
 
 	val btSettings = bTSettings.settingsFlow.stateIn(
 		scope = viewModelScope,
@@ -91,16 +90,13 @@ class BTServerViewModel(
 			BTServerEvents.OnCloseDisconnectDialog -> toggleDialog(false)
 			BTServerEvents.OnRestartServer -> restartServer()
 			BTServerEvents.OnStopServerAndNavigateBack -> cancelServerStartAndPopBack()
-			is BTServerEvents.OnTextFieldValue -> _serverState.update { state ->
-				state.copy(textFieldValue = event.message)
-			}
 		}
 	}
 
 
 	private fun cancelServerStartAndPopBack() = viewModelScope.launch {
 		_serverState.update { state -> state.copy(showServerTerminal = false) }
-		_uiEvents.emit(UiEvents.NavigateBack)
+		uiEvents.emit(UiEvents.NavigateBack)
 	}
 
 
@@ -117,7 +113,8 @@ class BTServerViewModel(
 	}
 
 	private fun checkClientDisconnect() {
-		connectedDevice.map { it.peerState to it.serverState }.distinctUntilChanged()
+		connectedDevice.map { it.peerState to it.serverState }
+			.distinctUntilChanged()
 			.onEach { (peerState, serverState) ->
 				if (serverState != ServerConnectionState.PEER_CONNECTION_ACCEPTED) return@onEach
 				// there was a peer connection but not the peer has disconnected
@@ -127,9 +124,11 @@ class BTServerViewModel(
 						"Restart",
 						::restartServer
 					)
-					_uiEvents.emit(event)
+					uiEvents.emit(event)
 				}
-			}.launchIn(viewModelScope)
+			}
+			.catch { uiEvents.emit(UiEvents.ShowToast("Client error")) }
+			.launchIn(viewModelScope)
 	}
 
 	private fun toggleDialog(isOpen: Boolean) = _serverState.update { state ->
@@ -149,26 +148,28 @@ class BTServerViewModel(
 		val isClearTextField = settings.clearInputOnSend
 		val isLocalEchoEnabled = settings.localEchoEnabled
 
-		val message = _serverState.value.textFieldValue.trim()
+		val message = _serverState.value.textFieldState.text.trim()
 		if (message.isEmpty()) {
-			_uiEvents.emit(UiEvents.ShowSnackBar("Cannot send empty message"))
+			uiEvents.emit(UiEvents.ShowSnackBar("Cannot send empty message"))
 			return@launch
 		}
-		val result = serverConnector.sendData(message)
+		val result = serverConnector.sendData(message.toString())
 
 		result.fold(
 			onSuccess = {
 				if (isLocalEchoEnabled) {
 					val selfMessage = BluetoothMessage(
-						message = message,
+						message = message.toString(),
 						type = BluetoothMessageType.MESSAGE_FROM_SELF
 					)
 					_localEcho.emit(selfMessage)
 				}
-				if (isClearTextField) _serverState.update { state -> state.copy(textFieldValue = "") }
+				if (isClearTextField) {
+					_serverState.value.textFieldState.clearText()
+				}
 			},
 			onFailure = { err ->
-				_uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "Failed to send message"))
+				uiEvents.emit(UiEvents.ShowSnackBar(err.message ?: "Failed to send message"))
 			},
 		)
 	}
@@ -184,7 +185,7 @@ class BTServerViewModel(
 			else serverConnector.readIncomingData
 		}
 		.catch { _ ->
-			_uiEvents.emit(
+			uiEvents.emit(
 				UiEvents.ShowSnackBarWithActions(
 					message = "Unable to read incoming data",
 					actionText = "Disconnect",
